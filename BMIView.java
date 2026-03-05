@@ -81,3 +81,61 @@ public class BMIView extends JFrame {
         btnReset = new JButton("Reset");
         btnReset.setBounds(230, 280, 100, 30);
         add(btnReset);
+
+
+        //  BMI Panel
+        JPanel pnlValues = new JPanel();
+        pnlValues.setBorder(BorderFactory.createTitledBorder("BMI VALUES"));
+        pnlValues.setBounds(30, 330, 320, 150);
+        pnlValues.setLayout(new GridLayout(4, 1));
+
+        pnlValues.add(new JLabel("  Underweight :  less than 18.5"));
+        pnlValues.add(new JLabel("  Normal :       between 18.5 and 24.9"));
+        pnlValues.add(new JLabel("  Overweight :   between 25 and 29.9"));
+        pnlValues.add(new JLabel("  Obese :        30 or greater"));
+        add(pnlValues);
+
+    
+
+        // Create button logic
+        btnCalculate.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleCalculate();
+            }
+        });
+
+        // Reset Buttn
+        btnReset.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                txtWeight.setText("");
+                txtHeight.setText("");
+                txtBMI.setText("");
+                txtCategory.setText("");
+            }
+        });
+    }
+
+    //when click calculate button go to validate page  
+    private void handleCalculate() {
+        //  Validate input
+        String error = BMIValidator.validate(txtWeight.getText(), txtHeight.getText());
+        if (error != null) {
+            JOptionPane.showMessageDialog(this, error, "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // get inputs
+        double weight = Double.parseDouble(txtWeight.getText());
+        double height = Double.parseDouble(txtHeight.getText());
+
+        // calculate bmi
+        double bmi = BMILogic.calculate(weight, height, rbMetric.isSelected());
+
+        // display result
+        txtBMI.setText(String.format("%.2f", bmi));
+        txtCategory.setText(BMILogic.getCategory(bmi));
+    }
+}
+
