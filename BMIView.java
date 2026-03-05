@@ -19,7 +19,7 @@ public class BMIView extends JFrame {
         setLayout(null);
         setResizable(false);
 
-        // select units
+        // select unit
         JLabel lblUnits = new JLabel("Select Units:");
         lblUnits.setBounds(30, 30, 100, 25);
         add(lblUnits);
@@ -36,3 +36,48 @@ public class BMIView extends JFrame {
 
         add(rbEnglish);
         add(rbMetric);
+
+              JLabel lblWeight = new JLabel("Enter weight:");
+        lblWeight.setBounds(30, 70, 100, 25);
+        add(lblWeight);
+
+        txtWeight = new JTextField();
+        txtWeight.setBounds(150, 70, 180, 25);
+        add(txtWeight);
+
+        JLabel lblHeight = new JLabel("Enter height:");
+        lblHeight.setBounds(30, 110, 100, 25);
+        add(lblHeight);
+
+        txtHeight = new JTextField();
+        txtHeight.setBounds(150, 110, 180, 25);
+        add(txtHeight);
+
+        // Calculate Button 
+        btnCalculate = new JButton("Calculate");
+        btnCalculate.setBounds(230, 150, 100, 30);
+        add(btnCalculate);
+
+        // Output Section
+        JLabel lblBMI = new JLabel("Your BMI:");
+        lblBMI.setBounds(30, 200, 100, 25);
+        add(lblBMI);
+
+        txtBMI = new JTextField();
+        txtBMI.setBounds(150, 200, 180, 25);
+        txtBMI.setEditable(false);
+        add(txtBMI);
+
+        JLabel lblCat = new JLabel("BMI Category:");
+        lblCat.setBounds(30, 240, 100, 25);
+        add(lblCat);
+
+        txtCategory = new JTextField();
+        txtCategory.setBounds(150, 240, 180, 25);
+        txtCategory.setEditable(false);
+        add(txtCategory);
+
+        // Reset Button
+        btnReset = new JButton("Reset");
+        btnReset.setBounds(230, 280, 100, 30);
+        add(btnReset);
