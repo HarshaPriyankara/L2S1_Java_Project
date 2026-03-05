@@ -11,6 +11,8 @@ public class BMIView extends JFrame {
     private JButton btnCalculate, btnReset;
     private ButtonGroup unitGroup;
 
+    private JLabel lblWeight, lblHeight;
+
     public BMIView() {
         //create title
         setTitle("BMI CALCULATOR");
@@ -37,21 +39,32 @@ public class BMIView extends JFrame {
         add(rbEnglish);
         add(rbMetric);
 
-              JLabel lblWeight = new JLabel("Enter weight:");
-        lblWeight.setBounds(30, 70, 100, 25);
-        add(lblWeight);
+        rbEnglish.addActionListener(e -> {
+    lblWeight.setText("Enter weight (lb):");
+    lblHeight.setText("Enter height (in):");
+});
 
-        txtWeight = new JTextField();
-        txtWeight.setBounds(150, 70, 180, 25);
-        add(txtWeight);
+rbMetric.addActionListener(e -> {
+    lblWeight.setText("Enter weight (kg):");
+    lblHeight.setText("Enter height (m):");
+});
 
-        JLabel lblHeight = new JLabel("Enter height:");
-        lblHeight.setBounds(30, 110, 100, 25);
-        add(lblHeight);
+        //input fiellds
+        lblWeight = new JLabel("Enter weight (kg):");
+lblWeight.setBounds(30, 70, 150, 25);
+add(lblWeight);
 
-        txtHeight = new JTextField();
-        txtHeight.setBounds(150, 110, 180, 25);
-        add(txtHeight);
+txtWeight = new JTextField();
+txtWeight.setBounds(150, 70, 180, 25);
+add(txtWeight);
+
+lblHeight = new JLabel("Enter height (m):");
+lblHeight.setBounds(30, 110, 150, 25);
+add(lblHeight);
+
+txtHeight = new JTextField();
+txtHeight.setBounds(150, 110, 180, 25);
+add(txtHeight);
 
         // Calculate Button 
         btnCalculate = new JButton("Calculate");
