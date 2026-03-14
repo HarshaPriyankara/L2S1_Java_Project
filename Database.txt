@@ -133,7 +133,10 @@ CREATE TABLE notice(
     Created_by VARCHAR(50),
     Title VARCHAR(100),
     Content VARCHAR(500),
-    Department_id Char(5)
+    Department_id Char(5),
+    Lecture_id INT,
+    FOREIGN KEY(Lecture_id) REFERENCES Lecturer(Lecture_id) ON DELETE CASCADE,
+    FOREIGN KEY(Department_id) REFERENCES Department(Department_id) ON DELETE CASCADE
 );
 
 -- create table for enrolls_in relationship between student and course
