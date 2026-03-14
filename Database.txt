@@ -105,6 +105,36 @@ CREATE TABLE attendance (
     FOREIGN KEY (reg_no) REFERENCES STUDENT(reg_no),
     FOREIGN KEY (course_code) REFERENCES COURSE(course_code)
 );
+---------------------------------------------------------
+
+CREATE TABLE course_material(
+    Material_id CHAR(5) PRIMARY KEY,
+    Type VARCHAR(50),
+    Uploaded_at DATE,
+    File_URL VARCHAR(500),
+    Uploaded_by VARCHAR(50),
+    Title VARCHAR(100)
+
+);
+
+CREATE TABLE timetable(
+    Timetable_id CHAR(5) PRIMARY KEY,
+    Start_time TIME,
+    End_time TIME,
+    Day VARCHAR(20),
+    Session_type VARCHAR(10),
+    Venue VARCHAR(100)
+);
+
+CREATE TABLE notice(
+    Notice_id CHAR(5) PRIMARY KEY,
+    Target_role VARCHAR(50),
+    Created_date DATE,
+    Created_by VARCHAR(50),
+    Title VARCHAR(100),
+    Content VARCHAR(500),
+    Department_id Char(5)
+);
 
 -- create table for enrolls_in relationship between student and course
 CREATE TABLE enrollment (
