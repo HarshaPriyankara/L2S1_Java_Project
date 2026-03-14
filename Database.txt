@@ -57,6 +57,7 @@ CREATE TABLE technical_officer (
 CREATE TABLE lecturer (
     Lecturer_id INT PRIMARY KEY,
     Dep_id  CHAR(5),
+	Specialization VARCHAR(50),
     FOREIGN KEY (Dep_id) REFERENCES department(Department_id),
     FOREIGN KEY (Lecturer_id) REFERENCES USER(User_id) ON DELETE CASCADE
 );
@@ -68,8 +69,10 @@ CREATE TABLE course (
     Credits INT,
     Lecturer_in_charge INT,
     Dep_id  CHAR(5),
+	Timetable_id CHAR(5),
     FOREIGN KEY (Dep_id) REFERENCES department(Department_id),
-    FOREIGN KEY (Lecturer_in_charge) REFERENCES lecturer(Lecturer_id)
+    FOREIGN KEY (Lecturer_in_charge) REFERENCES lecturer(Lecturer_id),
+	FOREIGN KEY (Timetable_id) REFERENCES timetable(Timetable_id),
 );
 
 CREATE TABLE MARK (
@@ -112,8 +115,11 @@ CREATE TABLE course_material(
     Type VARCHAR(50),
     Uploaded_at DATE,
     File_URL VARCHAR(500),
-    Uploaded_by VARCHAR(50),
-    Title VARCHAR(100)
+    Uploaded_by INT,
+    Title VARCHAR(100),
+	Course_code VARCHAR(20), 
+	FOREIGN KEY (Uploaded_by) REFERENCES lecturer(Lecturer_id),
+	FOREIGN KEY (Course_code) REFERENCES course(LCourse_code)
 
 );
 
@@ -123,7 +129,9 @@ CREATE TABLE timetable(
     End_time TIME,
     Day VARCHAR(20),
     Session_type VARCHAR(10),
-    Venue VARCHAR(100)
+    Venue VARCHAR(100),
+	Department_id  CHAR(5),
+	FOREIGN KEY (Department_id) REFERENCES department(Department_id)
 );
 
 CREATE TABLE notice(
