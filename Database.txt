@@ -71,8 +71,7 @@ CREATE TABLE course (
     Dep_id  CHAR(5),
 	Timetable_id CHAR(5),
     FOREIGN KEY (Dep_id) REFERENCES department(Department_id),
-    FOREIGN KEY (Lecturer_in_charge) REFERENCES lecturer(Lecturer_id),
-	FOREIGN KEY (Timetable_id) REFERENCES timetable(Timetable_id),
+    FOREIGN KEY (Lecturer_in_charge) REFERENCES lecturer(Lecturer_id)
 );
 
 CREATE TABLE MARK (
@@ -108,7 +107,6 @@ CREATE TABLE attendance (
     FOREIGN KEY (reg_no) REFERENCES STUDENT(reg_no),
     FOREIGN KEY (course_code) REFERENCES COURSE(course_code)
 );
----------------------------------------------------------
 
 CREATE TABLE course_material(
     Material_id CHAR(5) PRIMARY KEY,
@@ -119,7 +117,7 @@ CREATE TABLE course_material(
     Title VARCHAR(100),
 	Course_code VARCHAR(20), 
 	FOREIGN KEY (Uploaded_by) REFERENCES lecturer(Lecturer_id),
-	FOREIGN KEY (Course_code) REFERENCES course(LCourse_code)
+	FOREIGN KEY (Course_code) REFERENCES course(Course_code)
 
 );
 
@@ -131,7 +129,9 @@ CREATE TABLE timetable(
     Session_type VARCHAR(10),
     Venue VARCHAR(100),
 	Department_id  CHAR(5),
-	FOREIGN KEY (Department_id) REFERENCES department(Department_id)
+    Course_code VARCHAR(20),
+	FOREIGN KEY (Department_id) REFERENCES department(Department_id),
+    FOREIGN KEY (Course_code) REFERENCES course(Course_code)
 );
 
 CREATE TABLE notice(
@@ -142,8 +142,8 @@ CREATE TABLE notice(
     Title VARCHAR(100),
     Content VARCHAR(500),
     Department_id Char(5),
-    Lecture_id INT,
-    FOREIGN KEY(Lecture_id) REFERENCES Lecturer(Lecture_id) ON DELETE CASCADE,
+    Lecturer_id INT,
+    FOREIGN KEY(Lecturer_id) REFERENCES Lecturer(Lecturer_id) ON DELETE CASCADE,
     FOREIGN KEY(Department_id) REFERENCES Department(Department_id) ON DELETE CASCADE
 );
 
