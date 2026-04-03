@@ -5,11 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="13eadbc0-399e-491b-8f93-ad48eafc7f18" name="Changes" comment="">
+<<<<<<< HEAD
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/L2S1_Java_Project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/L2S1_Java_Project.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/DBConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/utils/DBConnection.java" afterDir="false" />
+=======
       <change beforePath="$PROJECT_DIR$/Admin.java" beforeDir="false" afterPath="$PROJECT_DIR$/models/Admin.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Lecturer.java" beforeDir="false" afterPath="$PROJECT_DIR$/models/Lecturer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TechnicalOfficer.java" beforeDir="false" afterPath="$PROJECT_DIR$/models/TechnicalOfficer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Undergraduate.java" beforeDir="false" afterPath="$PROJECT_DIR$/models/Undergraduate.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/models/User.java" afterDir="false" />
+>>>>>>> origin/dev
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,6 +52,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.DBConnection.executor": "Run",
     "Downloaded.Files.Path.Enabled": "false",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Repository.Attach.Annotations": "false",
