@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13eadbc0-399e-491b-8f93-ad48eafc7f18" name="Changes" comment="" />
+    <list default="true" id="13eadbc0-399e-491b-8f93-ad48eafc7f18" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/L2S1_Java_Project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/L2S1_Java_Project.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/DBConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/utils/DBConnection.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -37,6 +41,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.DBConnection.executor": "Run",
     "Downloaded.Files.Path.Enabled": "false",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Repository.Attach.Annotations": "false",
