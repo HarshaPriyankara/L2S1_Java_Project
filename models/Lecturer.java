@@ -1,4 +1,6 @@
-public class Lecturer extends User{
+package models;
+
+public class Lecturer extends User {
 
     private String lecturerID;
     private String specialization;

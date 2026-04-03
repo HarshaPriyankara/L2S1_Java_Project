@@ -1,4 +1,6 @@
-public class Admin extends User{
+package models;
+
+public class Admin extends User {
 
     private String adminID;
 

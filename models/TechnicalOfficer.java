@@ -1,4 +1,6 @@
-public class TechnicalOfficer extends User{
+package models;
+
+public class TechnicalOfficer extends User {
 
     private String officerID;
 

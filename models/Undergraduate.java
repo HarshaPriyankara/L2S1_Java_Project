@@ -1,3 +1,5 @@
+package models;
+
 public class Undergraduate extends User {
 
     private String regNo;
