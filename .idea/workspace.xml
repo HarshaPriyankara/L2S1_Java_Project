@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13eadbc0-399e-491b-8f93-ad48eafc7f18" name="Changes" comment="" />
+    <list default="true" id="13eadbc0-399e-491b-8f93-ad48eafc7f18" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Admin.java" beforeDir="false" afterPath="$PROJECT_DIR$/models/Admin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Lecturer.java" beforeDir="false" afterPath="$PROJECT_DIR$/models/Lecturer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TechnicalOfficer.java" beforeDir="false" afterPath="$PROJECT_DIR$/models/TechnicalOfficer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Undergraduate.java" beforeDir="false" afterPath="$PROJECT_DIR$/models/Undergraduate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/models/User.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -31,6 +37,9 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="3BhPzaN7kiIeEfL0moDScMP2tSJ" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -46,7 +55,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "dilusha",
+    "git-widget-placeholder": "#2 on harsha",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
