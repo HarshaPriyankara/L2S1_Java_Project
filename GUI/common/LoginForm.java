@@ -1,0 +1,136 @@
+package GUI.common;
+
+import DAO.UserDAO;
+import GUI.admin.AdminDashboard;
+import GUI.lecturer.LecturerDashboard;
+import GUI.student.StudentDashboard;
+import GUI.to.TechnicalOfficerDashboard;
+import Models.User;
+
+import javax.swing.*;
+import java.awt.*;
+import java.sql.SQLException;
+
+public class LoginForm extends JFrame {
+    private JTextField txtUsername;
+    private JPasswordField txtPassword;
+    private JButton btnLogin;
+
+    public LoginForm() {
+        setTitle("Student Management System - Login");
+        setSize(650, 700);
+        setLocationRelativeTo(null);// Align middle of screen
+        JPanel panel = new JPanel();
+        setLayout(new BorderLayout());
+
+        JLabel imageLabel = new JLabel();
+        ImageIcon icon = new ImageIcon("Images/login.png"); // your image path
+        Image img = icon.getImage().getScaledInstance(300, 700, Image.SCALE_SMOOTH);
+        imageLabel.setIcon(new ImageIcon(img));
+
+        add(imageLabel, BorderLayout.WEST);
+
+        JPanel formPanel = new JPanel();
+        formPanel.setBackground(Color.white); // set background color
+        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
+
+        formPanel.add(Box.createVerticalGlue());// set middle form
+
+        JLabel lblEmail = new JLabel("Username:");
+        lblEmail.setAlignmentX(Component.LEFT_ALIGNMENT);
+        formPanel.add(lblEmail);
+
+        formPanel.add(Box.createVerticalStrut(5)); // set gap between label and field
+
+        // 2. Email TextField
+        txtUsername = new JTextField();
+        // set field size
+        Dimension size = new Dimension(300, 40);
+        txtUsername.setPreferredSize(size);
+        txtUsername.setMaximumSize(size);
+        txtUsername.setMinimumSize(size);
+        txtUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
+        formPanel.add(txtUsername);
+
+        formPanel.add(Box.createVerticalStrut(20)); // set gap between 2 fields
+        // 3. Password Label
+        JLabel lblPassword = new JLabel("Password:");
+        lblPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
+        formPanel.add(lblPassword);
+
+        formPanel.add(Box.createVerticalStrut(5));
+
+        // 4. Password Field
+        txtPassword = new JPasswordField();
+        // set field size
+        txtPassword.setPreferredSize(size);
+        txtPassword.setMaximumSize(size);
+        txtPassword.setMinimumSize(size);
+        txtPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
+        formPanel.add(txtPassword);
+
+        formPanel.add(Box.createVerticalStrut(30)); // Password එකයි Button එකයි අතර පරතරය
+
+        // 5. Login Button
+        btnLogin = new JButton("Login");
+        btnLogin.setPreferredSize(new Dimension(150, 45)); // Button එකේ size එක
+        btnLogin.setBackground(new Color(52, 152, 219)); // set background color blue
+        btnLogin.setForeground(Color.WHITE); // set font color white
+        btnLogin.setMaximumSize(new Dimension(150, 45));
+        btnLogin.setAlignmentX(Component.LEFT_ALIGNMENT);
+        formPanel.add(btnLogin);
+
+        add(formPanel, BorderLayout.CENTER);
+        formPanel.add(Box.createVerticalGlue());// set middle form
+
+
+        // Button Click Event
+        btnLogin.addActionListener(e -> {
+            try {
+                loginAction();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
+    }
+
+    private void loginAction() throws SQLException {
+        String username = txtUsername.getText();
+        String password = new String(txtPassword.getPassword());
+
+        UserDAO dao = new UserDAO();
+        User user = dao.validateUser(username, password);
+
+        if (user != null) {
+            String role = user.getRole();
+            JOptionPane.showMessageDialog(this, "Login Successful! Role: " + role);
+
+            // go to dashboard
+            openDashboard(role);
+            this.dispose(); // Login window එක වහන්න
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid Username or Password!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void openDashboard(String role) {
+       switch (role.toLowerCase()) {
+            case "admin":// user1
+                new AdminDashboard().setVisible(true);
+                break;
+            case "lecturer": //user2
+                new LecturerDashboard().setVisible(true);
+                break;
+            case "student": //user3
+                new StudentDashboard().setVisible(true);
+                break;
+            case "techofficer": //user4
+                new TechnicalOfficerDashboard().setVisible(true);
+                break;
+        }
+    }
+}

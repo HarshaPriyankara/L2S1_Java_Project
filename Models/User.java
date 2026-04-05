@@ -1,4 +1,4 @@
-package models;
+package Models;
 
 import java.time.LocalDate;
 
@@ -22,7 +22,7 @@ public class User {
     public String getDetails(){return null;}
 
     public String getRole() {
-        return "*************************************";
+        return role;
     }
 
     public void setUserID(String userID) {
@@ -53,8 +53,8 @@ public class User {
         return this.lname;
     }
 
-    public String getContactNo() {
-        return this.contactNo;
+    public LocalDate getDateOfBirth() {
+        return this.dob;
     }
 
     public String getAddress() {
