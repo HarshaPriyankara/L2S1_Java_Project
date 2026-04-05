@@ -1,5 +1,12 @@
+import GUI.admin.AdminDashboard;
+import GUI.common.LoginForm;
+
 public class main{
     public static void main(String[] main){
-        System.out.println("Hello World");
+
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            new LoginForm().setVisible(true);
+        });
+
     }
 }
