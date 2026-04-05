@@ -14,7 +14,7 @@ class Notice {
  
 
 
-    public Notice() 
+    public Notice(){
     }
 
 
@@ -33,7 +33,8 @@ class Notice {
 
 
     public static List<Notice> viewAllNotice() {
-       
+
+        return List.of();
     }
 }
 

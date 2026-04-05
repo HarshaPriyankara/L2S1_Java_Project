@@ -1,4 +1,4 @@
-package models;
+package Models;
 public class Department {
 
     private String departmentId;
@@ -10,8 +10,9 @@ public class Department {
     }
 
     public String getDepartmentDetails() {
-      
 
+
+        return "";
     }
 
     public void updateDepartment() {

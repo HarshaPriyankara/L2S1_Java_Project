@@ -1,4 +1,4 @@
-package models;
+package Models;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -32,9 +32,7 @@ class Timetable {
     }
 
     public static List<Timetable> getTimeTableByDept(String deptId) {
-        
-
-    public void display() {
-        
+        return List.of();
     }
+
 }
