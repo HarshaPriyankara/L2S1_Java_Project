@@ -13,7 +13,7 @@ public class ViewMedical extends JFrame {
         JFrame frame = new JFrame();
         setTitle("View Medicals");
         setSize(650,700);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         String[] columns ={"Serial Number","Reference Number","Medical Date","Medical Certificate Number","Submitted Date","Status"};

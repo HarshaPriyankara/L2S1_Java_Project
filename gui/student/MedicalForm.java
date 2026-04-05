@@ -52,8 +52,17 @@ public class MedicalForm extends JFrame {
             gbc.gridx = 0; gbc.gridy = 3;
             add(new JLabel("Session Type:"), gbc);
             gbc.gridx = 1;
-            String[] types = {"Normal Day", "Exam Day"};
-            cmbSessionType = new JComboBox<>(types);
+            String[] types = {
+                    "NormalDay",
+                    "ExamENG1222",
+                    "ExamICT1212",
+                    "ExamICT1222",
+                    "ExamICT1233",
+                    "ExamICT1242",
+                    "ExamTCS1212",
+                    "ExamICT1253",
+                    "ExamTMS1233"
+            };            cmbSessionType = new JComboBox<>(types);
             add(cmbSessionType, gbc);
 
             gbc.gridx = 0; gbc.gridy = 4;
@@ -114,8 +123,14 @@ public class MedicalForm extends JFrame {
 
 
                 try {
+                    File uploadDir = new File("uploads");
+                    if (!uploadDir.exists()) uploadDir.mkdir();
+
+                    String fileName = reg + "_" + System.currentTimeMillis() + "_" + selectedFile.getName();
+                    File destinationFile = new File(uploadDir + "/" + fileName);
+
                     Connection connection = utils.DBConnection.getConnection();
-                    String sql = "insert into medical_record (Medical_id,Reg_no,Session_date,Reason,Session_type) values (?,?,?,?,?)";
+                    String sql = "insert into medical_record (Medical_id,Reg_no,Session_date,Reason,Session_type,Document_path) values (?,?,?,?,?,?)";
 
                     PreparedStatement pst = connection.prepareStatement(sql);
                     pst.setString(1, mid);
@@ -123,6 +138,7 @@ public class MedicalForm extends JFrame {
                     pst.setDate(3, sqlDate);
                     pst.setString(4, reason);
                     pst.setString(5, session_type);
+                    pst.setString(6, destinationFile.getPath());
 
                     int status = pst.executeUpdate();
                     if (status > 0) {
