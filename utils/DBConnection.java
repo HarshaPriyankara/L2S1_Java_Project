@@ -3,10 +3,12 @@ package utils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
+
 
 public class DBConnection {
     //database credentials
-    private static final String URL = "jdbc:mysql://localhost:3306/Faculty_Of_Technology"
+    private static final String URL = "jdbc:mysql://localhost:3308/Faculty_Of_Technology"
             + "?useSSL=false&allowPublicKeyRetrieval=true"
             + "&serverTimezone=UTC";
     private static final String USER = "root";

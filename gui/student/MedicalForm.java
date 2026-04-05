@@ -3,11 +3,16 @@ package gui.student;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Date;
 
-    public class MedicalForm extends JFrame {
+public class MedicalForm extends JFrame {
 
         private JTextField txtMedicalId, txtRegNo;
         private JTextArea txtReason;
+        private JComboBox<String> cmbSessionType;
+        private JSpinner dateSpinner;
         private JLabel lblFilePath;
         private File selectedFile;
 
@@ -24,38 +29,51 @@ import java.io.File;
 
             gbc.gridx = 0; gbc.gridy = 0;
             add(new JLabel("Medical ID:"), gbc);
-
             gbc.gridx = 1;
             txtMedicalId = new JTextField(15);
             add(txtMedicalId, gbc);
 
             gbc.gridx = 0; gbc.gridy = 1;
             add(new JLabel("Registration No:"), gbc);
-
             gbc.gridx = 1;
             txtRegNo = new JTextField(15);
             add(txtRegNo, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 2;
-            add(new JLabel("Reason:"), gbc);
+            gbc.gridx = 0;gbc.gridy  =2;
+            add(new JLabel("Medical Date:"),gbc);
+            gbc.gridx =1;
+            SpinnerDateModel model = new SpinnerDateModel();
+            dateSpinner = new JSpinner(model);
+            JSpinner.DateEditor editor = new JSpinner.DateEditor(dateSpinner,"yyyy-MM-dd");
+            dateSpinner.setEditor(editor);
+            add(dateSpinner,gbc);
 
+
+            gbc.gridx = 0; gbc.gridy = 3;
+            add(new JLabel("Session Type:"), gbc);
+            gbc.gridx = 1;
+            String[] types = {"Normal Day", "Exam Day"};
+            cmbSessionType = new JComboBox<>(types);
+            add(cmbSessionType, gbc);
+
+            gbc.gridx = 0; gbc.gridy = 4;
+            add(new JLabel("Reason:"), gbc);
             gbc.gridx = 1;
             txtReason = new JTextArea(4, 15);
             add(new JScrollPane(txtReason), gbc);
 
-            gbc.gridx = 0; gbc.gridy = 3;
+            gbc.gridx = 0; gbc.gridy = 5;
             add(new JLabel("Document:"), gbc);
-
             gbc.gridx = 1;
             JButton btnUpload = new JButton("Choose File");
             add(btnUpload, gbc);
 
-            gbc.gridy = 4;
+            gbc.gridx = 4; gbc.gridy = 6;
             lblFilePath = new JLabel("No file selected");
             lblFilePath.setFont(new Font("Arial", Font.ITALIC, 11));
             add(lblFilePath, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 5;
+            gbc.gridx = 0; gbc.gridy = 7;
             gbc.gridwidth = 2;
             JButton btnSubmit = new JButton("Submit Medical");
             btnSubmit.setBackground(new Color(40, 167, 69));
@@ -74,26 +92,53 @@ import java.io.File;
 
             // Submit Logic
             btnSubmit.addActionListener(e -> {
-                String mid = txtMedicalId.getText();
-                String reg = txtRegNo.getText();
-                String reason = txtReason.getText();
-
-                if (mid.isEmpty() || reg.isEmpty() || reason.isEmpty() || selectedFile == null) {
-                    JOptionPane.showMessageDialog(this, "Please fill all fields and upload a file!", "Error", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    // Methana thamai database ekata save karana code eka liyanna ona
-                    System.out.println("Submitting: " + mid + " | " + reg);
-                    JOptionPane.showMessageDialog(this, "Medical Submitted Successfully!");
-                }
+                submitData();
             });
 
             setVisible(true);
-        }
+                    }
 
-        public static void main(String[] args) {
-            SwingUtilities.invokeLater(() -> {
-                new MedicalForm().setVisible(true);
-            });
+            private void submitData() {
+                String mid = txtMedicalId.getText();
+                String reg = txtRegNo.getText();
+                String reason = txtReason.getText();
+                String session_type = (String) cmbSessionType.getSelectedItem();
+
+                java.util.Date spinnerDate = (java.util.Date) dateSpinner.getValue();
+                java.sql.Date sqlDate = new java.sql.Date(spinnerDate.getTime());
+
+                if (mid.isEmpty() || reg.isEmpty() || reason.isEmpty() || selectedFile == null) {
+                    JOptionPane.showMessageDialog(this, "Please fill all fields and upload a file!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+
+                try {
+                    Connection connection = utils.DBConnection.getConnection();
+                    String sql = "insert into medical_record (Medical_id,Reg_no,Session_date,Reason,Session_type) values (?,?,?,?,?)";
+
+                    PreparedStatement pst = connection.prepareStatement(sql);
+                    pst.setString(1, mid);
+                    pst.setString(2, reg);
+                    pst.setDate(3, sqlDate);
+                    pst.setString(4, reason);
+                    pst.setString(5, session_type);
+
+                    int status = pst.executeUpdate();
+                    if (status > 0) {
+                        JOptionPane.showMessageDialog(this,"Medical Submitted Successfully!");
+                    }
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage());
+                }
+            }
+
+
+
+           public static void main(String[] args) {
+            SwingUtilities.invokeLater(() -> new MedicalForm());
         }
     }
 
