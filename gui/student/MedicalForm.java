@@ -9,7 +9,7 @@ import java.sql.Date;
 
 public class MedicalForm extends JFrame {
 
-        private JTextField txtMedicalId, txtRegNo;
+        private JTextField txtReferenceId, txtRegNo;
         private JTextArea txtReason;
         private JComboBox<String> cmbSessionType;
         private JSpinner dateSpinner;
@@ -28,10 +28,10 @@ public class MedicalForm extends JFrame {
             gbc.fill = GridBagConstraints.HORIZONTAL;
 
             gbc.gridx = 0; gbc.gridy = 0;
-            add(new JLabel("Medical ID:"), gbc);
+            add(new JLabel("Reference Number:"), gbc);
             gbc.gridx = 1;
-            txtMedicalId = new JTextField(15);
-            add(txtMedicalId, gbc);
+            txtReferenceId = new JTextField(15);
+            add(txtReferenceId, gbc);
 
             gbc.gridx = 0; gbc.gridy = 1;
             add(new JLabel("Registration No:"), gbc);
@@ -108,7 +108,7 @@ public class MedicalForm extends JFrame {
                     }
 
             private void submitData() {
-                String mid = txtMedicalId.getText();
+                String mid = txtReferenceId.getText();
                 String reg = txtRegNo.getText();
                 String reason = txtReason.getText();
                 String session_type = (String) cmbSessionType.getSelectedItem();
@@ -130,7 +130,7 @@ public class MedicalForm extends JFrame {
                     File destinationFile = new File(uploadDir + "/" + fileName);
 
                     Connection connection = utils.DBConnection.getConnection();
-                    String sql = "insert into medical_record (Medical_id,Reg_no,Session_date,Reason,Session_type,Document_path) values (?,?,?,?,?,?)";
+                    String sql = "insert into medical_record (Reference_Number,Reg_no,Session_date,Reason,Session_type,Document_path) values (?,?,?,?,?,?)";
 
                     PreparedStatement pst = connection.prepareStatement(sql);
                     pst.setString(1, mid);
