@@ -10,7 +10,7 @@ public class AdminCourseManagement extends javax.swing.JFrame {
     public AdminCourseManagement() {
         setTitle("Admin Dashboard - Course Management");
         setSize(1000, 600);
-        setLocationRelativeTo(null); // Screen එකේ මැදට ගැනීම
+        setLocationRelativeTo(null); // center the screen
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
