@@ -2,9 +2,15 @@ package GUI.admin;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class CreateNotice extends JFrame {
 
+    private JTextField titleField;
+    private JTextArea contentArea;
 
     public  CreateNotice(){
         setTitle("Notice Management - Create Notice");
@@ -42,7 +48,7 @@ public class CreateNotice extends JFrame {
         lblTitle.setFont(new Font("SansSerif", Font.BOLD, 14));
         mainContent.add(lblTitle);
 
-        JTextField titleField = new JTextField();
+         titleField = new JTextField();
         titleField.setBounds(50, 80, 650, 35);
         titleField.setFont(new Font("SansSerif", Font.PLAIN, 14));
         mainContent.add(titleField);
@@ -52,7 +58,7 @@ public class CreateNotice extends JFrame {
         lblContent.setFont(new Font("SansSerif", Font.BOLD, 14));
         mainContent.add(lblContent);
 
-        JTextArea contentArea = new JTextArea();
+         contentArea = new JTextArea();
         contentArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         contentArea.setLineWrap(true);  //when typed sentence go to right end of the typed line
@@ -78,6 +84,40 @@ public class CreateNotice extends JFrame {
 
     private void saveNoticeToFile(){
 
+        String title =titleField.getText();
+        String content =contentArea.getText();
+
+        if (title.isEmpty() || content.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill all fields!");
+            return;
+        }
+
+        String sanitizedTitle = title.replaceAll("[^a-zA-Z0-9\\s]", "_");
+        String folderPath = "notices/" + sanitizedTitle;
+        String fileName = sanitizedTitle + ".txt";
+
+        try{
+            File folder = new File(folderPath);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+
+            File file = new File(folder, fileName);
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            writer.write(content);
+            writer.close();
+
+            // 3. Database ekata danna (Oyaata database logic eka methanata danna puluwan)
+            // String sqlPath = file.getAbsolutePath();
+
+            JOptionPane.showMessageDialog(this, "Notice saved successfully in: " + folderPath);
+            String finalPathForDB = folderPath + "/" + fileName;
+            titleField.setText("");
+            contentArea.setText("");
+        }catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error saving notice: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
     }
 
     private JButton createSidebarButton(String text) {
