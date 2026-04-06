@@ -1,0 +1,11 @@
+# IntelliJ IDEA settings
+.idea/
+*.iml
+
+# Compiled output
+out/
+bin/
+*.class
+
+# External libraries (optional)
+*.jar
