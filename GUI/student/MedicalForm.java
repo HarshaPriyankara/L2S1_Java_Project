@@ -1,11 +1,10 @@
-package gui.student;
+package GUI.student;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.Date;
 
 public class MedicalForm extends JFrame {
 
@@ -129,7 +128,7 @@ public class MedicalForm extends JFrame {
                     String fileName = reg + "_" + System.currentTimeMillis() + "_" + selectedFile.getName();
                     File destinationFile = new File(uploadDir + "/" + fileName);
 
-                    Connection connection = utils.DBConnection.getConnection();
+                    Connection connection = Utils.DBConnection.getConnection();
                     String sql = "insert into medical_record (Reference_Number,Reg_no,Session_date,Reason,Session_type,Document_path) values (?,?,?,?,?,?)";
 
                     PreparedStatement pst = connection.prepareStatement(sql);

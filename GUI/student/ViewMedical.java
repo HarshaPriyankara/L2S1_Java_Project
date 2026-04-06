@@ -1,6 +1,4 @@
-package gui.student;
-
-import com.mysql.cj.util.Util;
+package GUI.student;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -9,10 +7,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-
 
 
 public class ViewMedical extends JFrame {
@@ -44,7 +38,7 @@ public class ViewMedical extends JFrame {
         add(scrollPane);
         try{
 
-            Connection connection = utils.DBConnection.getConnection();
+            Connection connection = Utils.DBConnection.getConnection();
             String sql = "Select * from medical_record WHERE Reg_no ='TG0001'";
 
             Statement statement = connection.createStatement();
