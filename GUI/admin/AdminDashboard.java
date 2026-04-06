@@ -8,23 +8,23 @@ public class AdminDashboard  extends javax.swing.JFrame {
 
     public AdminDashboard() {
         setTitle("Admin Dashboard");
-        setSize(650, 700);
+        setSize(1000, 600);
         setLocationRelativeTo(null);// Align middle of screen
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // 1. Sidebar එක (වම් පැත්තේ ඇති මෙනු එක)
+        // 1. Sidebar
         sidebar = new JPanel();
         sidebar.setBackground(Color.DARK_GRAY);
         sidebar.setPreferredSize(new Dimension(200, 700));
-        sidebar.setLayout(new GridLayout(10, 1, 5, 5)); // බොත්තම් පේළියට තියන්න
+        sidebar.setLayout(new GridLayout(10, 1, 5, 5));
 
-        // 2. Content Panel එක (මැද ඇති ප්‍රධාන කොටස)
+        // 2. Content Panel
         contentPanel = new JPanel();
         contentPanel.setBackground(Color.WHITE);
-        contentPanel.setLayout(new CardLayout()); // පැනල් මාරු කරන්න CardLayout හොඳයි
+        contentPanel.setLayout(new CardLayout());
 
-        // Sidebar එකට Buttons එකතු කිරීම
+        // add sidebar buttons
         JButton btnUser = new JButton("User Management");
         btnUser.setBackground(new Color(52, 152, 219)); // set color blue
         btnUser.setForeground(Color.WHITE);
@@ -48,13 +48,7 @@ public class AdminDashboard  extends javax.swing.JFrame {
         sidebar.add(btnLogout);
 
         add(sidebar, BorderLayout.WEST);
-        /*add(contentPanel, BorderLayout.CENTER);*/
-        JLabel imageLabel = new JLabel();
-        ImageIcon icon = new ImageIcon("Images/admin.jpg"); // your image path
-        Image img = icon.getImage().getScaledInstance(450, 700, Image.SCALE_SMOOTH);
-        imageLabel.setIcon(new ImageIcon(img));
-
-        add(imageLabel, BorderLayout.CENTER);
+        add(contentPanel, BorderLayout.CENTER);
     }
 
     static void main(String[] args) {
