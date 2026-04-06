@@ -86,11 +86,14 @@ CREATE TABLE MARK (
 
 CREATE TABLE medical_record (
     Medical_id INT AUTO_INCREMENT PRIMARY KEY,
+    Reference_Number VARCHAR(255) NOT NULL,
     Reg_no CHAR(20) NOT NULL,
     Session_date DATE NOT NULL,
     Reason VARCHAR(255),
+    submitted_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     Session_type ENUM('NormalDay','ExamENG1222','ExamICT1212','ExamICT1222','ExamICT1233','ExamICT1242','ExamTCS1212','ExamICT1253','ExamTMS1233') DEFAULT 'NormalDay',
     Approved BOOLEAN DEFAULT FALSE,
+    Document_path VARCHAR(255),
     FOREIGN KEY (Reg_no) REFERENCES STUDENT(Reg_no)
 ) ENGINE=InnoDB;
 
