@@ -13,18 +13,18 @@ public class StudentDashboard extends javax.swing.JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // 1. Sidebar එක (වම් පැත්තේ ඇති මෙනු එක)
+        // 1. Sidebar
         sidebar = new JPanel();
         sidebar.setBackground(Color.DARK_GRAY);
         sidebar.setPreferredSize(new Dimension(200, 600));
-        sidebar.setLayout(new GridLayout(10, 1, 5, 5)); // බොත්තම් පේළියට තියන්න
+        sidebar.setLayout(new GridLayout(10, 1, 5, 5));
 
-        // 2. Content Panel එක (මැද ඇති ප්‍රධාන කොටස)
+        // 2. Content Panel
         contentPanel = new JPanel();
         contentPanel.setBackground(Color.WHITE);
-        contentPanel.setLayout(new CardLayout()); // පැනල් මාරු කරන්න CardLayout හොඳයි
+        contentPanel.setLayout(new CardLayout());
 
-        // Sidebar එකට Buttons එකතු කිරීම
+        // Add sidebar buttons
         JButton btnManageUsers = new JButton("Manage Users");
         JButton btnCourses = new JButton("Courses");
         JButton btnLogout = new JButton("Logout");
