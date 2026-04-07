@@ -11,6 +11,7 @@ public class CreateNotice extends JFrame {
 
     private JTextField titleField;
     private JTextArea contentArea;
+    private JCheckBox chkLecturer, chkTechnical, chkUndergrad;
 
     public  CreateNotice(){
         setTitle("Notice Management - Create Notice");
@@ -36,6 +37,8 @@ public class CreateNotice extends JFrame {
 
 
 
+
+
     }
 
     private JPanel CreateMainCon() {
@@ -52,6 +55,24 @@ public class CreateNotice extends JFrame {
         titleField.setBounds(50, 80, 650, 35);
         titleField.setFont(new Font("SansSerif", Font.PLAIN, 14));
         mainContent.add(titleField);
+
+        JLabel lblTarget = new JLabel("Target Roles:");
+        lblTarget.setBounds(50, 430, 100, 30);
+        lblTarget.setFont(new Font("SansSerif", Font.BOLD, 14));
+        mainContent.add(lblTarget);
+
+        chkLecturer = new JCheckBox("Lecturer");
+        chkLecturer.setBounds(150, 430, 100, 30);
+        mainContent.add(chkLecturer);
+
+        chkTechnical = new JCheckBox("Technical Officer");
+        chkTechnical.setBounds(260, 430, 150, 30);
+        mainContent.add(chkTechnical);
+
+        chkUndergrad = new JCheckBox("Undergraduate");
+        chkUndergrad.setBounds(410, 430, 150, 30);
+        mainContent.add(chkUndergrad);
+
 
         JLabel lblContent = new JLabel("Notice Content:");
         lblContent.setBounds(50, 140, 150, 30);
@@ -70,7 +91,7 @@ public class CreateNotice extends JFrame {
 
 
         JButton btnSubmit = new JButton("Submit & Save");
-        btnSubmit.setBounds(50, 450, 150, 40);
+        btnSubmit.setBounds(50, 480, 150, 40);
         btnSubmit.setBackground(new Color(39, 174, 96));
         btnSubmit.setForeground(Color.WHITE);
         btnSubmit.setFont(new Font("SansSerif", Font.BOLD, 14));
