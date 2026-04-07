@@ -1,5 +1,4 @@
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 class Timetable {
@@ -12,7 +11,6 @@ class Timetable {
     private String venue;
     private String sessionType;
 
-    private static List<Timetable> timetableList = new ArrayList<>();
 
     public Timetable() {
     
@@ -33,9 +31,5 @@ class Timetable {
     }
 
     public static List<Timetable> getTimeTableByDept(String deptId) {
-        
-
-    public void display() {
-        
     }
 }

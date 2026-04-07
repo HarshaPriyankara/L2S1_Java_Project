@@ -1,5 +1,4 @@
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 class Notice {
@@ -11,10 +10,8 @@ class Notice {
     private String targetRole;
     private String departmentId;
 
-    private static List<Notice> noticeList = new ArrayList<>();
 
 
-    public Notice() 
     }
 
 
