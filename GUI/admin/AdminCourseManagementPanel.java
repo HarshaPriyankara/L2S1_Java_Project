@@ -6,7 +6,7 @@ import java.awt.*;
 public class AdminCourseManagementPanel extends javax.swing.JFrame {
     private JPanel sidebar, contentPanel, menuPanel, addCoursePanel;
     private JButton btnAddCourse, btnUpdateCourse, btnDeleteCourse;
-    private CardLayout cardLayout = new CardLayout(); // Panel මාරු කිරීමට
+    private CardLayout cardLayout = new CardLayout(); // change panel
 
     public AdminCourseManagementPanel() {
         setTitle("Admin Dashboard - Course Management");
@@ -69,8 +69,8 @@ public class AdminCourseManagementPanel extends javax.swing.JFrame {
         menuPanel.add(btnDeleteCourse);
         menuPanel.add(Box.createVerticalGlue());
 
-        // 2. අලුතින් Course එකක් එකතු කරන Form Panel එක
-        addCoursePanel = createAddCoursePanel();
+       //create AddNewCoursePanel object
+        AddNewCoursePanel addCoursePanel = new AddNewCoursePanel(contentPanel, cardLayout);
 
         // CardLayout එකට Panel දෙක එකතු කිරීම
         contentPanel.add(menuPanel, "Menu");
@@ -81,47 +81,6 @@ public class AdminCourseManagementPanel extends javax.swing.JFrame {
         add(contentPanel, BorderLayout.CENTER);
 
         cardLayout.show(contentPanel, "Menu"); // Default එක Menu එක පෙන්වන්න
-    }
-
-    // Course Add කිරීමේ Form එක නිර්මාණය කරන Method එක
-    private JPanel createAddCoursePanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(Color.WHITE);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        String[] labels = {"Course Code:", "Course Name:", "Type:", "Credits:", "Lecturer ID:", "Dept ID:"};
-        JTextField[] fields = new JTextField[labels.length];
-
-        for (int i = 0; i < labels.length; i++) {
-            gbc.gridx = 0; gbc.gridy = i;
-            panel.add(new JLabel(labels[i]), gbc);
-
-            gbc.gridx = 1;
-            fields[i] = new JTextField(20);
-            panel.add(fields[i], gbc);
-        }
-
-        // Buttons
-        JPanel btnPanel = new JPanel();
-        btnPanel.setBackground(Color.WHITE);
-
-        JButton btnSave = new JButton("Save Course");
-        btnSave.setBackground(new Color(46, 204, 113)); // Green
-        btnSave.setForeground(Color.WHITE);
-
-        JButton btnBack = new JButton("Back to Menu");
-        btnBack.addActionListener(e -> cardLayout.show(contentPanel, "Menu")); // back to menu
-
-        btnPanel.add(btnSave);
-        btnPanel.add(btnBack);
-
-        gbc.gridx = 0; gbc.gridy = labels.length;
-        gbc.gridwidth = 2;
-        panel.add(btnPanel, gbc);
-
-        return panel;
     }
 
     private void styleButton(JButton btn) {
