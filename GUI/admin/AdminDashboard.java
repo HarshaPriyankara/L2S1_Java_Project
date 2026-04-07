@@ -50,7 +50,7 @@ public class AdminDashboard  extends javax.swing.JFrame {
         // when click the Course management button
         btnCourse.addActionListener(e -> {
             // create new AdminCourseManagement
-            AdminCourseManagementPanel courseMgmt = new AdminCourseManagementPanel();
+            AdminCourseManagement courseMgmt = new AdminCourseManagement();
             // visible in screen
             courseMgmt.setVisible(true);
             // close before window
