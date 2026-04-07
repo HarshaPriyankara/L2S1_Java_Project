@@ -1,7 +1,9 @@
+package Models;
+
 import java.time.LocalDate;
 import java.util.List;
 
-class Notice {
+ public class Notice {
     private String noticeId;
     private String title;
     private String content;
@@ -25,7 +27,7 @@ class Notice {
 
 
     public void viewNotice() {
-       
+
     }
 
 
