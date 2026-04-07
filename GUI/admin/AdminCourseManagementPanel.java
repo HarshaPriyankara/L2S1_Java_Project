@@ -15,7 +15,7 @@ public class AdminCourseManagementPanel extends javax.swing.JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // --- Sidebar (ස්ථාවර කොටස) ---
+        // sidebar
         sidebar = new JPanel();
         sidebar.setBackground(new Color(44, 62, 80));
         sidebar.setPreferredSize(new Dimension(280, 700));
@@ -52,14 +52,17 @@ public class AdminCourseManagementPanel extends javax.swing.JFrame {
         btnAddCourse = new JButton("Add New Course");
         styleButton(btnAddCourse);
 
-        // Button එක Click කල විට Form එක පෙන්වීමට Action එක
         btnAddCourse.addActionListener(e -> cardLayout.show(contentPanel, "AddForm"));
 
         btnUpdateCourse = new JButton("Update Course");
         styleButton(btnUpdateCourse);
 
+        btnUpdateCourse.addActionListener(e -> cardLayout.show(contentPanel, "UpdateForm"));
+
         btnDeleteCourse = new JButton("Delete Course");
         styleButton(btnDeleteCourse);
+
+        btnDeleteCourse.addActionListener(e -> cardLayout.show(contentPanel, "DeleteForm"));
 
         menuPanel.add(Box.createVerticalGlue());
         menuPanel.add(btnAddCourse);
@@ -69,18 +72,22 @@ public class AdminCourseManagementPanel extends javax.swing.JFrame {
         menuPanel.add(btnDeleteCourse);
         menuPanel.add(Box.createVerticalGlue());
 
-       //create AddNewCoursePanel object
+       //create 3 panel object
         AddNewCoursePanel addCoursePanel = new AddNewCoursePanel(contentPanel, cardLayout);
+        UpdateCoursePanel updateCoursePanel = new UpdateCoursePanel(contentPanel, cardLayout);
+        DeleteCoursePanel deleteCoursePanel = new DeleteCoursePanel(contentPanel, cardLayout);
 
-        // CardLayout එකට Panel දෙක එකතු කිරීම
+        // add panel to card layout
         contentPanel.add(menuPanel, "Menu");
         contentPanel.add(addCoursePanel, "AddForm");
+        contentPanel.add(updateCoursePanel, "UpdateForm");
+        contentPanel.add(deleteCoursePanel, "DeleteForm");
 
-        // Main Layout එකට සම්බන්ධ කිරීම
+        // join content panel to main layout
         add(sidebar, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
 
-        cardLayout.show(contentPanel, "Menu"); // Default එක Menu එක පෙන්වන්න
+        cardLayout.show(contentPanel, "Menu"); // set menu as default
     }
 
     private void styleButton(JButton btn) {
