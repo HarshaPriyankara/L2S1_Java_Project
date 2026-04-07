@@ -1,3 +1,4 @@
+package Models;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -13,23 +14,25 @@ class Timetable {
 
 
     public Timetable() {
-    
+
     }
 
 
     public void createTimeTable() {
-      
+
     }
 
     public void updateTimeTable() {
-     
+
     }
 
 
     public static void deleteTimeTable() {
-  
+
     }
 
     public static List<Timetable> getTimeTableByDept(String deptId) {
+        return List.of();
     }
+
 }

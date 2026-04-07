@@ -1,5 +1,5 @@
-package dao;
+package DAO;
 
-public class DepartmrntDAO {
+public class DepartmentDAO {
 
 }

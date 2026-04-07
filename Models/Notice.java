@@ -13,16 +13,12 @@ import java.util.List;
     private String departmentId;
 
 
-
-    }
-
-
     public void createNotice() {
-        
+
     }
 
     public static void deleteNotice() {
-       
+
     }
 
 
@@ -32,6 +28,7 @@ import java.util.List;
 
 
     public static List<Notice> viewAllNotice() {
-       
+               return List.of();
+
     }
-}
+ }
