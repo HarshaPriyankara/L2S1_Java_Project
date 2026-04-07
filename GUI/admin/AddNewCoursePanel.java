@@ -34,13 +34,16 @@ class AddNewCoursePanel extends JPanel {
         JTextField txtDep = new JTextField();
         add(txtDep);
 
-        JButton btnSave = new JButton("Save Course");
         JButton btnBack = new JButton("Back");
+        JButton btnSave = new JButton("Save Course");
+        btnSave.setBackground(new Color(46, 204, 113));
+        btnSave.setForeground(Color.WHITE);
 
-        // Back button action
+        // back to menu
         btnBack.addActionListener(e -> cardLayout.show(parentPanel, "Menu"));
 
-        add(btnSave);
         add(btnBack);
+        add(btnSave);
+
     }
 }
