@@ -7,8 +7,8 @@ public class Course {
     private String courseCode;
     private String courseName;
     private int credits;
-    private int theoryHours;
-    private int practicalHours;
+    private String type;
+    private String lecturerId;
     private String departmentId;
 
 
@@ -16,12 +16,12 @@ public class Course {
     public Course() {
     }
 
-    public Course(String courseCode, String courseName, int credits, int theoryHours, int practicalHours, String departmentId) {
+    public Course(String courseCode, String courseName, int credits, String type, String lecturerId, String departmentId) {
         this.courseCode = courseCode;
         this.courseName = courseName;
         this.credits = credits;
-        this.theoryHours = theoryHours;
-        this.practicalHours = practicalHours;
+        this.type = type;
+        this.lecturerId = lecturerId;
         this.departmentId = departmentId;
     }
 
@@ -32,11 +32,9 @@ public class Course {
 
     }
 
-    public void updateCourse(String courseName, int credits, int theoryHours, int practicalHours) {
+    public void updateCourse(String courseName, int credits) {
         this.courseName = courseName;
         this.credits = credits;
-        this.theoryHours = theoryHours;
-        this.practicalHours = practicalHours;
         System.out.println("[Course] updated : " + courseCode);
     }
 
@@ -45,11 +43,31 @@ public class Course {
         return "Course Code    : " + courseCode + "\n" +
                 "Course Name    : " + courseName + "\n" +
                 "Credits        : " + credits + "\n" +
-                "Theory Hours   : " + theoryHours + "\n" +
-                "Practical Hours: " + practicalHours + "\n" +
                 "Department     : " + departmentId;
     }
 
 
+    public String getCourseCode() {
+        return courseCode;
+    }
 
+    public String getName() {
+        return courseName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public int getCredits() {
+        return credits;
+    }
+
+    public String getLecturerId() {
+        return lecturerId;
+    }
+
+    public String getDeptId() {
+        return departmentId;
+    }
 }
