@@ -6,12 +6,16 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class CreateNotice extends JFrame {
 
     private JTextField titleField;
     private JTextArea contentArea;
     private JCheckBox chkLecturer, chkTechnical, chkUndergrad;
+    StringBuilder targetRole;
 
     public  CreateNotice(){
         setTitle("Notice Management - Create Notice");
@@ -73,7 +77,6 @@ public class CreateNotice extends JFrame {
         chkUndergrad.setBounds(410, 430, 150, 30);
         mainContent.add(chkUndergrad);
 
-
         JLabel lblContent = new JLabel("Notice Content:");
         lblContent.setBounds(50, 140, 150, 30);
         lblContent.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -108,14 +111,27 @@ public class CreateNotice extends JFrame {
         String title =titleField.getText();
         String content =contentArea.getText();
 
-        if (title.isEmpty() || content.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill all fields!");
-            return;
-        }
 
         String sanitizedTitle = title.replaceAll("[^a-zA-Z0-9\\s]", "_");
         String folderPath = "notices/" + sanitizedTitle;
         String fileName = sanitizedTitle + ".txt";
+
+
+         targetRole = new StringBuilder();
+        if (chkLecturer.isSelected()) targetRole.append("Lecturer,");
+        if (chkTechnical.isSelected()) targetRole.append("Technical Officer,");
+        if (chkUndergrad.isSelected()) targetRole.append("Undergraduate,");
+
+        String finalRoles = targetRole.toString();
+        if (finalRoles.endsWith(",")) {
+            finalRoles = finalRoles.substring(0, finalRoles.length() - 1);
+        }
+
+        if (title.isEmpty() || content.isEmpty() || finalRoles.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill all fields!");
+            return;
+        }
+
 
         try{
             File folder = new File(folderPath);
@@ -128,16 +144,33 @@ public class CreateNotice extends JFrame {
             writer.write(content);
             writer.close();
 
-            // 3. Database ekata danna (Oyaata database logic eka methanata danna puluwan)
-            // String sqlPath = file.getAbsolutePath();
-
-            JOptionPane.showMessageDialog(this, "Notice saved successfully in: " + folderPath);
             String finalPathForDB = folderPath + "/" + fileName;
+
+
+            String sql = "INSERT Into notice (Target_role,Title,Created_date,Content) VALUES (?,?,Curdate(),?)";
+            Connection connection =Utils.DBConnection.getConnection();
+            PreparedStatement pst =connection.prepareStatement(sql);
+
+            pst.setString(1,finalRoles);
+            pst.setString(2,title);
+            pst.setString(3,finalPathForDB);
+
+            int rowExecute = pst.executeUpdate();
+
+            if (rowExecute > 0) {
+                  JOptionPane.showMessageDialog(this,"Notice inserted successfully!");
+             }
+
+
+
             titleField.setText("");
             contentArea.setText("");
+
         }catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "Error saving notice: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this,e.getMessage());
         }
     }
 
