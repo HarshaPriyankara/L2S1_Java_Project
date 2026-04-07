@@ -18,14 +18,14 @@ public class LoginForm extends JFrame {
 
     public LoginForm() {
         setTitle("Student Management System - Login");
-        setSize(650, 700);
+        setSize(1000, 600);
         setLocationRelativeTo(null);// Align middle of screen
         JPanel panel = new JPanel();
         setLayout(new BorderLayout());
 
         JLabel imageLabel = new JLabel();
-        ImageIcon icon = new ImageIcon("Images/login.png"); // your image path
-        Image img = icon.getImage().getScaledInstance(300, 700, Image.SCALE_SMOOTH);
+        ImageIcon icon = new ImageIcon("Images/login2.jpg"); // your image path
+        Image img = icon.getImage().getScaledInstance(500, 600, Image.SCALE_SMOOTH);
         imageLabel.setIcon(new ImageIcon(img));
 
         add(imageLabel, BorderLayout.WEST);
@@ -70,11 +70,10 @@ public class LoginForm extends JFrame {
         txtPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
         formPanel.add(txtPassword);
 
-        formPanel.add(Box.createVerticalStrut(30)); // Password එකයි Button එකයි අතර පරතරය
-
+        formPanel.add(Box.createVerticalStrut(30)); // gap between pwd field and button
         // 5. Login Button
         btnLogin = new JButton("Login");
-        btnLogin.setPreferredSize(new Dimension(150, 45)); // Button එකේ size එක
+        btnLogin.setPreferredSize(new Dimension(150, 45)); // button size
         btnLogin.setBackground(new Color(52, 152, 219)); // set background color blue
         btnLogin.setForeground(Color.WHITE); // set font color white
         btnLogin.setMaximumSize(new Dimension(150, 45));
@@ -111,7 +110,7 @@ public class LoginForm extends JFrame {
 
             // go to dashboard
             openDashboard(role);
-            this.dispose(); // Login window එක වහන්න
+            this.dispose(); // close Login window
         } else {
             JOptionPane.showMessageDialog(this, "Invalid Username or Password!", "Error", JOptionPane.ERROR_MESSAGE);
         }
