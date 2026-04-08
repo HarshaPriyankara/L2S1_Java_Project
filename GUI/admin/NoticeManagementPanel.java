@@ -16,7 +16,7 @@ public class NoticeManagementPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = GridBagConstraints.RELATIVE;
-        gbc.insets = new Insets(15, 0, 15, 0); // බොත්තම් අතර පරතරය
+        gbc.insets = new Insets(15, 0, 15, 0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
 
@@ -28,7 +28,7 @@ public class NoticeManagementPanel extends JPanel {
 
     private JButton createNoticeButton(String text) {
         JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(500, 80)); // රූපයේ තිබූ ලෙස විශාල බොත්තම්
+        btn.setPreferredSize(new Dimension(500, 80)); 
         btn.setBackground(BUTTON_COLOR);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
