@@ -14,21 +14,21 @@ class Timetable {
 
 
     public Timetable() {
-    
+
     }
 
 
     public void createTimeTable() {
-      
+
     }
 
     public void updateTimeTable() {
-     
+
     }
 
 
     public static void deleteTimeTable() {
-  
+
     }
 
     public static List<Timetable> getTimeTableByDept(String deptId) {
