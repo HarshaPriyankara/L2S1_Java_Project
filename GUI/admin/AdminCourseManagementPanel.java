@@ -3,94 +3,51 @@ package GUI.admin;
 import javax.swing.*;
 import java.awt.*;
 
-public class AdminCourseManagementPanel extends javax.swing.JFrame {
-    private JPanel sidebar, contentPanel, menuPanel, addCoursePanel;
-    private JButton btnAddCourse, btnUpdateCourse, btnDeleteCourse;
-    private CardLayout cardLayout = new CardLayout(); // change panel
+public class AdminCourseManagementPanel extends JPanel {
 
-    public AdminCourseManagementPanel() {
-        setTitle("Admin Dashboard - Course Management");
-        setSize(1000, 600);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    // Sub-card names
+    private static final String MENU   = "CourseMenu";
+    private static final String ADD    = "AddForm";
+    private static final String UPDATE = "UpdateForm";
+    private static final String DELETE = "DeleteForm";
+
+    // Inner card layout (just for this panel's sub-views)
+    private final CardLayout innerLayout = new CardLayout();
+    private final JPanel     innerPanel  = new JPanel(innerLayout);
+
+    public AdminCourseManagementPanel(JPanel rootContent, CardLayout rootCard) {
         setLayout(new BorderLayout());
+        setBackground(Color.WHITE);
 
-        // sidebar
-        sidebar = new JPanel();
-        sidebar.setBackground(new Color(44, 62, 80));
-        sidebar.setPreferredSize(new Dimension(280, 700));
-        sidebar.setLayout(new GridLayout(10, 1, 0, 10));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // Build sub-panels
+        innerPanel.add(buildMenuPanel(),  MENU);
+        innerPanel.add(new AddNewCoursePanel(innerPanel, innerLayout),    ADD);
+        innerPanel.add(new UpdateCoursePanel(innerPanel, innerLayout),    UPDATE);
+        innerPanel.add(new DeleteCoursePanel(innerPanel, innerLayout),    DELETE);
 
-        String[] navButtons = {"User Management", "Course Management", "Notice Management", "Timetable Management", "Logout"};
-        for (String text : navButtons) {
-            JButton btn = new JButton(text);
-            btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
-            btn.setBackground(new Color(52, 73, 94));
-            btn.setForeground(Color.WHITE);
-            btn.setFocusPainted(false);
-            btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            btn.setBorder(BorderFactory.createLineBorder(new Color(52, 73, 94), 1));
-
-            // Hover Effect
-            btn.addMouseListener(new java.awt.event.MouseAdapter() {
-                public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setBackground(new Color(52, 152, 219)); }
-                public void mouseExited(java.awt.event.MouseEvent evt) { btn.setBackground(new Color(52, 73, 94)); }
-            });
-            sidebar.add(btn);
-        }
-
-        // Content Panel
-        contentPanel = new JPanel(cardLayout);
-
-        //  Menu Panel(Add, Update, Delete Buttons)
-        menuPanel = new JPanel();
-        menuPanel.setBackground(Color.WHITE);
-        menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-
-        btnAddCourse = new JButton("Add New Course");
-        styleButton(btnAddCourse);
-
-        btnAddCourse.addActionListener(e -> cardLayout.show(contentPanel, "AddForm"));
-
-        btnUpdateCourse = new JButton("Update Course");
-        styleButton(btnUpdateCourse);
-
-        btnUpdateCourse.addActionListener(e -> cardLayout.show(contentPanel, "UpdateForm"));
-
-        btnDeleteCourse = new JButton("Delete Course");
-        styleButton(btnDeleteCourse);
-
-        btnDeleteCourse.addActionListener(e -> cardLayout.show(contentPanel, "DeleteForm"));
-
-        menuPanel.add(Box.createVerticalGlue());
-        menuPanel.add(btnAddCourse);
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        menuPanel.add(btnUpdateCourse);
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        menuPanel.add(btnDeleteCourse);
-        menuPanel.add(Box.createVerticalGlue());
-
-        //create 3 panel object
-        AddNewCoursePanel addCoursePanel = new AddNewCoursePanel(contentPanel, cardLayout);
-        UpdateCoursePanel updateCoursePanel = new UpdateCoursePanel(contentPanel, cardLayout);
-        DeleteCoursePanel deleteCoursePanel = new DeleteCoursePanel(contentPanel, cardLayout);
-
-        // add panel to card layout
-        contentPanel.add(menuPanel, "Menu");
-        contentPanel.add(addCoursePanel, "AddForm");
-        contentPanel.add(updateCoursePanel, "UpdateForm");
-        contentPanel.add(deleteCoursePanel, "DeleteForm");
-
-        // join content panel to main layout
-        add(sidebar, BorderLayout.WEST);
-        add(contentPanel, BorderLayout.CENTER);
-
-        cardLayout.show(contentPanel, "Menu"); // set menu as default
+        add(innerPanel, BorderLayout.CENTER);
+        innerLayout.show(innerPanel, MENU);
     }
 
-    private void styleButton(JButton btn) {
+    private JPanel buildMenuPanel() {
+        JPanel menu = new JPanel();
+        menu.setBackground(Color.WHITE);
+        menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
+        menu.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+
+        menu.add(Box.createVerticalGlue());
+        menu.add(courseButton("Add New Course",  () -> innerLayout.show(innerPanel, ADD)));
+        menu.add(Box.createRigidArea(new Dimension(0, 20)));
+        menu.add(courseButton("Update Course",   () -> innerLayout.show(innerPanel, UPDATE)));
+        menu.add(Box.createRigidArea(new Dimension(0, 20)));
+        menu.add(courseButton("Delete Course",   () -> innerLayout.show(innerPanel, DELETE)));
+        menu.add(Box.createVerticalGlue());
+
+        return menu;
+    }
+
+    private JButton courseButton(String text, Runnable action) {
+        JButton btn = new JButton(text);
         btn.setPreferredSize(new Dimension(500, 100));
         btn.setMaximumSize(new Dimension(1000, 100));
         btn.setBackground(new Color(52, 152, 219));
@@ -98,12 +55,8 @@ public class AdminCourseManagementPanel extends javax.swing.JFrame {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 24));
         btn.setFocusPainted(false);
         btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    }
-
-    public static void main(String[] args) {
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            new AdminCourseManagementPanel().setVisible(true);
-        });
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.addActionListener(e -> action.run());
+        return btn;
     }
 }
