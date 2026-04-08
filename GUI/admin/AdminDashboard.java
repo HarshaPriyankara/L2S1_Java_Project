@@ -57,11 +57,25 @@ public class AdminDashboard  extends javax.swing.JFrame {
             this.dispose();
         });
 
+
+        // when click user button
+        btnUser.addActionListener(e -> {
+            AddUserPanel userPanel = new AddUserPanel();
+            userPanel.setVisible(true);
+            this.dispose();
+        });
+
+        btnUser.addActionListener(e -> {
+            AddUserPanel userPanel = new AddUserPanel();
+            userPanel.setVisible(true);
+            this.dispose();
+        });
+
         add(sidebar, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
     }
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(() -> {
             new AdminDashboard().setVisible(true);
         });

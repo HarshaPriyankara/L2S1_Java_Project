@@ -5,52 +5,54 @@ import Models.Course;
 import javax.swing.*;
 import java.awt.*;
 
-class AddNewCoursePanel extends JPanel {
+class UpdateCoursePanel extends JPanel {
+
     private JTextField txtCode, txtName, txtType, txtCredits, txtLecturer, txtDep;
-    public AddNewCoursePanel(JPanel parentPanel, CardLayout cardLayout) {
+
+    public UpdateCoursePanel(JPanel parentPanel, CardLayout cardLayout) {
         setLayout(new GridLayout(7, 2, 10, 10));
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
 
         // fields
-        add(new JLabel("*Course Code:"));
+        add(new JLabel("Course Code (to Update):"));
         txtCode = new JTextField();
         add(txtCode);
 
-        add(new JLabel("*Course Name:"));
+        add(new JLabel("New Course Name:"));
         txtName = new JTextField();
         add(txtName);
 
-        add(new JLabel("Type:"));
+        add(new JLabel("New Type:"));
         txtType = new JTextField();
         add(txtType);
 
-        add(new JLabel("*Credits:"));
+        add(new JLabel("New Credits:"));
         txtCredits = new JTextField();
         add(txtCredits);
 
-        add(new JLabel("Lecturer ID:"));
+        add(new JLabel("New Lecturer ID:"));
         txtLecturer = new JTextField();
         add(txtLecturer);
 
-        add(new JLabel("Department ID:"));
+        add(new JLabel("New Department ID:"));
         txtDep = new JTextField();
         add(txtDep);
 
         JButton btnBack = new JButton("Back");
-        JButton btnSave = new JButton("Save Course");
-        btnSave.setBackground(new Color(46, 204, 113));
-        btnSave.setForeground(Color.WHITE);
+        JButton btnUpdate = new JButton("Update Course");
+        btnUpdate.setBackground(new Color(46, 204, 113)); // button color
+        btnUpdate.setForeground(Color.WHITE);
+
+        add(btnBack);
+        add(btnUpdate);
 
         // back to menu
         btnBack.addActionListener(e -> cardLayout.show(parentPanel, "Menu"));
 
-        add(btnBack);
-        add(btnSave);
-        //save button action
-        btnSave.addActionListener(e -> {
+        // 2. Update button action
+        btnUpdate.addActionListener(e -> {
             try {
-                //get data
                 String code = txtCode.getText().trim();
                 String name = txtName.getText().trim();
                 String credit = txtCredits.getText().trim();
@@ -58,28 +60,26 @@ class AddNewCoursePanel extends JPanel {
                 String lecturer = txtLecturer.getText().trim();
                 String department = txtDep.getText().trim();
 
-                String dept = txtDep.getText().trim();
-
-                // validation
+                // Validation
                 if (code.isEmpty() || name.isEmpty() || credit.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Please fill all required fields!", "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Course Code, Name and Credits are required!", "Warning", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-                // check credit is number
-                int credits = Integer.parseInt(credit);
-                // create object , get data in fields
-                Course newCourse = new Course(code, name, credits, type, lecturer, department);
-                // create DAO object
-                DAO.CourseDAO courseDao = new DAO.CourseDAO();
 
-                boolean isSuccess = courseDao.addCourse(newCourse);
+                int credits = Integer.parseInt(credit);
+
+                // create course object
+                Course updatedCourse = new Course(code, name, credits, type, lecturer, department);
+
+                // update via DAO class
+                DAO.CourseDAO courseDao = new DAO.CourseDAO();
+                boolean isSuccess = courseDao.updateCourse(updatedCourse);
 
                 if (isSuccess) {
-                    JOptionPane.showMessageDialog(this, "Course Added Successfully!");
-                    // clear field if correct
+                    JOptionPane.showMessageDialog(this, "Course Updated Successfully!");
                     clearFields();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Failed to add course. Code might already exist.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Update Failed! Check if Course Code exists.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
 
             } catch (NumberFormatException ex) {
@@ -87,6 +87,7 @@ class AddNewCoursePanel extends JPanel {
             }
         });
     }
+
     private void clearFields() {
         txtCode.setText("");
         txtName.setText("");
@@ -95,5 +96,5 @@ class AddNewCoursePanel extends JPanel {
         txtLecturer.setText("");
         txtDep.setText("");
     }
-}
 
+}
