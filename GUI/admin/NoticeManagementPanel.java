@@ -28,7 +28,7 @@ public class NoticeManagementPanel extends JPanel {
 
     private JButton createNoticeButton(String text) {
         JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(500, 80)); 
+        btn.setPreferredSize(new Dimension(500, 80));
         btn.setBackground(BUTTON_COLOR);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
