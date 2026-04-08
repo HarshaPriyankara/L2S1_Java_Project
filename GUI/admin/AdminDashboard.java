@@ -25,8 +25,7 @@ public class AdminDashboard extends JFrame {
         // Register all top-level panels once
         contentPanel.add(new UserManagementPanel(),   "UserManagement");
         contentPanel.add(new AdminCourseManagementPanel(contentPanel, cardLayout), "CourseManagement");
-        contentPanel.add(new JPanel(),                "NoticeManagement");    // placeholder
-        contentPanel.add(new JPanel(),                "TimetableManagement"); // placeholder
+        contentPanel.add(new NoticeManagementPanel(), "NoticeManagement");        contentPanel.add(new JPanel(),                "TimetableManagement"); // placeholder
         contentPanel.add(buildHomePanel(),            "Home");
 
         cardLayout.show(contentPanel, "Home");
