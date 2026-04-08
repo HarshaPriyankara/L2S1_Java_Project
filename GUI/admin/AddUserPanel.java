@@ -1,5 +1,8 @@
 package GUI.admin;
 
+import GUI.common.LoginForm;
+
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -32,6 +35,20 @@ public class AddUserPanel extends JFrame {
         JButton btnNotice    = createNavButton("Notice Management");
         JButton btnTimetable = createNavButton("Timetable Management");
         JButton btnLogout    = createNavButton("Logout");
+
+        btnLogout.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                    null,
+                    "Are you sure you want to logout?",
+                    "Logout",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                new LoginForm().setVisible(true); // open login form
+                this.dispose(); // close current window
+            }
+        });
 
         sidebar.add(btnUser);
         sidebar.add(Box.createVerticalStrut(16));
