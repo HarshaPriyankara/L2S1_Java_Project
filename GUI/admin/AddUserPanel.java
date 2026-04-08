@@ -7,7 +7,7 @@ import java.awt.event.*;
 public class AddUserPanel extends JFrame {
     private static final Color darkBg      = new Color(0x2E2E2E);
     private static final Color buttonColor = new Color(46, 125, 192);
-    private static final     Color cardColor   = new Color(125, 196, 236);
+    private static final Color cardColor   = new Color(85, 179, 232);
 
     //content panel - right_side
     JPanel contentPanel;
@@ -113,6 +113,15 @@ public class AddUserPanel extends JFrame {
 
         // When card is clicked
         card.addMouseListener(new MouseAdapter() {
+
+            public void mouseEntered(MouseEvent e) {
+                card.setBackground(new Color(65, 200, 255)); // hover color
+            }
+
+            public void mouseExited(MouseEvent e) {
+                card.setBackground(cardColor); // original color
+            }
+
             public void mouseClicked(MouseEvent e) {
                 if (title.equals("Create New User")) {
                     showCreateUserForm();
