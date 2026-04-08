@@ -1,81 +1,83 @@
 package GUI.admin;
 
+import GUI.common.LoginForm;
 import javax.swing.*;
 import java.awt.*;
 
-public class AdminDashboard  extends javax.swing.JFrame {
-    private static final Color darkBg      = new Color(0x2E2E2E);
-    private static final Color buttonColor = new Color(46, 125, 192);
+public class AdminDashboard extends JFrame {
 
+    private static final Color DARK_BG      = new Color(0x2E2E2E);
+    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
 
-    private JPanel sidebar, contentPanel;
+    private final CardLayout cardLayout = new CardLayout();
+    private final JPanel contentPanel   = new JPanel(cardLayout);
 
     public AdminDashboard() {
         setTitle("Admin Dashboard");
         setSize(1000, 600);
-        setLocationRelativeTo(null);// Align middle of screen
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // 1. Sidebar
-        JPanel sidebar = new JPanel();
-        sidebar.setBackground(darkBg);
-        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setPreferredSize(new Dimension(260, 0));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(60, 24, 24, 24));
+        add(buildSidebar(), BorderLayout.WEST);
+        add(contentPanel,   BorderLayout.CENTER);
 
-        JButton btnUser      = createNavButton("User Management");
-        JButton btnCourse    = createNavButton("Course Management");
-        JButton btnNotice    = createNavButton("Notice Management");
-        JButton btnTimetable = createNavButton("Timetable Management");
-        JButton btnLogout    = createNavButton("Logout");
+        // Register all top-level panels once
+        contentPanel.add(new UserManagementPanel(),   "UserManagement");
+        contentPanel.add(new AdminCourseManagementPanel(contentPanel, cardLayout), "CourseManagement");
+        contentPanel.add(new JPanel(),                "NoticeManagement");    // placeholder
+        contentPanel.add(new JPanel(),                "TimetableManagement"); // placeholder
+        contentPanel.add(buildHomePanel(),            "Home");
 
-        sidebar.add(btnUser);
-        sidebar.add(Box.createVerticalStrut(16));
-        sidebar.add(btnCourse);
-        sidebar.add(Box.createVerticalStrut(16));
-        sidebar.add(btnNotice);
-        sidebar.add(Box.createVerticalStrut(16));
-        sidebar.add(btnTimetable);
-        sidebar.add(Box.createVerticalStrut(16));
-        sidebar.add(btnLogout);
-
-
-
-        // 2. Content Panel
-        contentPanel = new JPanel();
-        contentPanel.setBackground(Color.WHITE);
-        contentPanel.setLayout(new CardLayout());
-
-
-        // when click the Course management button
-        btnCourse.addActionListener(e -> {
-            // create new AdminCourseManagement
-            AdminCourseManagementPanel courseMgmt = new AdminCourseManagementPanel();
-            // visible in screen
-            courseMgmt.setVisible(true);
-            // close before window
-            this.dispose();
-        });
-
-        add(sidebar, BorderLayout.WEST);
-        add(contentPanel, BorderLayout.CENTER);
+        cardLayout.show(contentPanel, "Home");
     }
 
-    private JButton createNavButton(String text) {
+    private JPanel buildSidebar() {
+        JPanel sidebar = new JPanel();
+        sidebar.setBackground(DARK_BG);
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setPreferredSize(new Dimension(220, 0));
+        sidebar.setBorder(BorderFactory.createEmptyBorder(60, 16, 24, 16));
+
+        sidebar.add(navButton("User Management",      () -> cardLayout.show(contentPanel, "UserManagement")));
+        sidebar.add(Box.createVerticalStrut(12));
+        sidebar.add(navButton("Course Management",    () -> cardLayout.show(contentPanel, "CourseManagement")));
+        sidebar.add(Box.createVerticalStrut(12));
+        sidebar.add(navButton("Notice Management",    () -> cardLayout.show(contentPanel, "NoticeManagement")));
+        sidebar.add(Box.createVerticalStrut(12));
+        sidebar.add(navButton("Timetable Management", () -> cardLayout.show(contentPanel, "TimetableManagement")));
+        sidebar.add(Box.createVerticalGlue());
+        sidebar.add(navButton("Logout", () -> {
+            new LoginForm().setVisible(true); // open login form
+            dispose(); // close current window
+        }));
+
+        return sidebar;
+    }
+
+    private JButton navButton(String text, Runnable action) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("SansSerif", Font.BOLD, 13));
         btn.setForeground(Color.WHITE);
-        btn.setBackground(buttonColor);
+        btn.setBackground(BUTTON_COLOR);
         btn.setFocusPainted(false);
         btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.addActionListener(e -> action.run());
         return btn;
     }
 
+    private JPanel buildHomePanel() {
+        JPanel p = new JPanel(new GridBagLayout());
+        p.setBackground(Color.WHITE);
+        JLabel lbl = new JLabel("Welcome, Admin");
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
+        lbl.setForeground(new Color(0x555555));
+        p.add(lbl);
+        return p;
+    }
+
     public static void main(String[] args) {
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            new AdminDashboard().setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new AdminDashboard().setVisible(true));
     }
 }
