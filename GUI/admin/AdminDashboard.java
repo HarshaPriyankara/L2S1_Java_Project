@@ -50,10 +50,24 @@ public class AdminDashboard  extends javax.swing.JFrame {
         // when click the Course management button
         btnCourse.addActionListener(e -> {
             // create new AdminCourseManagement
-            AdminCourseManagement courseMgmt = new AdminCourseManagement();
+            AdminCourseManagementPanel courseMgmt = new AdminCourseManagementPanel();
             // visible in screen
             courseMgmt.setVisible(true);
             // close before window
+            this.dispose();
+        });
+
+
+        // when click user button
+        btnUser.addActionListener(e -> {
+            AddUserPanel userPanel = new AddUserPanel();
+            userPanel.setVisible(true);
+            this.dispose();
+        });
+
+        btnUser.addActionListener(e -> {
+            AddUserPanel userPanel = new AddUserPanel();
+            userPanel.setVisible(true);
             this.dispose();
         });
 
@@ -61,7 +75,7 @@ public class AdminDashboard  extends javax.swing.JFrame {
         add(contentPanel, BorderLayout.CENTER);
     }
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(() -> {
             new AdminDashboard().setVisible(true);
         });
