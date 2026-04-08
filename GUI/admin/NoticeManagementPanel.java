@@ -10,21 +10,42 @@ public class NoticeManagementPanel extends JPanel {
     public NoticeManagementPanel() {
 
         setBackground(Color.WHITE);
+        showMainButtons();
+    }
 
+    public void showMainButtons() {
+        this.removeAll();
+        this.setLayout(new GridBagLayout());
 
-        setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = GridBagConstraints.RELATIVE;
         gbc.insets = new Insets(15, 0, 15, 0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        JButton btnCreate = createNoticeButton("Create Notice");
 
-        add(createNoticeButton("Create Notice"), gbc);
+        btnCreate.addActionListener(e -> {
+            loadCreateNoticePanel();
+        });
+
+        add(btnCreate, gbc);
         add(createNoticeButton("Update Notice"), gbc);
         add(createNoticeButton("Delete Notice"), gbc);
         add(createNoticeButton("View Notice"), gbc);
+
+        this.revalidate();
+        this.repaint();
     }
+
+    private void loadCreateNoticePanel() {
+        this.removeAll(); // remove buttons
+        this.setLayout(new BorderLayout());
+        this.add(new CreateNotice(this)); // add White Space  to new panel
+        this.revalidate();
+        this.repaint();
+    }
+
 
     private JButton createNoticeButton(String text) {
         JButton btn = new JButton(text);
@@ -35,9 +56,7 @@ public class NoticeManagementPanel extends JPanel {
         btn.setFont(new Font("SansSerif", Font.BOLD, 22));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        btn.addActionListener(e -> {
-            System.out.println(text + " Clicked");
-        });
+
 
         return btn;
     }
