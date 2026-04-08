@@ -32,7 +32,10 @@ public class NoticeManagementPanel extends JPanel {
         add(btnCreate, gbc);
         add(createNoticeButton("Update Notice"), gbc);
         add(createNoticeButton("Delete Notice"), gbc);
-        add(createNoticeButton("View Notice"), gbc);
+
+        JButton btnView = createNoticeButton("View Notice");
+        btnView.addActionListener(e -> loadViewNoticePanel());
+        add(btnView, gbc);
 
         this.revalidate();
         this.repaint();
@@ -42,6 +45,15 @@ public class NoticeManagementPanel extends JPanel {
         this.removeAll(); // remove buttons
         this.setLayout(new BorderLayout());
         this.add(new CreateNotice(this)); // add White Space  to new panel
+        this.revalidate();
+        this.repaint();
+    }
+
+
+    private void loadViewNoticePanel() {
+        this.removeAll();
+        this.setLayout(new BorderLayout());
+        this.add(new ViewNotice(this)); // 'this' pass කරන්න අමතක කරන්න එපා
         this.revalidate();
         this.repaint();
     }
