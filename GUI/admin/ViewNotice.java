@@ -1,117 +1,104 @@
 package GUI.admin;
 
+import DAO.AdminDAO;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.util.List;
 import java.lang.ref.PhantomReference;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-public class ViewNotice extends JFrame {
 
 
+public class ViewNotice extends JPanel {
 
-    public  ViewNotice(){
+    private NoticeManagementPanel parentPanel;
+    private JTable noticeTable;
 
-        setTitle("View Notice");
-        setSize(1000,600);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+    public ViewNotice(NoticeManagementPanel parentPanel) {
+
+        this.parentPanel = parentPanel;
         setLayout(new BorderLayout());
+        setBackground(Color.WHITE);
 
-        JPanel sidebar = new JPanel();
-        sidebar.setBackground(new Color(44, 62, 80));
-        sidebar.setPreferredSize(new Dimension(250, 0));
-        sidebar.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10));
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.setBackground(Color.WHITE);
+        JButton btnBack = new JButton("Back");
+        btnBack.addActionListener(e -> parentPanel.showMainButtons());
+        topPanel.add(btnBack);
+        add(topPanel, BorderLayout.NORTH);
 
-        String[] navItems = {"Create Notice", "Delete Notice", "Update Notice", "View Notice", "Back"};
-
-        for (String item : navItems) {
-            JButton navBtn = createSidebarButton(item);
-            navBtn.addActionListener(e -> {
-                if (item.equals("Create Notice")) {
-                    new CreateNotice().setVisible(true);
-                    this.dispose();
-                } else if (item.equals("Back")) {
-                    this.dispose();
-                }
-            });
-            sidebar.add(navBtn);
-        }
-        add(sidebar, BorderLayout.WEST);
-
-        add(CreateMainCon(),BorderLayout.CENTER);
-
-
-    }
-
-    private JPanel CreateMainCon(){
-        JPanel mainContent = new JPanel(new BorderLayout());
-        mainContent.setBackground(Color.WHITE);
-        mainContent.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        String[] columns = {"NOTICE ID", "TARGET ROLE", "CREATED DATE", "TITLE", "FILE PATH", "---"};
+        String[] columns = {"ID", "Title", "Target Roles", "Added Date", "Action"};
 
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
-
             @Override
-            public boolean isCellEditable(int row ,int column){
-                return column == 5;
+            public boolean isCellEditable(int row, int column) {
+                return column == 4; // Action column එක විතරක් Edit කරන්න දෙන්න (Button එක ඔබන්න ඕන නිසා)
             }
         };
-        String sql = "SELECT notice_id, target_role, created_date, title, Content FROM notice";
 
-        try(Connection connection = Utils.DBConnection.getConnection();
-            PreparedStatement pst = connection.prepareStatement(sql);
-            ResultSet rs = pst.executeQuery();){
+        noticeTable = new JTable(model);
+        noticeTable.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
+        noticeTable.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(new JCheckBox(), noticeTable));
 
-            while (rs.next()){
+        noticeTable.setRowHeight(30);
+        loadTableData(model);
+        add(new JScrollPane(noticeTable), BorderLayout.CENTER);
+    }
 
-                Object[] row  = {
-                        rs.getString("Notice_id"),
-                        rs.getString("Target_role"),
-                        rs.getString("Created_date"),
-                        rs.getString("Title"),
-                        rs.getString("Content"),
-                        "View"
-                };
-                model.addRow(row);
-            }
 
-        }catch (SQLException e){
-            JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage());
+    class ButtonEditor extends DefaultCellEditor {
+        protected JButton button;
+        private JTable table;
+
+        public ButtonEditor(JCheckBox checkBox, JTable table) {
+            super(checkBox);
+            this.table = table;
+            button = new JButton("View");
+            button.addActionListener(e -> {
+                int row = table.getSelectedRow();
+                int id = (int) table.getValueAt(row, 0);
+                String title = (String) table.getValueAt(row, 1);
+
+                AdminDAO dao = new AdminDAO();
+                String path = dao.getNoticeContentPath(id);
+
+                if (path != null) {
+                    Frame frame = (Frame) SwingUtilities.getWindowAncestor(table);
+                    new NoticeViewer(frame, title, path).setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(table, "File path not found in Database!");
+                }
+                fireEditingStopped();
+            });
         }
 
-        JTable table = new JTable(model);
-        table.setRowHeight(35);
-        table.getColumnModel().getColumn(5).setCellRenderer(new ViewNoticeHelper());
-        table.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox()));
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            return button;
+        }
+    }
 
-        mainContent.add(new JScrollPane(table), BorderLayout.CENTER);
-        return mainContent;
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+        public ButtonRenderer() {
+            setText("View");
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            return this;
+        }
     }
 
 
+    private void loadTableData(DefaultTableModel model) {
+        AdminDAO dao = new AdminDAO();
+        List<Object[]> data = dao.getAllNotices();
+        for (Object[] row : data) {
+            // Database එකෙන් එන columns 4 ට අමතරව 5 වෙනි column එකට "View" අගය එකතු කළා
+            Object[] rowWithButton = {row[0], row[1], row[2], row[3], "View"};
+            model.addRow(rowWithButton);
+        }
 
-    private JButton createSidebarButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(220, 45));
-        btn.setBackground(new Color(52, 73, 94));
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 14));
-        return btn;
+
     }
 
-
-
-    public  static void  main(String[] args){
-
-        javax.swing.SwingUtilities.invokeLater(()->{
-            new ViewNotice().setVisible(true);
-        });
-    }
 }
