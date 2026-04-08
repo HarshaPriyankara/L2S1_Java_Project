@@ -57,7 +57,7 @@ public class AdminDashboard  extends javax.swing.JFrame {
         add(imageLabel, BorderLayout.CENTER);
     }
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(() -> {
             new AdminDashboard().setVisible(true);
         });
