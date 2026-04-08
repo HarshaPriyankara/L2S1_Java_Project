@@ -33,6 +33,15 @@ public class AdminDashboard  extends javax.swing.JFrame {
         btnCourse.setForeground(Color.WHITE);
         JButton btnNotice = new JButton("Notice Management");
         btnNotice.setBackground(new Color(52, 152, 219)); // set color blue
+
+        btnNotice.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CreateNotice noticePage = new CreateNotice();
+                noticePage.setVisible(true);
+
+             AdminDashboard.this.dispose();             }
+        });
+
         btnNotice.setForeground(Color.WHITE);
         JButton btnTimetable = new JButton("Timetable Management");
         btnTimetable.setBackground(new Color(52, 152, 219)); // set color blue

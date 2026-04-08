@@ -15,7 +15,7 @@ public class CreateNotice extends JFrame {
     private JTextField titleField;
     private JTextArea contentArea;
     private JCheckBox chkLecturer, chkTechnical, chkUndergrad;
-    StringBuilder targetRole;
+    private StringBuilder targetRole;
 
     public  CreateNotice(){
         setTitle("Notice Management - Create Notice");
@@ -33,6 +33,15 @@ public class CreateNotice extends JFrame {
 
         for (String item : navItems) {
             JButton navBtn = createSidebarButton(item);
+            navBtn.addActionListener(e -> {
+                if (item.equals("View Notice")) {
+                    new ViewNotice().setVisible(true);
+                    this.dispose(); // Close current window
+                } else if (item.equals("Back")) {
+                    // Add your dashboard/main menu logic here
+                    this.dispose();
+                }
+            });
             sidebar.add(navBtn);
         }
         add(sidebar, BorderLayout.WEST);
