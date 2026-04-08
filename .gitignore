@@ -11,4 +11,4 @@ bin/
 *.jar
 
 # DB connection file
-//Utils/DBConnection.java
+Utils/DBConnection.java
