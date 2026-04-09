@@ -30,10 +30,10 @@ public class NoticeManagementPanel extends JPanel {
         });
 
         add(btnCreate, gbc);
-        add(createNoticeButton("Update Notice"), gbc);
-        add(createNoticeButton("Delete Notice"), gbc);
+       // add(createNoticeButton("Update Notice"), gbc);
+       // add(createNoticeButton("Delete Notice"), gbc);
 
-        JButton btnView = createNoticeButton("View Notice");
+        JButton btnView = createNoticeButton("View & Modify Notice");
         btnView.addActionListener(e -> loadViewNoticePanel());
         add(btnView, gbc);
 
@@ -71,5 +71,18 @@ public class NoticeManagementPanel extends JPanel {
 
 
         return btn;
+    }
+
+
+    public void showUpdateNotice(int id, String title) {
+        this.removeAll();
+        this.setLayout(new BorderLayout());
+
+        // Assuming you have a class named UpdateNotice
+        // that takes (NoticeManagementPanel, id, title) as arguments
+        this.add(new UpdateNotice(this, id, title));
+
+        this.revalidate();
+        this.repaint();
     }
 }
