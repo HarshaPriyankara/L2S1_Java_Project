@@ -64,4 +64,34 @@ public class User {
     public String getUserID() {
         return this.userID;
     }
+
+    // Add these to your existing User.java
+
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
+
+    public void setContactNo(String contactNo) {
+        this.contactNo = contactNo;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public String getContactNo() {
+        return this.contactNo;
+    }
 }
