@@ -3,51 +3,41 @@ package DAO;
 import Models.User;
 import Utils.DBConnection;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import java.sql.Date;
-import java.time.LocalDate;
-
+import java.sql.*;
 
 public class UserDAO {
 
-    //check user ib db
-    public User validateUser(String username, String password) throws SQLException {
-        Connection conn = DBConnection.getConnection(); // db connection
-        String sql = "SELECT * FROM user WHERE  User_id= ? AND Password = ?";
+    // ── Validate login ───────────────────────────────────────────────────────
 
+    public User validateUser(String username, String password) {
+        String sql = "SELECT * FROM user WHERE User_id = ? AND Password = ?";
         try {
+            Connection conn = DBConnection.getConnection();
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, username);
             pst.setString(2, password);
 
             ResultSet rs = pst.executeQuery();
-
             if (rs.next()) {
-
                 User user = new User();
-
                 user.setUserID(rs.getString("User_id"));
-                user.setFname(rs.getString("f_name"));
-                user.setLname(rs.getString("l_name"));
+                user.setFname(rs.getString("F_name"));
+                user.setLname(rs.getString("L_name"));
                 user.setEmail(rs.getString("Email"));
                 user.setRole(rs.getString("Role"));
-
                 return user;
             }
         } catch (SQLException e) {
             System.out.println("Login Error: " + e.getMessage());
         }
-        return null; // if not user return null
+        return null;
     }
 
-    // ── Existing: update profile (fixed) ────────────────────────────────────
+    // ── Update profile ───────────────────────────────────────────────────────
 
     public boolean updateProfile(User user) {
-        String sql = "UPDATE user SET f_name=?, l_name=?, dob=?, address=?, email=? WHERE User_id=?";
+        String sql = "UPDATE user SET F_name=?, L_name=?, date_of_birth=?, Address=?, " +
+                "Email=?, contact_no=? WHERE User_id=?";
         try {
             Connection conn = DBConnection.getConnection();
             PreparedStatement pst = conn.prepareStatement(sql);
@@ -57,8 +47,8 @@ public class UserDAO {
                     ? Date.valueOf(user.getDateOfBirth()) : null);
             pst.setString(4, user.getAddress());
             pst.setString(5, user.getEmail());
-            pst.setString(6, user.getUserID());   // was param 5, now correctly 6
-
+            pst.setString(6, user.getContactNo());
+            pst.setString(7, user.getUserID());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -66,12 +56,11 @@ public class UserDAO {
         }
     }
 
-
-    // ── New: create user ─────────────────────────────────────────────────────
+    // ── Create user ──────────────────────────────────────────────────────────
 
     public boolean createUser(User user) {
-        String sql = "INSERT INTO user (User_id, f_name, l_name, Email, Password, " +
-                "Role, dob, contact_no, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO user (User_id, F_name, L_name, Email, Password, " +
+                "Role, date_of_birth, Address, contact_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conn = DBConnection.getConnection();
             PreparedStatement pst = conn.prepareStatement(sql);
@@ -83,9 +72,8 @@ public class UserDAO {
             pst.setString(6, user.getRole());
             pst.setDate  (7, user.getDateOfBirth() != null
                     ? Date.valueOf(user.getDateOfBirth()) : null);
-            pst.setString(8, user.getContactNo());
-            pst.setString(9, user.getAddress());
-
+            pst.setString(8, user.getAddress());
+            pst.setString(9, user.getContactNo());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -93,11 +81,11 @@ public class UserDAO {
         }
     }
 
-    // ── New: update all user details (admin use) ─────────────────────────────
+    // ── Update user (admin) ──────────────────────────────────────────────────
 
     public boolean updateUser(User user) {
-        String sql = "UPDATE user SET f_name=?, l_name=?, Email=?, Password=?, " +
-                "Role=?, dob=?, contact_no=?, address=? WHERE User_id=?";
+        String sql = "UPDATE user SET F_name=?, L_name=?, Email=?, Password=?, " +
+                "Role=?, date_of_birth=?, Address=?, contact_no=? WHERE User_id=?";
         try {
             Connection conn = DBConnection.getConnection();
             PreparedStatement pst = conn.prepareStatement(sql);
@@ -108,10 +96,9 @@ public class UserDAO {
             pst.setString(5, user.getRole());
             pst.setDate  (6, user.getDateOfBirth() != null
                     ? Date.valueOf(user.getDateOfBirth()) : null);
-            pst.setString(7, user.getContactNo());
-            pst.setString(8, user.getAddress());
+            pst.setString(7, user.getAddress());
+            pst.setString(8, user.getContactNo());
             pst.setString(9, user.getUserID());
-
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -119,7 +106,7 @@ public class UserDAO {
         }
     }
 
-    // ── New: delete user ─────────────────────────────────────────────────────
+    // ── Delete user ──────────────────────────────────────────────────────────
 
     public boolean deleteUser(String userId) {
         String sql = "DELETE FROM user WHERE User_id = ?";
@@ -134,7 +121,7 @@ public class UserDAO {
         }
     }
 
-    // ── New: check user exists ───────────────────────────────────────────────
+    // ── Check user exists ────────────────────────────────────────────────────
 
     public boolean userExists(String userId) {
         String sql = "SELECT 1 FROM user WHERE User_id = ?";

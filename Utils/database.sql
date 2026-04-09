@@ -17,6 +17,7 @@ CREATE TABLE user (
                       date_of_birth DATE,
                       Address       VARCHAR(100),
                       Email         VARCHAR(100) UNIQUE,
+                      contact_no VARCHAR(20),
                       Role          VARCHAR(50),
                       Password      VARCHAR(100)
 );
