@@ -136,4 +136,33 @@ public class UserDAO {
             return false;
         }
     }
+
+
+    // ── Get user by ID  for update user───────────────────────────────────────────────────────
+
+    public User getUserById(String userId) {
+        String sql = "SELECT * FROM user WHERE User_id = ?";
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, userId);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                User user = new User();
+                user.setUserID(rs.getString("User_id"));
+                user.setFname(rs.getString("F_name"));
+                user.setLname(rs.getString("L_name"));
+                user.setEmail(rs.getString("Email"));
+                user.setRole(rs.getString("Role"));
+                user.setContactNo(rs.getString("contact_no"));
+                user.setAddress(rs.getString("Address"));
+                Date dob = rs.getDate("date_of_birth");
+                if (dob != null) user.setDob(dob.toLocalDate());
+                return user;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

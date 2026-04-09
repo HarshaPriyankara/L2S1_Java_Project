@@ -140,7 +140,39 @@ public class UserManagementPanel extends JPanel {
 
         addTitle("Update User Details", BUTTON_COLOR);
 
-        JTextField txtId      = addField("User ID");
+        // ── Step 1: ID lookup row ──────────────────────────────────────────
+        JLabel idLbl = new JLabel("User ID");
+        idLbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        idLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel idRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        idRow.setBackground(Color.WHITE);
+        idRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        idRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+
+        JTextField txtId = new JTextField();
+        txtId.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        txtId.setPreferredSize(new Dimension(300, 35));
+
+        JButton fetchBtn = new JButton("Load User");
+        fetchBtn.setFont(new Font("SansSerif", Font.BOLD, 13));
+        fetchBtn.setBackground(BUTTON_COLOR);
+        fetchBtn.setForeground(Color.WHITE);
+        fetchBtn.setFocusPainted(false);
+        fetchBtn.setBorderPainted(false);
+        fetchBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        fetchBtn.setPreferredSize(new Dimension(110, 35));
+
+        idRow.add(txtId);
+        idRow.add(Box.createHorizontalStrut(10));
+        idRow.add(fetchBtn);
+
+        contentPanel.add(idLbl);
+        contentPanel.add(Box.createVerticalStrut(5));
+        contentPanel.add(idRow);
+        contentPanel.add(Box.createVerticalStrut(16));
+
+        // ── Step 2: Editable fields (initially empty / disabled) ──────────
         JTextField txtFN      = addField("First Name");
         JTextField txtLN      = addField("Last Name");
         JTextField txtEmail   = addField("Email");
@@ -148,14 +180,63 @@ public class UserManagementPanel extends JPanel {
         JTextField txtContact = addField("Contact No");
         JTextField txtAddr    = addField("Address");
         JComboBox<String> cmbRole = addRoleCombo();
-        JPasswordField txtPw  = addPasswordField("New Password");
+        JPasswordField txtPw  = addPasswordField("New Password (leave blank to keep current)");
 
+        // Disable all fields until a user is loaded
+        setFieldsEnabled(false, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr);
+        cmbRole.setEnabled(false);
+        txtPw.setEnabled(false);
+
+        // ── Step 3: Button row ─────────────────────────────────────────────
         JPanel row = buttonRow();
         backButton(row);
         JButton upd = actionButton(row, "Update User", BUTTON_COLOR);
+        upd.setEnabled(false);
+        contentPanel.add(row);
+        refresh();
 
+        // ── Load user on fetch ─────────────────────────────────────────────
+        fetchBtn.addActionListener(e -> {
+            String id = txtId.getText().trim();
+            if (id.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a User ID.",
+                        "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            UserDAO dao = new UserDAO();
+            User existing = dao.getUserById(id);
+            if (existing == null) {
+                JOptionPane.showMessageDialog(this, "No user found with that ID.",
+                        "Not Found", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Populate fields with existing data
+            txtFN.setText(existing.getFname());
+            txtLN.setText(existing.getLname());
+            txtEmail.setText(existing.getEmail());
+            txtDob.setText(existing.getDateOfBirth() != null
+                    ? existing.getDateOfBirth().toString() : "");
+            txtContact.setText(existing.getContactNo());
+            txtAddr.setText(existing.getAddress());
+            if (existing.getRole() != null) {
+                cmbRole.setSelectedItem(existing.getRole());
+            }
+            txtPw.setText("");   // always blank — user types new one only if changing
+
+            // Enable editing
+            setFieldsEnabled(true, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr);
+            cmbRole.setEnabled(true);
+            txtPw.setEnabled(true);
+            upd.setEnabled(true);
+            txtId.setEditable(false);   // lock ID once loaded
+            fetchBtn.setEnabled(false);
+        });
+
+        // ── Save update ────────────────────────────────────────────────────
         upd.addActionListener(e -> {
-            if (anyEmpty(txtId, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr)) return;
+            if (anyEmpty(txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr)) return;
 
             LocalDate dob;
             try {
@@ -167,11 +248,7 @@ public class UserManagementPanel extends JPanel {
             }
 
             UserDAO dao = new UserDAO();
-            if (!dao.userExists(txtId.getText().trim())) {
-                JOptionPane.showMessageDialog(this, "No user found with that ID.",
-                        "Not Found", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+            User existing = dao.getUserById(txtId.getText().trim());
 
             User user = new User();
             user.setUserID(txtId.getText().trim());
@@ -182,7 +259,11 @@ public class UserManagementPanel extends JPanel {
             user.setContactNo(txtContact.getText().trim());
             user.setAddress(txtAddr.getText().trim());
             user.setRole((String) cmbRole.getSelectedItem());
-            user.setPassword(new String(txtPw.getPassword()).trim());
+
+            // Keep old password if the field is left blank
+            String newPw = new String(txtPw.getPassword()).trim();
+            user.setPassword(newPw.isEmpty() && existing != null
+                    ? existing.getPassword() : newPw);
 
             if (dao.updateUser(user)) {
                 JOptionPane.showMessageDialog(this,
@@ -194,9 +275,11 @@ public class UserManagementPanel extends JPanel {
                         "Update failed.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+    }
 
-        contentPanel.add(row);
-        refresh();
+    // helper to bulk-enable/disable plain text fields
+    private void setFieldsEnabled(boolean enabled, JTextField... fields) {
+        for (JTextField f : fields) f.setEnabled(enabled);
     }
 
     // ── Delete form ──────────────────────────────────────────────────────────
