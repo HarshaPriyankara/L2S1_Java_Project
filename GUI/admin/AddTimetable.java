@@ -5,14 +5,16 @@ import java.awt.*;
 
 public class AddTimetable extends JPanel {
 
-    // Components
     private JTextField txtId, txtStartTime, txtEndTime, txtVenue;
-    private JComboBox<String> cmbLevel, cmbDay, cmbType, cmbDept, cmbCourse;
-    private JButton btnAdd, btnClear;
+    private JComboBox<String> cmbLevel, cmbDay, cmbCourse;
+    private JButton btnAdd, btnClear, btnBack;
+    private TimetableManagement parent; // Menu එකට යාම පාලනය කිරීමට
 
-    public AddTimetable() {
+    public AddTimetable(TimetableManagement parent) {
+        this.parent = parent;
+
         setBackground(Color.WHITE);
-        setLayout(new GridBagLayout()); // මැදට එන්න GridBagLayout පාවිච්චි කරමු
+        setLayout(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -21,87 +23,56 @@ public class AddTimetable extends JPanel {
 
         // --- Title ---
         JLabel lblTitle = new JLabel("Add New Timetable Entry");
-        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 22));
+        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 26));
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        gbc.insets = new Insets(0, 0, 30, 0);
         add(lblTitle, gbc);
 
-        // --- Fields ---
+        // --- Form Fields ---
         gbc.gridwidth = 1;
+        gbc.insets = new Insets(10, 10, 10, 10);
 
-        // ID
-        addLabel("Timetable ID:", gbc, 1);
-        txtId = new JTextField(15);
-        addTextField(txtId, gbc, 1);
+        addFormField("Timetable ID:", txtId = new JTextField(20), gbc, 1);
+        addFormField("Level:", cmbLevel = new JComboBox<>(new String[]{"Level 1", "Level 2", "Level 3", "Level 4"}), gbc, 2);
+        addFormField("Day:", cmbDay = new JComboBox<>(new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}), gbc, 3);
+        addFormField("Start Time:", txtStartTime = new JTextField(), gbc, 4);
+        addFormField("End Time:", txtEndTime = new JTextField(), gbc, 5);
+        addFormField("Venue:", txtVenue = new JTextField(), gbc, 6);
+        addFormField("Course Code:", cmbCourse = new JComboBox<>(new String[]{"-- Select --", "ICT2101", "ICT2102"}), gbc, 7);
 
-        // Level
-        addLabel("Level:", gbc, 2);
-        cmbLevel = new JComboBox<>(new String[]{"Level 1", "Level 2", "Level 3", "Level 4"});
-        addComboBox(cmbLevel, gbc, 2);
-
-        // Day
-        addLabel("Day:", gbc, 3);
-        cmbDay = new JComboBox<>(new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"});
-        addComboBox(cmbDay, gbc, 3);
-
-        // Start Time
-        addLabel("Start Time (e.g. 08:30):", gbc, 4);
-        txtStartTime = new JTextField();
-        addTextField(txtStartTime, gbc, 4);
-
-        // End Time
-        addLabel("End Time (e.g. 10:30):", gbc, 5);
-        txtEndTime = new JTextField();
-        addTextField(txtEndTime, gbc, 5);
-
-        // Venue
-        addLabel("Venue:", gbc, 6);
-        txtVenue = new JTextField();
-        addTextField(txtVenue, gbc, 6);
-
-        // Course (Placeholder data)
-        addLabel("Course Code:", gbc, 7);
-        cmbCourse = new JComboBox<>(new String[]{"-- Select Course --", "ICT2101", "ICT2102", "ICT2103"});
-        addComboBox(cmbCourse, gbc, 7);
-
-        // --- Buttons ---
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // --- Buttons පැනල් එක ---
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         btnPanel.setBackground(Color.WHITE);
 
-        btnAdd = new JButton("Add Entry");
-        btnAdd.setBackground(new Color(46, 125, 192)); // Dashboard එකේ button color එක
-        btnAdd.setForeground(Color.WHITE);
-        btnAdd.setFocusPainted(false);
+        // Back බටන් එක (Menu එකට යාමට)
+        btnBack = new JButton("Back to Menu");
+        btnBack.addActionListener(e -> parent.showMenu()); // Menu එක පෙන්වීමට මාරු වේ
 
         btnClear = new JButton("Clear");
+        btnClear.addActionListener(e -> clearFields());
 
+        btnAdd = new JButton("Add Entry");
+        btnAdd.setBackground(new Color(46, 125, 192));
+        btnAdd.setForeground(Color.WHITE);
+        btnAdd.setFocusPainted(false);
+        btnAdd.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, "Data Saved Successfully!");
+        });
+
+        btnPanel.add(btnBack);
         btnPanel.add(btnClear);
         btnPanel.add(btnAdd);
 
         gbc.gridx = 0; gbc.gridy = 8; gbc.gridwidth = 2;
+        gbc.insets = new Insets(30, 0, 0, 0);
         add(btnPanel, gbc);
-
-        // Simple Test Action
-        btnAdd.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Data is ready! (Database connection pending)");
-        });
-
-        btnClear.addActionListener(e -> clearFields());
     }
 
-    // Helper methods to keep code clean
-    private void addLabel(String text, GridBagConstraints gbc, int y) {
+    private void addFormField(String label, JComponent comp, GridBagConstraints gbc, int y) {
         gbc.gridx = 0; gbc.gridy = y;
-        add(new JLabel(text), gbc);
-    }
-
-    private void addTextField(JTextField field, GridBagConstraints gbc, int y) {
-        gbc.gridx = 1; gbc.gridy = y;
-        add(field, gbc);
-    }
-
-    private void addComboBox(JComboBox box, GridBagConstraints gbc, int y) {
-        gbc.gridx = 1; gbc.gridy = y;
-        add(box, gbc);
+        add(new JLabel(label), gbc);
+        gbc.gridx = 1;
+        add(comp, gbc);
     }
 
     private void clearFields() {
