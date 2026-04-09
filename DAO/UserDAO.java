@@ -8,6 +8,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
+
 public class UserDAO {
 
     //check user ib db
@@ -40,20 +44,106 @@ public class UserDAO {
         return null; // if not user return null
     }
 
-    // update profile
-    public boolean updateProfile(User user) throws SQLException {
-        Connection conn = DBConnection.getConnection();
-        String sql = "UPDATE users SET F_name=?, L_name=?, date_of_birth=?, Address=?, Address=? WHERE User_id=?";
+    // ── Existing: update profile (fixed) ────────────────────────────────────
 
+    public boolean updateProfile(User user) {
+        String sql = "UPDATE user SET f_name=?, l_name=?, dob=?, address=?, email=? WHERE User_id=?";
         try {
+            Connection conn = DBConnection.getConnection();
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, user.getFname());
             pst.setString(2, user.getLname());
-            pst.setString(3, user.getDateOfBirth().toString());
+            pst.setDate  (3, user.getDateOfBirth() != null
+                    ? Date.valueOf(user.getDateOfBirth()) : null);
             pst.setString(4, user.getAddress());
-            pst.setString(5, user.getUserID());
+            pst.setString(5, user.getEmail());
+            pst.setString(6, user.getUserID());   // was param 5, now correctly 6
 
             return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    // ── New: create user ─────────────────────────────────────────────────────
+
+    public boolean createUser(User user) {
+        String sql = "INSERT INTO user (User_id, f_name, l_name, Email, Password, " +
+                "Role, dob, contact_no, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, user.getUserID());
+            pst.setString(2, user.getFname());
+            pst.setString(3, user.getLname());
+            pst.setString(4, user.getEmail());
+            pst.setString(5, user.getPassword());
+            pst.setString(6, user.getRole());
+            pst.setDate  (7, user.getDateOfBirth() != null
+                    ? Date.valueOf(user.getDateOfBirth()) : null);
+            pst.setString(8, user.getContactNo());
+            pst.setString(9, user.getAddress());
+
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ── New: update all user details (admin use) ─────────────────────────────
+
+    public boolean updateUser(User user) {
+        String sql = "UPDATE user SET f_name=?, l_name=?, Email=?, Password=?, " +
+                "Role=?, dob=?, contact_no=?, address=? WHERE User_id=?";
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, user.getFname());
+            pst.setString(2, user.getLname());
+            pst.setString(3, user.getEmail());
+            pst.setString(4, user.getPassword());
+            pst.setString(5, user.getRole());
+            pst.setDate  (6, user.getDateOfBirth() != null
+                    ? Date.valueOf(user.getDateOfBirth()) : null);
+            pst.setString(7, user.getContactNo());
+            pst.setString(8, user.getAddress());
+            pst.setString(9, user.getUserID());
+
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ── New: delete user ─────────────────────────────────────────────────────
+
+    public boolean deleteUser(String userId) {
+        String sql = "DELETE FROM user WHERE User_id = ?";
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, userId);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ── New: check user exists ───────────────────────────────────────────────
+
+    public boolean userExists(String userId) {
+        String sql = "SELECT 1 FROM user WHERE User_id = ?";
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, userId);
+            ResultSet rs = pst.executeQuery();
+            return rs.next();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
