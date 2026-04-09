@@ -1,8 +1,13 @@
 package GUI.admin;
 
+import DAO.UserDAO;
+import Models.User;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class UserManagementPanel extends JPanel {
 
@@ -56,9 +61,9 @@ public class UserManagementPanel extends JPanel {
             public void mouseExited(MouseEvent e)   { card.setBackground(CARD_COLOR); }
             public void mouseClicked(MouseEvent e)  {
                 switch (title) {
-                    case "Create New User"    -> showCreateForm();
-                    case "Update User Details"-> showUpdateForm();
-                    case "Delete User"        -> showDeleteForm();
+                    case "Create New User"     -> showCreateForm();
+                    case "Update User Details" -> showUpdateForm();
+                    case "Delete User"         -> showDeleteForm();
                 }
             }
         });
@@ -73,23 +78,54 @@ public class UserManagementPanel extends JPanel {
 
         addTitle("Create New User", BUTTON_COLOR);
 
-        JTextField txtId   = addField("User ID");
-        JTextField txtFN   = addField("First Name");
-        JTextField txtLN   = addField("Last Name");
-        JTextField txtDob  = addField("Date of Birth (YYYY-MM-DD)");
-        JTextField txtAddr = addField("Address");
-        JTextField txtMail = addField("Email");
+        JTextField txtId      = addField("User ID");
+        JTextField txtFN      = addField("First Name");
+        JTextField txtLN      = addField("Last Name");
+        JTextField txtEmail   = addField("Email");
+        JTextField txtDob     = addField("Date of Birth (YYYY-MM-DD)");
+        JTextField txtContact = addField("Contact No");
+        JTextField txtAddr    = addField("Address");
         JComboBox<String> cmbRole = addRoleCombo();
-        JPasswordField txtPw = addPasswordField("Password");
+        JPasswordField txtPw  = addPasswordField("Password");
 
         JPanel row = buttonRow();
         backButton(row);
         JButton save = actionButton(row, "Save User", BUTTON_COLOR);
+
         save.addActionListener(e -> {
-            if (anyEmpty(txtId, txtFN, txtLN, txtDob, txtAddr, txtMail)) return;
-            JOptionPane.showMessageDialog(this, "User saved!\nID: " + txtId.getText(), "Success",
-                    JOptionPane.INFORMATION_MESSAGE);
-            showCards();
+            if (anyEmpty(txtId, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr)) return;
+
+            LocalDate dob;
+            try {
+                dob = LocalDate.parse(txtDob.getText().trim());
+            } catch (DateTimeParseException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.",
+                        "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            User user = new User();
+            user.setUserID(txtId.getText().trim());
+            user.setFname(txtFN.getText().trim());
+            user.setLname(txtLN.getText().trim());
+            user.setEmail(txtEmail.getText().trim());
+            user.setDob(dob);
+            user.setContactNo(txtContact.getText().trim());
+            user.setAddress(txtAddr.getText().trim());
+            user.setRole((String) cmbRole.getSelectedItem());
+            user.setPassword(new String(txtPw.getPassword()).trim());
+
+            UserDAO dao = new UserDAO();
+            if (dao.createUser(user)) {
+                JOptionPane.showMessageDialog(this,
+                        "User saved!\nID: " + txtId.getText(), "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+                showCards();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to save user. ID or email may already exist.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         contentPanel.add(row);
@@ -104,23 +140,59 @@ public class UserManagementPanel extends JPanel {
 
         addTitle("Update User Details", BUTTON_COLOR);
 
-        JTextField txtId   = addField("User ID");
-        JTextField txtFN   = addField("First Name");
-        JTextField txtLN   = addField("Last Name");
-        JTextField txtDob  = addField("Date of Birth (YYYY-MM-DD)");
-        JTextField txtAddr = addField("Address");
-        JTextField txtMail = addField("Email");
+        JTextField txtId      = addField("User ID");
+        JTextField txtFN      = addField("First Name");
+        JTextField txtLN      = addField("Last Name");
+        JTextField txtEmail   = addField("Email");
+        JTextField txtDob     = addField("Date of Birth (YYYY-MM-DD)");
+        JTextField txtContact = addField("Contact No");
+        JTextField txtAddr    = addField("Address");
         JComboBox<String> cmbRole = addRoleCombo();
-        JPasswordField txtPw = addPasswordField("New Password");
+        JPasswordField txtPw  = addPasswordField("New Password");
 
         JPanel row = buttonRow();
         backButton(row);
         JButton upd = actionButton(row, "Update User", BUTTON_COLOR);
+
         upd.addActionListener(e -> {
-            if (anyEmpty(txtId, txtFN, txtLN, txtDob, txtAddr, txtMail)) return;
-            JOptionPane.showMessageDialog(this, "User updated!\nID: " + txtId.getText(), "Success",
-                    JOptionPane.INFORMATION_MESSAGE);
-            showCards();
+            if (anyEmpty(txtId, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr)) return;
+
+            LocalDate dob;
+            try {
+                dob = LocalDate.parse(txtDob.getText().trim());
+            } catch (DateTimeParseException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.",
+                        "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            UserDAO dao = new UserDAO();
+            if (!dao.userExists(txtId.getText().trim())) {
+                JOptionPane.showMessageDialog(this, "No user found with that ID.",
+                        "Not Found", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            User user = new User();
+            user.setUserID(txtId.getText().trim());
+            user.setFname(txtFN.getText().trim());
+            user.setLname(txtLN.getText().trim());
+            user.setEmail(txtEmail.getText().trim());
+            user.setDob(dob);
+            user.setContactNo(txtContact.getText().trim());
+            user.setAddress(txtAddr.getText().trim());
+            user.setRole((String) cmbRole.getSelectedItem());
+            user.setPassword(new String(txtPw.getPassword()).trim());
+
+            if (dao.updateUser(user)) {
+                JOptionPane.showMessageDialog(this,
+                        "User updated!\nID: " + txtId.getText(), "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+                showCards();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Update failed.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         contentPanel.add(row);
@@ -147,6 +219,7 @@ public class UserManagementPanel extends JPanel {
         JPanel row = buttonRow();
         backButton(row);
         JButton del = actionButton(row, "Delete User", new Color(0xCC0000));
+
         del.addActionListener(e -> {
             String id = txtId.getText().trim();
             if (id.isEmpty()) {
@@ -154,13 +227,27 @@ public class UserManagementPanel extends JPanel {
                         "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
+
+            UserDAO dao = new UserDAO();
+            if (!dao.userExists(id)) {
+                JOptionPane.showMessageDialog(this, "No user found with that ID.",
+                        "Not Found", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             int ok = JOptionPane.showConfirmDialog(this,
-                    "Delete user ID: " + id + "?", "Confirm", JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE);
+                    "Delete user ID: " + id + "?", "Confirm",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (ok == JOptionPane.YES_OPTION) {
-                JOptionPane.showMessageDialog(this, "User " + id + " deleted.", "Deleted",
-                        JOptionPane.INFORMATION_MESSAGE);
-                showCards();
+                if (dao.deleteUser(id)) {
+                    JOptionPane.showMessageDialog(this,
+                            "User " + id + " deleted.", "Deleted",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    showCards();
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Delete failed.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -168,7 +255,7 @@ public class UserManagementPanel extends JPanel {
         refresh();
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // ── Helpers (unchanged) ──────────────────────────────────────────────────
 
     private void addTitle(String text, Color color) {
         JLabel lbl = new JLabel(text);
