@@ -47,28 +47,28 @@ public class Course {
                 "Department     : " + department;
     }
 
+    public String getCourseCode() {
+        return courseCode;
+    }
 
     public String getName() {
         return courseName;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public int getCredits() {
         return credits;
     }
 
-    public String getType() {
-        return courseCode;
-    }
+    public String getLecturerId() {return lecturer;}
 
-    public String getLecturerId() {
+    public String getDeptId() {
         return department;
     }
 
-    public String getDeptId() {
-        return courseCode;
-    }
 
-    public String getCourseCode() {
-        return courseCode;
-    }
+
 }
