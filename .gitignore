@@ -9,5 +9,4 @@ bin/
 
 # External libraries (optional)
 *.jar
-
-Utils/DBConnection.java
+DBConnection.java
