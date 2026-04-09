@@ -2,6 +2,7 @@ package DAO;
 
 import Utils.DBConnection;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -70,6 +71,31 @@ public class AdminDAO {
             System.out.println("DAO Error (GetPath): " + e.getMessage());
         }
         return path;
+    }
+
+
+
+
+    public boolean deleteNotice(int noticeId, String filePath) {
+        String sql = "DELETE FROM notice WHERE Notice_id = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setInt(1, noticeId);
+            int result = pst.executeUpdate();
+
+            if (result > 0) {
+                // Database එකෙන් මැකුණා නම්, File එකත් මකා දමන්න
+                File file = new File(filePath);
+                if (file.exists()) {
+                    file.delete();
+                }
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println("DAO Error (Delete): " + e.getMessage());
+        }
+        return false;
     }
 
 }
