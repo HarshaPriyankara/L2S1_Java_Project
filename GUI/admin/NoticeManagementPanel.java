@@ -10,21 +10,54 @@ public class NoticeManagementPanel extends JPanel {
     public NoticeManagementPanel() {
 
         setBackground(Color.WHITE);
+        showMainButtons();
+    }
 
+    public void showMainButtons() {
+        this.removeAll();
+        this.setLayout(new GridBagLayout());
 
-        setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = GridBagConstraints.RELATIVE;
         gbc.insets = new Insets(15, 0, 15, 0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        JButton btnCreate = createNoticeButton("Create Notice");
 
-        add(createNoticeButton("Create Notice"), gbc);
-        add(createNoticeButton("Update Notice"), gbc);
-        add(createNoticeButton("Delete Notice"), gbc);
-        add(createNoticeButton("View Notice"), gbc);
+        btnCreate.addActionListener(e -> {
+            loadCreateNoticePanel();
+        });
+
+        add(btnCreate, gbc);
+       // add(createNoticeButton("Update Notice"), gbc);
+       // add(createNoticeButton("Delete Notice"), gbc);
+
+        JButton btnView = createNoticeButton("View & Modify Notice");
+        btnView.addActionListener(e -> loadViewNoticePanel());
+        add(btnView, gbc);
+
+        this.revalidate();
+        this.repaint();
     }
+
+    private void loadCreateNoticePanel() {
+        this.removeAll(); // remove buttons
+        this.setLayout(new BorderLayout());
+        this.add(new CreateNotice(this)); // add White Space  to new panel
+        this.revalidate();
+        this.repaint();
+    }
+
+
+    private void loadViewNoticePanel() {
+        this.removeAll();
+        this.setLayout(new BorderLayout());
+        this.add(new ViewNotice(this)); // 'this' pass කරන්න අමතක කරන්න එපා
+        this.revalidate();
+        this.repaint();
+    }
+
 
     private JButton createNoticeButton(String text) {
         JButton btn = new JButton(text);
@@ -35,10 +68,21 @@ public class NoticeManagementPanel extends JPanel {
         btn.setFont(new Font("SansSerif", Font.BOLD, 22));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        btn.addActionListener(e -> {
-            System.out.println(text + " Clicked");
-        });
+
 
         return btn;
+    }
+
+
+    public void showUpdateNotice(int id, String title) {
+        this.removeAll();
+        this.setLayout(new BorderLayout());
+
+        // Assuming you have a class named UpdateNotice
+        // that takes (NoticeManagementPanel, id, title) as arguments
+        this.add(new UpdateNotice(this, id, title));
+
+        this.revalidate();
+        this.repaint();
     }
 }
