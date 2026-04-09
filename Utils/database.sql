@@ -27,11 +27,7 @@ CREATE TABLE department (
                             Dep_name      VARCHAR(50)
 );
 
-CREATE TABLE user_contact_number (
-                                     User_id  CHAR(6),
-                                     Phone_no VARCHAR(50),
-                                     FOREIGN KEY (User_id) REFERENCES user(User_id) ON DELETE CASCADE
-);
+
 
 CREATE TABLE admin (
                        Admin_id CHAR(6) PRIMARY KEY,
