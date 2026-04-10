@@ -12,20 +12,18 @@ public class LecturerDashboard extends JFrame {
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel contentPanel   = new JPanel(cardLayout);
 
-    public LecturerDashboard() {
+    public LecturerDashboard(String loggedInUserId) {
         setTitle("Lecturer Dashboard");
         setSize(1000, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-
         add(buildSidebar(), BorderLayout.WEST);
         add(contentPanel,   BorderLayout.CENTER);
 
-
-        contentPanel.add(buildHomePanel(), "Home");
-
+        contentPanel.add(buildHomePanel(),                          "Home");
+        contentPanel.add(new ProfileManagementPanel(loggedInUserId), "Update Profile");
         cardLayout.show(contentPanel, "Home");
     }
 
@@ -36,13 +34,13 @@ public class LecturerDashboard extends JFrame {
         sidebar.setPreferredSize(new Dimension(220, 0));
         sidebar.setBorder(BorderFactory.createEmptyBorder(60, 16, 24, 16));
 
-         sidebar.add(navButton("Upload Marks",         () -> cardLayout.show(contentPanel, "Home")));
+        sidebar.add(navButton("Upload Marks",         () -> cardLayout.show(contentPanel, "Home")));
         sidebar.add(Box.createVerticalStrut(12));
         sidebar.add(navButton("Add Course Materials", () -> cardLayout.show(contentPanel, "Home")));
         sidebar.add(Box.createVerticalStrut(12));
         sidebar.add(navButton("View Student Details", () -> cardLayout.show(contentPanel, "Home")));
         sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Update Profile",       () -> cardLayout.show(contentPanel, "Home")));
+        sidebar.add(navButton("Update Profile",       () -> cardLayout.show(contentPanel, "Update Profile")));
 
         sidebar.add(Box.createVerticalGlue());
 
@@ -77,6 +75,6 @@ public class LecturerDashboard extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LecturerDashboard().setVisible(true));
+        SwingUtilities.invokeLater(() -> new LecturerDashboard("L001").setVisible(true));
     }
 }

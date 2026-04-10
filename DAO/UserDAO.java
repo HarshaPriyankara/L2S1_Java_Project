@@ -84,21 +84,22 @@ public class UserDAO {
     // ── Update user (admin) ──────────────────────────────────────────────────
 
     public boolean updateUser(User user) {
-        String sql = "UPDATE user SET F_name=?, L_name=?, Email=?, Password=?, " +
+        String sql = "UPDATE user SET User_id=?, F_name=?, L_name=?, Email=?, Password=?, " +
                 "Role=?, date_of_birth=?, Address=?, contact_no=? WHERE User_id=?";
         try {
             Connection conn = DBConnection.getConnection();
             PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, user.getFname());
-            pst.setString(2, user.getLname());
-            pst.setString(3, user.getEmail());
-            pst.setString(4, user.getPassword());
-            pst.setString(5, user.getRole());
-            pst.setDate  (6, user.getDateOfBirth() != null
+            pst.setString(1, user.getUserID());           // new ID
+            pst.setString(2, user.getFname());
+            pst.setString(3, user.getLname());
+            pst.setString(4, user.getEmail());
+            pst.setString(5, user.getPassword());
+            pst.setString(6, user.getRole());
+            pst.setDate  (7, user.getDateOfBirth() != null
                     ? Date.valueOf(user.getDateOfBirth()) : null);
-            pst.setString(7, user.getAddress());
-            pst.setString(8, user.getContactNo());
-            pst.setString(9, user.getUserID());
+            pst.setString(8, user.getAddress());
+            pst.setString(9, user.getContactNo());
+            pst.setString(10, user.getOriginalUserID());  // WHERE clause — original ID
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -156,6 +157,7 @@ public class UserDAO {
                 user.setRole(rs.getString("Role"));
                 user.setContactNo(rs.getString("contact_no"));
                 user.setAddress(rs.getString("Address"));
+                user.setPassword(rs.getString("Password"));
                 Date dob = rs.getDate("date_of_birth");
                 if (dob != null) user.setDob(dob.toLocalDate());
                 return user;
