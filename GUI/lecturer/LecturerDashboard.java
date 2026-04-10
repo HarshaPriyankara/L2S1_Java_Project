@@ -26,6 +26,8 @@ public class LecturerDashboard extends JFrame {
 
         contentPanel.add(buildHomePanel(), "Home");
 
+        contentPanel.add(new MarksManagement(),"MarksManagement");
+
         cardLayout.show(contentPanel, "Home");
     }
 
@@ -36,7 +38,7 @@ public class LecturerDashboard extends JFrame {
         sidebar.setPreferredSize(new Dimension(220, 0));
         sidebar.setBorder(BorderFactory.createEmptyBorder(60, 16, 24, 16));
 
-         sidebar.add(navButton("Upload Marks",         () -> cardLayout.show(contentPanel, "Home")));
+         sidebar.add(navButton("Upload Marks",         () -> cardLayout.show(contentPanel, "MarksManagement")));
         sidebar.add(Box.createVerticalStrut(12));
         sidebar.add(navButton("Add Course Materials", () -> cardLayout.show(contentPanel, "Home")));
         sidebar.add(Box.createVerticalStrut(12));
