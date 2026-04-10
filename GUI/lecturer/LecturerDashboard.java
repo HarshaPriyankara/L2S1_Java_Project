@@ -40,6 +40,10 @@ public class LecturerDashboard extends JFrame {
         sidebar.add(Box.createVerticalStrut(12));
         sidebar.add(navButton("View Student Details", () -> cardLayout.show(contentPanel, "Home")));
         sidebar.add(Box.createVerticalStrut(12));
+        sidebar.add(navButton("Undergraduate Details", () -> cardLayout.show(contentPanel, "Undergraduate Details")));
+        sidebar.add(Box.createVerticalStrut(12));
+        sidebar.add(navButton("View Notice", () -> cardLayout.show(contentPanel, "View Notice")));
+        sidebar.add(Box.createVerticalStrut(12));
         sidebar.add(navButton("Update Profile",       () -> cardLayout.show(contentPanel, "Update Profile")));
 
         sidebar.add(Box.createVerticalGlue());
