@@ -13,6 +13,8 @@ public class User {
     private String contactNo;
     private String address;
 
+    private String originalUserID;
+
     public boolean login(){
 
         return false;
@@ -94,4 +96,8 @@ public class User {
     public String getContactNo() {
         return this.contactNo;
     }
+
+
+    public String getOriginalUserID() { return originalUserID; }
+    public void setOriginalUserID(String id) { this.originalUserID = id; }
 }

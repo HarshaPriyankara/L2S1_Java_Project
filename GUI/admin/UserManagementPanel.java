@@ -173,6 +173,7 @@ public class UserManagementPanel extends JPanel {
         contentPanel.add(Box.createVerticalStrut(16));
 
         // ── Step 2: Editable fields (initially empty / disabled) ──────────
+        JTextField txtNewId   = addField("New User ID (leave blank to keep current)");
         JTextField txtFN      = addField("First Name");
         JTextField txtLN      = addField("Last Name");
         JTextField txtEmail   = addField("Email");
@@ -250,8 +251,23 @@ public class UserManagementPanel extends JPanel {
             UserDAO dao = new UserDAO();
             User existing = dao.getUserById(txtId.getText().trim());
 
+            String originalId = txtId.getText().trim();
+            String newId = txtNewId.getText().trim();
+            String effectiveId = newId.isEmpty() ? originalId : newId;
+
+// If ID is changing, check the new ID doesn't already exist
+            if (!newId.isEmpty() && !newId.equals(originalId)) {
+                if (dao.userExists(newId)) {
+                    JOptionPane.showMessageDialog(this,
+                            "User ID " + newId + " already exists.",
+                            "Validation Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+
             User user = new User();
-            user.setUserID(txtId.getText().trim());
+            user.setUserID(effectiveId);
+            user.setOriginalUserID(originalId);   // needed for WHERE clause — see below
             user.setFname(txtFN.getText().trim());
             user.setLname(txtLN.getText().trim());
             user.setEmail(txtEmail.getText().trim());
