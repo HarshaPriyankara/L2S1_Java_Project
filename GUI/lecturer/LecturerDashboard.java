@@ -1,41 +1,82 @@
 package GUI.lecturer;
 
+import GUI.common.LoginForm;
 import javax.swing.*;
 import java.awt.*;
 
-public class LecturerDashboard extends javax.swing.JFrame {
-    private JPanel sidebar, contentPanel;
+public class LecturerDashboard extends JFrame {
+
+    private static final Color DARK_BG      = new Color(0x2E2E2E);
+    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
+
+    private final CardLayout cardLayout = new CardLayout();
+    private final JPanel contentPanel   = new JPanel(cardLayout);
 
     public LecturerDashboard() {
         setTitle("Lecturer Dashboard");
         setSize(1000, 600);
-        setLocationRelativeTo(null);// Align middle of screen
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // 1. Sidebar එක (වම් පැත්තේ ඇති මෙනු එක)
-        sidebar = new JPanel();
-        sidebar.setBackground(Color.DARK_GRAY);
-        sidebar.setPreferredSize(new Dimension(200, 600));
-        sidebar.setLayout(new GridLayout(10, 1, 5, 5)); // බොත්තම් පේළියට තියන්න
 
-        // 2. Content Panel එක (මැද ඇති ප්‍රධාන කොටස)
-        contentPanel = new JPanel();
-        contentPanel.setBackground(Color.WHITE);
-        contentPanel.setLayout(new CardLayout()); // පැනල් මාරු කරන්න CardLayout හොඳයි
+        add(buildSidebar(), BorderLayout.WEST);
+        add(contentPanel,   BorderLayout.CENTER);
 
-        // Sidebar එකට Buttons එකතු කිරීම
-        JButton btnAddMarks = new JButton("Upload Marks");
-        JButton btnAddMaterial = new JButton("Add Courses Materials");
-        JButton btnViewStudent = new JButton("View Students Details");
-        JButton btnLogout = new JButton("Logout");
 
-        sidebar.add(btnAddMarks);
-        sidebar.add(btnAddMaterial);
-        sidebar.add(btnViewStudent);
-        sidebar.add(btnLogout);
+        contentPanel.add(buildHomePanel(), "Home");
 
-        add(sidebar, BorderLayout.WEST);
-        add(contentPanel, BorderLayout.CENTER);
+        cardLayout.show(contentPanel, "Home");
+    }
+
+    private JPanel buildSidebar() {
+        JPanel sidebar = new JPanel();
+        sidebar.setBackground(DARK_BG);
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setPreferredSize(new Dimension(220, 0));
+        sidebar.setBorder(BorderFactory.createEmptyBorder(60, 16, 24, 16));
+
+         sidebar.add(navButton("Upload Marks",         () -> cardLayout.show(contentPanel, "Home")));
+        sidebar.add(Box.createVerticalStrut(12));
+        sidebar.add(navButton("Add Course Materials", () -> cardLayout.show(contentPanel, "Home")));
+        sidebar.add(Box.createVerticalStrut(12));
+        sidebar.add(navButton("View Student Details", () -> cardLayout.show(contentPanel, "Home")));
+        sidebar.add(Box.createVerticalStrut(12));
+        sidebar.add(navButton("Update Profile",       () -> cardLayout.show(contentPanel, "Home")));
+
+        sidebar.add(Box.createVerticalGlue());
+
+        sidebar.add(navButton("Logout", () -> {
+            new LoginForm().setVisible(true);
+            dispose();
+        }));
+
+        return sidebar;
+    }
+
+    private JButton navButton(String text, Runnable action) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(BUTTON_COLOR);
+        btn.setFocusPainted(false);
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.addActionListener(e -> action.run());
+        return btn;
+    }
+
+    private JPanel buildHomePanel() {
+        JPanel p = new JPanel(new GridBagLayout());
+        p.setBackground(Color.WHITE);
+        JLabel lbl = new JLabel("Welcome, Lecturer");
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
+        lbl.setForeground(new Color(0x555555));
+        p.add(lbl);
+        return p;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new LecturerDashboard().setVisible(true));
     }
 }
