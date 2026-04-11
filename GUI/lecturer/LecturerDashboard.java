@@ -24,6 +24,7 @@ public class LecturerDashboard extends JFrame {
 
         contentPanel.add(buildHomePanel(),                          "Home");
         contentPanel.add(new ProfileManagementPanel(loggedInUserId), "Update Profile");
+        contentPanel.add(new GUI.common.ViewNotice("Lecturer", contentPanel, cardLayout), "View Notice");
         cardLayout.show(contentPanel, "Home");
     }
 
