@@ -1,7 +1,6 @@
 package GUI.lecturer;
 
 import GUI.common.LoginForm;
-import GUI.common.ViewNotice;
 import javax.swing.*;
 import java.awt.*;
 
@@ -25,7 +24,6 @@ public class LecturerDashboard extends JFrame {
 
         contentPanel.add(buildHomePanel(),                          "Home");
         contentPanel.add(new ProfileManagementPanel(loggedInUserId), "Update Profile");
-        contentPanel.add(new ViewNotice("Lecturer",contentPanel,cardLayout), "View Notice Card");
         cardLayout.show(contentPanel, "Home");
     }
 
@@ -44,7 +42,7 @@ public class LecturerDashboard extends JFrame {
         sidebar.add(Box.createVerticalStrut(12));
         sidebar.add(navButton("Undergraduate Details", () -> cardLayout.show(contentPanel, "Undergraduate Details")));
         sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("View Notice", () -> cardLayout.show(contentPanel, "View Notice Card")));
+        sidebar.add(navButton("View Notice", () -> cardLayout.show(contentPanel, "View Notice")));
         sidebar.add(Box.createVerticalStrut(12));
         sidebar.add(navButton("Update Profile",       () -> cardLayout.show(contentPanel, "Update Profile")));
 
