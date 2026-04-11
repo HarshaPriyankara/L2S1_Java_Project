@@ -160,17 +160,11 @@ CREATE TABLE course_material (
 -- ─────────────────────────────────────────────
 
 CREATE TABLE notice (
-                        Notice_id     CHAR(5)     PRIMARY KEY,
+                        Notice_id     INT(5)     PRIMARY KEY AUTO_INCREMENT,
                         Target_role   VARCHAR(50),
                         Created_date  DATE,
-                        Created_by    CHAR(6),                        -- FK to user instead of VARCHAR name
                         Title         VARCHAR(100),
-                        Content       VARCHAR(500),
-                        Department_id CHAR(5),
-                        Lecturer_id   CHAR(6),
-                        FOREIGN KEY (Created_by)    REFERENCES user(User_id)         ON DELETE SET NULL,
-                        FOREIGN KEY (Lecturer_id)   REFERENCES lecturer(Lecturer_id) ON DELETE SET NULL,
-                        FOREIGN KEY (Department_id) REFERENCES department(Department_id) ON DELETE CASCADE
+                        Content       VARCHAR(500)
 );
 
 CREATE TABLE enrollment (
