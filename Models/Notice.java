@@ -1,34 +1,26 @@
 package Models;
 
-import java.time.LocalDate;
-import java.util.List;
+public class Notice {
+   private int id;
+   private String title;
+   private String targetRole;
+   private String addedDate;
+   private String filePath; //
 
- public class Notice {
-    private String noticeId;
-    private String title;
-    private String content;
-    private String createdBy;
-    private LocalDate createdDate;
-    private String targetRole;
-    private String departmentId;
+   public Notice(int id, String title, String targetRole, String addedDate, String filePath) {
+      this.id = id;
+      this.title = title;
+      this.targetRole = targetRole;
+      this.addedDate = addedDate;
+      this.filePath = filePath;
+   }
 
-
-    public void createNotice() {
-
-    }
-
-    public static void deleteNotice() {
-
-    }
-
-
-    public void viewNotice() {
-
-    }
-
-
-    public static List<Notice> viewAllNotice() {
-               return List.of();
-
-    }
- }
+   // Getters...
+   public String getTitle() { return title; }
+   public String getTargetRole() { return targetRole; }
+   public String getAddedDate() { return addedDate; }
+   public String getFilePath() { return filePath; }
+   public int getId() {
+      return id;
+   }
+}
