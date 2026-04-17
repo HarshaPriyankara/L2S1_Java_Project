@@ -143,13 +143,12 @@ CREATE TABLE attendance (
 );
 
 CREATE TABLE course_material (
-                                 Material_id CHAR(5)      PRIMARY KEY,
-                                 Type        VARCHAR(50),
-                                 Uploaded_at DATE,
-                                 File_URL    VARCHAR(500),
-                                 Uploaded_by CHAR(6),
+                                 Material_id INT(5) PRIMARY KEY AUTO_INCREMENT,
                                  Title       VARCHAR(100),
                                  Course_code VARCHAR(20),
+                                 Uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                 Uploaded_by CHAR(6),
+                                 File_URL    VARCHAR(1000),
                                  FOREIGN KEY (Uploaded_by) REFERENCES lecturer(Lecturer_id) ON DELETE SET NULL,
                                  FOREIGN KEY (Course_code) REFERENCES course(Course_code)   ON DELETE CASCADE
 );
