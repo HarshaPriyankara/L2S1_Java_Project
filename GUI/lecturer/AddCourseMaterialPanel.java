@@ -10,9 +10,10 @@ import java.awt.datatransfer.DataFlavor;
 
 public class AddCourseMaterialPanel extends JPanel {
 
-    private JTextField txtMaterialID, txtTitle, txtCourseCode, txtUploadDate;
-    private JTextArea txtLink; // JTextArea for file area
+    private JTextField txtTitle, txtCourseCode, txtUploadedBy;
+    private JTextArea txtLink;
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
+    private static final Color CLEAR_BTN_COLOR = new Color(120, 120, 120);
 
     public AddCourseMaterialPanel() {
         // Layout and Padding
@@ -24,23 +25,16 @@ public class AddCourseMaterialPanel extends JPanel {
         addTitle("Upload Course Materials", BUTTON_COLOR);
 
         // 2. Input Fields
-        txtMaterialID = addField("*Material ID");
         txtTitle      = addField("*Material Title");
         txtCourseCode = addField("*Course Code");
-        txtUploadDate = addField("Upload Date");
-        txtUploadDate.setEditable(false);
-        txtUploadDate.setBackground(new Color(245, 245, 245));
+        txtUploadedBy = addField("*Uploaded By (Lecturer ID)");
 
-        String today = java.time.LocalDate.now().toString();
-        txtUploadDate.setText(today);
-        // Link Field
+        // Link Field (Drag and Drop Area)
         addCustomLabel("File URL (Drag and Drop Here)");
-
         txtLink = new JTextArea(5, 20);
         txtLink.setFont(new Font("SansSerif", Font.PLAIN, 13));
         txtLink.setLineWrap(true);
         txtLink.setWrapStyleWord(true);
-        txtLink.setToolTipText("Drag and drop a file here to get the path automatically");
 
         JScrollPane scrollPane = new JScrollPane(txtLink);
         scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
@@ -52,7 +46,6 @@ public class AddCourseMaterialPanel extends JPanel {
             public boolean canImport(TransferSupport support) {
                 return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
             }
-
             @Override
             public boolean importData(TransferSupport support) {
                 try {
@@ -70,8 +63,8 @@ public class AddCourseMaterialPanel extends JPanel {
         add(scrollPane);
         add(Box.createVerticalStrut(20));
 
-        // 3. Button Row
-        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        // 3. Button Row (Save & Clear)
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         row.setBackground(Color.WHITE);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -79,29 +72,33 @@ public class AddCourseMaterialPanel extends JPanel {
         JButton btnSave = new JButton("Upload Material");
         styleButton(btnSave, BUTTON_COLOR);
 
+        JButton btnClear = new JButton("Clear All");
+        styleButton(btnClear, CLEAR_BTN_COLOR);
+
+        row.add(btnClear);
         row.add(btnSave);
         add(row);
 
+        // Listeners
         btnSave.addActionListener(e -> saveMaterial());
+        btnClear.addActionListener(e -> clearFields());
     }
 
     private void saveMaterial() {
-        String mid = txtMaterialID.getText().trim();
         String title = txtTitle.getText().trim();
         String cCode = txtCourseCode.getText().trim();
-        String date = txtUploadDate.getText().trim();
+        String uploadedBy = txtUploadedBy.getText().trim();
         String sourcePath = txtLink.getText().trim();
 
-        if (mid.isEmpty() || title.isEmpty() || sourcePath.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Fields cannot be empty!");
+        if (title.isEmpty() || cCode.isEmpty() || uploadedBy.isEmpty() || sourcePath.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields are required!");
             return;
         }
 
         String newPath = saveFileToFolder(sourcePath);
 
         if (newPath != null) {
-
-            JOptionPane.showMessageDialog(this, "File saved to: " + newPath);
+            JOptionPane.showMessageDialog(this, "Material uploaded successfully!");
             clearFields();
         } else {
             JOptionPane.showMessageDialog(this, "File upload failed!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -151,18 +148,12 @@ public class AddCourseMaterialPanel extends JPanel {
     private String saveFileToFolder(String sourcePath) {
         try {
             File sourceFile = new File(sourcePath);
-
             File directory = new File("D:\\University\\Java project\\CourseMaterial\\");
-            if (!directory.exists()) {
-                directory.mkdirs(); //if not folder create new
-            }
+            if (!directory.exists()) directory.mkdirs();
 
             File destinationFile = new File(directory, sourceFile.getName());
-
             Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-            return destinationFile.getPath();
-
+            return destinationFile.getPath().replace("\\", "/");
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -170,9 +161,9 @@ public class AddCourseMaterialPanel extends JPanel {
     }
 
     private void clearFields() {
-        txtMaterialID.setText("");
         txtTitle.setText("");
         txtCourseCode.setText("");
+        txtUploadedBy.setText("");
         txtLink.setText("");
     }
 }
