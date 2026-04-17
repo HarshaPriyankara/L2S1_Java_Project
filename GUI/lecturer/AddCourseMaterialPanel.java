@@ -1,5 +1,7 @@
 package GUI.lecturer;
 
+import DAO.CourseMaterialDAO;
+
 import javax.swing.*;
 import java.awt.*;
 import java.nio.file.Files;
@@ -95,11 +97,18 @@ public class AddCourseMaterialPanel extends JPanel {
             return;
         }
 
-        String newPath = saveFileToFolder(sourcePath);
+        String newPath = saveFileToFolder(sourcePath,title);
 
         if (newPath != null) {
-            JOptionPane.showMessageDialog(this, "Material uploaded successfully!");
-            clearFields();
+            boolean isSavedInDB = CourseMaterialDAO.addMaterial(title, cCode, uploadedBy, newPath);
+
+            if (isSavedInDB) {
+                JOptionPane.showMessageDialog(this, "Material uploaded.");
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error! Check if Course Code or Lecturer ID is valid.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
         } else {
             JOptionPane.showMessageDialog(this, "File upload failed!", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -145,13 +154,23 @@ public class AddCourseMaterialPanel extends JPanel {
         btn.setPreferredSize(new Dimension(150, 38));
     }
 
-    private String saveFileToFolder(String sourcePath) {
+    private String saveFileToFolder(String sourcePath, String title) {
         try {
             File sourceFile = new File(sourcePath);
+            //change file name as field title
+            String fileName = sourceFile.getName();
+            String extension = "";
+            int i = fileName.lastIndexOf('.');
+            if (i > 0) {
+                extension = fileName.substring(i);
+            }
+            String sanitizedTitle = title.replaceAll("[^a-zA-Z0-9]", "_");
+            String newFileName = sanitizedTitle + extension;
+
             File directory = new File("D:\\University\\Java project\\CourseMaterial\\");
             if (!directory.exists()) directory.mkdirs();
 
-            File destinationFile = new File(directory, sourceFile.getName());
+            File destinationFile = new File(directory, newFileName);
             Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return destinationFile.getPath().replace("\\", "/");
         } catch (Exception e) {
