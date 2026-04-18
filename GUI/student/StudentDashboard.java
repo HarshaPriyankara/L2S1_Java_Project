@@ -5,6 +5,7 @@ import GUI.admin.NoticeManagementPanel;
 import GUI.admin.TimetableManagement;
 import GUI.admin.UserManagementPanel;
 import GUI.common.LoginForm;
+import GUI.common.ViewNotice;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,8 +36,7 @@ public class StudentDashboard extends JFrame {
         contentPanel.add(new CoursePanel(), "Course Details");
         contentPanel.add(new GradePanel(),"Grades/GPA");
         contentPanel.add(new TimetablePanel(), "Timetable Details");
-        contentPanel.add(new NoticePanel(),"Notice");
-
+        contentPanel.add(new ViewNotice("Student", contentPanel, cardLayout), "Notice");
 
 
         contentPanel.add(buildHomePanel(),"Home");
