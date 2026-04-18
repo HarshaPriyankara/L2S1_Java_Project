@@ -10,13 +10,11 @@ public class NoticeDAO {
     public List<Notice> getNoticesByRole(String role) {
         List<Notice> notices = new ArrayList<>();
 
-        // SQL query eka LIKE operator ekata change kala
         String sql = "SELECT * FROM notice WHERE target_role LIKE ? OR target_role = 'All'";
 
         try (Connection conn = Utils.DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            // Role eka thiyenne kohe hari kiyala balanna % use karanawa
             pstmt.setString(1, "%" + role + "%");
             ResultSet rs = pstmt.executeQuery();
 
