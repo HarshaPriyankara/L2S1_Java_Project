@@ -117,18 +117,19 @@ public class LoginForm extends JFrame {
     }
 
     private void openDashboard(String role, User user) {
+        String loggedInID = user.getUserID();
         switch (role.toLowerCase()) {
             case "admin":
-                new AdminDashboard().setVisible(true);
+                new AdminDashboard(loggedInID).setVisible(true);
                 break;
             case "lecturer":
-                new LecturerDashboard(user.getUserID()).setVisible(true); // pass logged-in ID
+                new LecturerDashboard(loggedInID).setVisible(true);
                 break;
             case "student":
-                new StudentDashboard().setVisible(true);
+                new StudentDashboard(loggedInID).setVisible(true);
                 break;
             case "techofficer":
-                new TechnicalOfficerDashboard().setVisible(true);
+                new TechnicalOfficerDashboard(loggedInID).setVisible(true);
                 break;
         }
     }

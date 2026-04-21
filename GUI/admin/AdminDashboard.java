@@ -12,7 +12,7 @@ public class AdminDashboard extends JFrame {
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel contentPanel   = new JPanel(cardLayout);
 
-    public AdminDashboard() {
+    public AdminDashboard(String loggedInID) {
         setTitle("Admin Dashboard");
         setSize(1000, 600);
         setLocationRelativeTo(null);
@@ -78,6 +78,6 @@ public class AdminDashboard extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new AdminDashboard().setVisible(true));
+        SwingUtilities.invokeLater(() -> new AdminDashboard("adm01").setVisible(true));
     }
 }
