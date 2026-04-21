@@ -9,14 +9,13 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.io.IOException;
 import java.util.List;
-import java.awt.Insets;
 
+// INHERITANCE: Extending JPanel 
 public class ViewNotice extends JPanel {
 
+    // ENCAPSULATION: All internal fields are kept private
     private JTable table;
     private DefaultTableModel model;
     private List<Notice> noticeList;
@@ -40,8 +39,10 @@ public class ViewNotice extends JPanel {
         topPanel.add(btnBack);
         add(topPanel, BorderLayout.NORTH);
 
-        // --- 1. Table Setup (Columns 3ක් පමණයි) ---
+        // --- 1. Table Setup ---
         String[] columns = {"Title", "Added Date", "Action"};
+        
+        // POLYMORPHISM: Overriding anonymous inner class method to disable cell editing
         model = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -50,7 +51,7 @@ public class ViewNotice extends JPanel {
         table = new JTable(model);
         table.setRowHeight(40);
 
-        // --- 2. Button Renderer (Column index 2 ට) ---
+        // --- 2. Button Renderer ---
         table.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -65,7 +66,7 @@ public class ViewNotice extends JPanel {
 
         refreshTable();
 
-        // --- 3. Click Event (Index 2 Click කළ විට) ---
+        // --- 3. Click Event ---
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -73,7 +74,6 @@ public class ViewNotice extends JPanel {
                 int col = table.getSelectedColumn();
 
                 if (col == 2 && row != -1) {
-                    // Table එකේ ID එක පේන්න නැති නිසා noticeList එකෙන් ID එක ගන්නවා
                     int noticeId = noticeList.get(row).getId();
                     String title = noticeList.get(row).getTitle();
 
@@ -86,6 +86,7 @@ public class ViewNotice extends JPanel {
     }
 
     public void refreshTable() {
+        // ABSTRACTION: Complex DB logic encapsulated in NoticeDAO
         NoticeDAO dao = new NoticeDAO();
         noticeList = dao.getNoticesByRole(userRole);
         model.setRowCount(0);
@@ -101,7 +102,6 @@ public class ViewNotice extends JPanel {
         }
     }
 
-    // Admin logic එකම පාවිච්චි කරලා Notice එකේ content කියවන method එක
     private void openNoticeFile(String noticeId, String title) {
         JFrame viewFrame = new JFrame("Notice: " + title);
         viewFrame.setSize(600, 500);
@@ -109,36 +109,32 @@ public class ViewNotice extends JPanel {
 
         JTextArea textArea = new JTextArea();
         textArea.setEditable(false);
-        textArea.setMargin(new  Insets(10, 10, 10, 10));
+        textArea.setMargin(new Insets(10, 10, 10, 10));
         viewFrame.add(new JScrollPane(textArea), BorderLayout.CENTER);
 
-        // Database එකෙන් Content (Path) එක අරගෙන File එක කියවීම
-        String sql = "SELECT Content FROM notice WHERE Notice_id = ?";
-        try (Connection conn = Utils.DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
+        // ABSTRACTION: Replaced direct JDBC queries with NoticeDAO methods
+        NoticeDAO dao = new NoticeDAO();
+        String path = dao.getNoticeContentPath(Integer.parseInt(noticeId));
 
-            pst.setString(1, noticeId);
-            ResultSet rs = pst.executeQuery();
+        if (path != null) {
+            File file = new File(path);
 
-            if (rs.next()) {
-                String path = rs.getString("Content");
-                File file = new File(path);
-
-                if (file.exists()) {
-                    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            textArea.append(line + "\n");
-                        }
-                        viewFrame.setLocationRelativeTo(null);
-                        viewFrame.setVisible(true);
+            if (file.exists()) {
+                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        textArea.append(line + "\n");
                     }
-                } else {
-                    JOptionPane.showMessageDialog(this, "File not found: " + path);
+                    viewFrame.setLocationRelativeTo(null);
+                    viewFrame.setVisible(true);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, "Error reading file.");
                 }
+            } else {
+                JOptionPane.showMessageDialog(this, "File not found: " + path);
             }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        } else {
+            JOptionPane.showMessageDialog(this, "Notice content not found in database.");
         }
     }
 }
