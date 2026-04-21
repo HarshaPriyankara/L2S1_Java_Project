@@ -1,17 +1,19 @@
 package GUI.admin;
 
+
 import GUI.common.BaseDashboard;
+import Models.User;
+
 import javax.swing.*;
 import java.awt.*;
 
 // Inheritance: AdminDashboard inherits common features from BaseDashboard
 public class AdminDashboard extends BaseDashboard {
 
-    public AdminDashboard(String loggedInID) {
-        // Calls the constructor of BaseDashboard to set the title and ID
-        super("Admin Dashboard - Faculty of Technology", loggedInID);
+    public AdminDashboard(User user) {
+        // Pass the whole user object to the parent
+        super("Admin Dashboard", user);
     }
-
     /**
      * Abstraction: Implementing the mandatory method to register
      * specific Admin panels into the CardLayout.
@@ -74,8 +76,17 @@ public class AdminDashboard extends BaseDashboard {
     // Main method for testing this specific dashboard
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // Assume "adm001" is passed from the Login Form
-            new AdminDashboard("adm001").setVisible(true);
+            // 1. Create a temporary User object for testing
+            User testUser = new User();
+
+            // 2. Set the necessary data
+            testUser.setUserID("adm001");
+            testUser.setRole("Admin");
+            testUser.setFname("Admin");
+            testUser.setLname("User");
+
+            // 3. Pass the object to the constructor
+            new AdminDashboard(testUser).setVisible(true);
         });
     }
 }
