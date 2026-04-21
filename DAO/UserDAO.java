@@ -25,6 +25,7 @@ public class UserDAO {
                 user.setLname(rs.getString("L_name"));
                 user.setEmail(rs.getString("Email"));
                 user.setRole(rs.getString("Role"));
+                user.setProfilePicPath(rs.getString("profile_pic"));
                 return user;
             }
         } catch (SQLException e) {
@@ -49,6 +50,7 @@ public class UserDAO {
             pst.setString(5, user.getEmail());
             pst.setString(6, user.getContactNo());
             pst.setString(7, user.getUserID());
+
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -56,24 +58,26 @@ public class UserDAO {
         }
     }
 
-    // ── Create user ──────────────────────────────────────────────────────────
+    // Inside UserDAO.java
 
+    // Update CREATE USER
     public boolean createUser(User user) {
         String sql = "INSERT INTO user (User_id, F_name, L_name, Email, Password, " +
-                "Role, date_of_birth, Address, contact_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement pst = conn.prepareStatement(sql);
+                "Role, date_of_birth, Address, contact_no, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+
             pst.setString(1, user.getUserID());
             pst.setString(2, user.getFname());
             pst.setString(3, user.getLname());
             pst.setString(4, user.getEmail());
             pst.setString(5, user.getPassword());
             pst.setString(6, user.getRole());
-            pst.setDate  (7, user.getDateOfBirth() != null
-                    ? Date.valueOf(user.getDateOfBirth()) : null);
+            pst.setDate(7, user.getDateOfBirth() != null ? Date.valueOf(user.getDateOfBirth()) : null);
             pst.setString(8, user.getAddress());
             pst.setString(9, user.getContactNo());
+            pst.setString(10, user.getProfilePicPath()); // Added this line
+
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -81,25 +85,25 @@ public class UserDAO {
         }
     }
 
-    // ── Update user (admin) ──────────────────────────────────────────────────
-
+    // Update UPDATE USER
     public boolean updateUser(User user) {
         String sql = "UPDATE user SET User_id=?, F_name=?, L_name=?, Email=?, Password=?, " +
-                "Role=?, date_of_birth=?, Address=?, contact_no=? WHERE User_id=?";
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, user.getUserID());           // new ID
+                "Role=?, date_of_birth=?, Address=?, contact_no=?, profile_pic=? WHERE User_id=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+
+            pst.setString(1, user.getUserID());
             pst.setString(2, user.getFname());
             pst.setString(3, user.getLname());
             pst.setString(4, user.getEmail());
             pst.setString(5, user.getPassword());
             pst.setString(6, user.getRole());
-            pst.setDate  (7, user.getDateOfBirth() != null
-                    ? Date.valueOf(user.getDateOfBirth()) : null);
+            pst.setDate(7, user.getDateOfBirth() != null ? Date.valueOf(user.getDateOfBirth()) : null);
             pst.setString(8, user.getAddress());
             pst.setString(9, user.getContactNo());
-            pst.setString(10, user.getOriginalUserID());  // WHERE clause — original ID
+            pst.setString(10, user.getProfilePicPath()); // Added this line
+            pst.setString(11, user.getOriginalUserID());
+
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

@@ -1,82 +1,98 @@
 package GUI.lecturer;
 
-import GUI.common.LoginForm;
+import GUI.common.BaseDashboard;
+import GUI.common.ViewNotice;
 import javax.swing.*;
 import java.awt.*;
+import Models.User;
 
-public class LecturerDashboard extends JFrame {
-
-    private static final Color DARK_BG      = new Color(0x2E2E2E);
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
-
-    private final CardLayout cardLayout = new CardLayout();
-    private final JPanel contentPanel   = new JPanel(cardLayout);
-
-    public LecturerDashboard() {
-        setTitle("Lecturer Dashboard");
-        setSize(1000, 600);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+// Inheritance: LecturerDashboard inherits common GUI logic from BaseDashboard
+public class LecturerDashboard extends BaseDashboard {
 
 
-        add(buildSidebar(), BorderLayout.WEST);
-        add(contentPanel,   BorderLayout.CENTER);
 
-
-        contentPanel.add(buildHomePanel(), "Home");
-
-        cardLayout.show(contentPanel, "Home");
+    public LecturerDashboard(User user) {
+        // Pass the whole user object to the parent
+        super("Lecture Dashboard", user);
     }
 
-    private JPanel buildSidebar() {
-        JPanel sidebar = new JPanel();
-        sidebar.setBackground(DARK_BG);
-        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setPreferredSize(new Dimension(220, 0));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(60, 16, 24, 16));
+    /**
+     * Abstraction: Implementing the method to register panels specific
+     * to the Lecturer as required by the project document.
+     */
+    @Override
+    protected void setupUserPanels() {
+        // These are the panels for tasks a lecturer must perform
+        contentPanel.add(new MarksManagement(), "MarksManagement");
+        contentPanel.add(new AddCourseMaterialPanel(), "AddMaterial");
+        contentPanel.add(new ProfileManagementPanel(loggedInID), "UpdateProfile");
 
-         sidebar.add(navButton("Upload Marks",         () -> cardLayout.show(contentPanel, "Home")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Add Course Materials", () -> cardLayout.show(contentPanel, "Home")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("View Student Details", () -> cardLayout.show(contentPanel, "Home")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Update Profile",       () -> cardLayout.show(contentPanel, "Home")));
+        // Common panel for viewing notices
+        contentPanel.add(new ViewNotice("Lecturer", contentPanel, cardLayout), "ViewNotice");
 
-        sidebar.add(Box.createVerticalGlue());
-
-        sidebar.add(navButton("Logout", () -> {
-            new LoginForm().setVisible(true);
-            dispose();
-        }));
-
-        return sidebar;
+        // Add other panels like StudentDetails or Eligibility as you create them
     }
 
-    private JButton navButton(String text, Runnable action) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setForeground(Color.WHITE);
-        btn.setBackground(BUTTON_COLOR);
-        btn.setFocusPainted(false);
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.addActionListener(e -> action.run());
-        return btn;
+    /**
+     * Abstraction: Adding buttons to the sidebar that match the
+     * Lecturer's permissions in the project requirements.
+     */
+    @Override
+    protected void addNavigationButtons(JPanel sidebar) {
+
+        // Requirement: Upload marks for exams
+        sidebar.add(createNavButton("Upload Marks",
+                () -> cardLayout.show(contentPanel, "MarksManagement")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        // Requirement: Add materials to courses
+        sidebar.add(createNavButton("Add Course Materials",
+                () -> cardLayout.show(contentPanel, "AddMaterial")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        // Requirement: See notices
+        sidebar.add(createNavButton("View Notices",
+                () -> cardLayout.show(contentPanel, "ViewNotice")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        // Requirement: Update profile
+        sidebar.add(createNavButton("Update Profile",
+                () -> cardLayout.show(contentPanel, "UpdateProfile")));
     }
 
-    private JPanel buildHomePanel() {
+    /**
+     * Polymorphism: Providing a specific welcome message for the Lecturer.
+     */
+    @Override
+    protected JPanel buildHomePanel() {
         JPanel p = new JPanel(new GridBagLayout());
         p.setBackground(Color.WHITE);
+
         JLabel lbl = new JLabel("Welcome, Lecturer");
         lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
         lbl.setForeground(new Color(0x555555));
+
         p.add(lbl);
         return p;
     }
 
+    // Main method to test this dashboard
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LecturerDashboard().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            // 1. Create a temporary User object for testing
+            User testUser = new User();
+
+            // 2. Set the necessary data
+            testUser.setUserID("adm001");
+            testUser.setRole("Admin");
+            testUser.setFname("Admin");
+            testUser.setLname("User");
+
+            // 3. Pass the object to the constructor
+            new LecturerDashboard(testUser).setVisible(true);
+        });
     }
 }

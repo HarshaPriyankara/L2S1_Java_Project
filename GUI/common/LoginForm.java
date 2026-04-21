@@ -109,26 +109,27 @@ public class LoginForm extends JFrame {
             JOptionPane.showMessageDialog(this, "Login Successful! Role: " + role);
 
             // go to dashboard
-            openDashboard(role);
+            openDashboard(role, user);
             this.dispose(); // close Login window
         } else {
             JOptionPane.showMessageDialog(this, "Invalid Username or Password!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void openDashboard(String role) {
-       switch (role.toLowerCase()) {
-            case "admin":// user1
-                new AdminDashboard().setVisible(true);
+    private void openDashboard(String role, User user) {
+        String loggedInID = user.getUserID();
+        switch (role.toLowerCase()) {
+            case "admin":
+                new AdminDashboard(user).setVisible(true);
                 break;
-            case "lecturer": //user2
-                new LecturerDashboard().setVisible(true);
+            case "lecturer":
+                new LecturerDashboard(user).setVisible(true);
                 break;
-            case "student": //user3
-                new StudentDashboard().setVisible(true);
+            case "student":
+                new StudentDashboard(user).setVisible(true);
                 break;
-            case "techofficer": //user4
-                new TechnicalOfficerDashboard().setVisible(true);
+            case "techofficer":
+                new TechnicalOfficerDashboard(user).setVisible(true);
                 break;
         }
     }
