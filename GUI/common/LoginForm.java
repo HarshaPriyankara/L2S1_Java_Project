@@ -120,16 +120,16 @@ public class LoginForm extends JFrame {
         String loggedInID = user.getUserID();
         switch (role.toLowerCase()) {
             case "admin":
-                new AdminDashboard(loggedInID).setVisible(true);
+                new AdminDashboard(user).setVisible(true);
                 break;
             case "lecturer":
-                new LecturerDashboard(loggedInID).setVisible(true);
+                new LecturerDashboard(user).setVisible(true);
                 break;
             case "student":
-                new StudentDashboard(loggedInID).setVisible(true);
+                new StudentDashboard(user).setVisible(true);
                 break;
             case "techofficer":
-                new TechnicalOfficerDashboard(loggedInID).setVisible(true);
+                new TechnicalOfficerDashboard(user).setVisible(true);
                 break;
         }
     }

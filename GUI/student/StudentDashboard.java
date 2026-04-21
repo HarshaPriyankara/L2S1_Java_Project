@@ -1,99 +1,108 @@
 package GUI.student;
 
-import GUI.common.LoginForm;
+import GUI.common.BaseDashboard;
 import GUI.common.ViewNotice;
-
 import javax.swing.*;
 import java.awt.*;
+import Models.User;
 
-public class StudentDashboard extends JFrame {
+// Inheritance: StudentDashboard inherits from BaseDashboard
+public class StudentDashboard extends BaseDashboard {
 
-    private static final Color DARK_BG      = new Color(0x2E2E2E);
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
-    private String loggedInStudentID;
-    private final CardLayout cardLayout = new CardLayout();
-    private final JPanel contentPanel   = new JPanel(cardLayout);
+    public StudentDashboard(User user) {
+        // Pass the whole user object to the parent
+        super("Lecture Dashboard", user);
+    }
 
-
-    public StudentDashboard(String loggedInID) {
-        this.loggedInStudentID = loggedInID;
-        setTitle("Student Dashboard");
-        setSize(1000, 600);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-
-        add(buildSidebar(), BorderLayout.WEST);
-        add(contentPanel,   BorderLayout.CENTER);
-
-        // Register all top-level panels once
-        contentPanel.add(new UpdateProfilePanel(),"Update Profile");
+    /**
+     * Abstraction: Registering all the panels specific to the student
+     * as required by the project document.
+     */
+    @Override
+    protected void setupUserPanels() {
+        // These classes (UpdateProfilePanel, AttendancePanel, etc.) should exist in your project
+        contentPanel.add(new UpdateProfilePanel(), "Update Profile");
         contentPanel.add(new AttendancePanel(), "Attendance Details");
-        contentPanel.add(new MedicalPanel(),"Medical Details");
-        contentPanel.add(new CoursePanel(loggedInStudentID), "Course Details");
-        contentPanel.add(new GradePanel(),"Grades/GPA");
+        contentPanel.add(new MedicalPanel(), "Medical Details");
+        contentPanel.add(new CoursePanel(), "Course Details");
+        contentPanel.add(new GradePanel(), "Grades/GPA");
         contentPanel.add(new TimetablePanel(), "Timetable Details");
+
+        // ViewNotice is a shared component used by multiple user roles
         contentPanel.add(new ViewNotice("Undergraduate", contentPanel, cardLayout), "Notice");
-
-
-        contentPanel.add(buildHomePanel(),"Home");
-
-        cardLayout.show(contentPanel, "Home");
     }
 
-    private JPanel buildSidebar() {
-        JPanel sidebar = new JPanel();
-        sidebar.setBackground(DARK_BG);
-        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setPreferredSize(new Dimension(220, 0));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(60, 16, 24, 16));
+    /**
+     * Abstraction: Adding buttons to the sidebar that match the
+     * Student's permissions[cite: 38, 39, 40, 41, 42, 43, 44].
+     */
+    @Override
+    protected void addNavigationButtons(JPanel sidebar) {
 
-        sidebar.add(navButton("Update Profile",      () -> cardLayout.show(contentPanel, "Update Profile")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Attendance Details",    () -> cardLayout.show(contentPanel, "Attendance Details")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Medical Details",    () -> cardLayout.show(contentPanel, "Medical Details")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Course Details", () -> cardLayout.show(contentPanel, "Course Details")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Grades/GPA", () -> cardLayout.show(contentPanel, "Grades/GPA")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Timetable Details", () -> cardLayout.show(contentPanel, "Timetable Details")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Notice", () -> cardLayout.show(contentPanel, "Notice")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Logout", () -> {
-            new LoginForm().setVisible(true); // open login form
-            dispose(); // close current window
-        }));
+        sidebar.add(createNavButton("Update Profile",
+                () -> cardLayout.show(contentPanel, "Update Profile")));
 
-        return sidebar;
+        sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("Attendance Details",
+                () -> cardLayout.show(contentPanel, "Attendance Details")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("Medical Details",
+                () -> cardLayout.show(contentPanel, "Medical Details")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("Course Details",
+                () -> cardLayout.show(contentPanel, "Course Details")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("Grades/GPA",
+                () -> cardLayout.show(contentPanel, "Grades/GPA")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("Timetable Details",
+                () -> cardLayout.show(contentPanel, "Timetable Details")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("Notice",
+                () -> cardLayout.show(contentPanel, "Notice")));
     }
 
-
-    private JButton navButton(String text, Runnable action) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setForeground(Color.WHITE);
-        btn.setBackground(BUTTON_COLOR);
-        btn.setFocusPainted(false);
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.addActionListener(e -> action.run());
-        return btn;
-    }
-
-    private JPanel buildHomePanel() {
+    /**
+     * Polymorphism: Overriding the welcome message specifically for students.
+     */
+    @Override
+    protected JPanel buildHomePanel() {
         JPanel p = new JPanel(new GridBagLayout());
         p.setBackground(Color.WHITE);
-        JLabel lbl = new JLabel("Welcome, Student");
+
+        JLabel lbl = new JLabel("Welcome to Student Portal");
         lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
         lbl.setForeground(new Color(0x555555));
+
         p.add(lbl);
         return p;
     }
 
+    // Main method to test the Student Dashboard alone
     public static void main(String[] args) {
-        new StudentDashboard("tg1725").setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            // 1. Create a temporary User object for testing
+            User testUser = new User();
+
+            // 2. Set the necessary data
+            testUser.setUserID("adm001");
+            testUser.setRole("Admin");
+            testUser.setFname("Admin");
+            testUser.setLname("User");
+
+            // 3. Pass the object to the constructor
+            new StudentDashboard(testUser).setVisible(true);
+        });
     }
 }
