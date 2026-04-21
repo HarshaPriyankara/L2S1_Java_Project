@@ -1,4 +1,4 @@
-package GUI.lecturer;
+/*package GUI.lecturer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -94,4 +94,4 @@ public class MarksDeletePanel extends JPanel {
             }
         }
     }
-}
+}*/
