@@ -24,7 +24,7 @@ public class StudentDashboard extends BaseDashboard {
         contentPanel.add(new UpdateProfilePanel(), "Update Profile");
         contentPanel.add(new AttendancePanel(), "Attendance Details");
         contentPanel.add(new MedicalPanel(), "Medical Details");
-        contentPanel.add(new CoursePanel(), "Course Details");
+        contentPanel.add(new CoursePanel(loggedInID), "Course Details");
         contentPanel.add(new GradePanel(), "Grades/GPA");
         contentPanel.add(new TimetablePanel(), "Timetable Details");
 
