@@ -1,5 +1,7 @@
 package GUI.to;
 
+import GUI.lecturer.LecturerDashboard;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -7,7 +9,7 @@ public class TechnicalOfficerDashboard extends JFrame {
     private JPanel contentPanel;
     private CardLayout cardLayout;
 
-    public TechnicalOfficerDashboard() {
+    public TechnicalOfficerDashboard(String loggedInID) {
         setTitle("Technical Officer Dashboard - Faculty of Technology");
         setSize(1300, 850);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -77,6 +79,6 @@ public class TechnicalOfficerDashboard extends JFrame {
     }
 
     public static void main(String[] args) {
-        new TechnicalOfficerDashboard();
+        SwingUtilities.invokeLater(() -> new TechnicalOfficerDashboard("to001").setVisible(true));
     }
 }
