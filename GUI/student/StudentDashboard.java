@@ -1,10 +1,7 @@
 package GUI.student;
 
-import GUI.admin.AdminCourseManagementPanel;
-import GUI.admin.NoticeManagementPanel;
-import GUI.admin.TimetableManagement;
-import GUI.admin.UserManagementPanel;
 import GUI.common.LoginForm;
+import GUI.common.ViewNotice;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +15,7 @@ public class StudentDashboard extends JFrame {
     private final JPanel contentPanel   = new JPanel(cardLayout);
 
 
-    public StudentDashboard() {
+    public StudentDashboard(String loggedInID) {
         setTitle("Student Dashboard");
         setSize(1000, 600);
         setLocationRelativeTo(null);
@@ -35,8 +32,7 @@ public class StudentDashboard extends JFrame {
         contentPanel.add(new CoursePanel(), "Course Details");
         contentPanel.add(new GradePanel(),"Grades/GPA");
         contentPanel.add(new TimetablePanel(), "Timetable Details");
-        contentPanel.add(new NoticePanel(),"Notice");
-
+        contentPanel.add(new ViewNotice("Undergraduate", contentPanel, cardLayout), "Notice");
 
 
         contentPanel.add(buildHomePanel(),"Home");
@@ -97,6 +93,6 @@ public class StudentDashboard extends JFrame {
     }
 
     public static void main(String[] args) {
-        new StudentDashboard().setVisible(true);
+        new StudentDashboard("tg1725").setVisible(true);
     }
 }

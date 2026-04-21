@@ -7,16 +7,15 @@ import java.util.List;
 
 public class NoticeDAO {
 
-
     public List<Notice> getNoticesByRole(String role) {
         List<Notice> notices = new ArrayList<>();
 
-          String sql = "SELECT * FROM notice WHERE target_role = ? OR target_role = 'All'";
+        String sql = "SELECT * FROM notice WHERE target_role LIKE ? OR target_role = 'All'";
 
         try (Connection conn = Utils.DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, role);
+            pstmt.setString(1, "%" + role + "%");
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
@@ -25,7 +24,7 @@ public class NoticeDAO {
                         rs.getString("Title"),
                         rs.getString("Target_role"),
                         rs.getString("Created_date"),
-                        rs.getString("Content") // මෙතන තමා path එක තියෙන්නේ
+                        rs.getString("Content")
                 ));
             }
         } catch (SQLException e) {
