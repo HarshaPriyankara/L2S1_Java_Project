@@ -11,7 +11,7 @@ public class DeleteTimetable extends JPanel {
     private JLabel lblDetails;
     private JButton btnSearch, btnDelete, btnClear, btnBack;
     private TimetableManagement parent;
-    private Timetable recordToDelete = null; // මැකීමට පෙර සොයාගත් record එක තබා ගැනීමට
+    private Timetable recordToDelete = null;
 
     public DeleteTimetable(TimetableManagement parent) {
         this.parent = parent;
@@ -23,20 +23,21 @@ public class DeleteTimetable extends JPanel {
         gbc.insets = new Insets(15, 15, 15, 15);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Title
+        // --- Title ---
         JLabel lblTitle = new JLabel("Delete Timetable Entry");
         lblTitle.setFont(new Font("SansSerif", Font.BOLD, 26));
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        gbc.insets = new Insets(0, 0, 20, 0);
         add(lblTitle, gbc);
 
-        // ID Search Section
+        // --- Search Section ---
         gbc.gridwidth = 1;
         gbc.gridx = 0; gbc.gridy = 1;
         add(new JLabel("Enter Timetable ID:"), gbc);
 
         JPanel searchPanel = new JPanel(new BorderLayout(5, 0));
         searchPanel.setBackground(Color.WHITE);
-        txtId = new JTextField(10);
+        txtId = new JTextField(12);
         btnSearch = new JButton("Search");
         searchPanel.add(txtId, BorderLayout.CENTER);
         searchPanel.add(btnSearch, BorderLayout.EAST);
@@ -44,26 +45,34 @@ public class DeleteTimetable extends JPanel {
         gbc.gridx = 1;
         add(searchPanel, gbc);
 
-        // Details Display (මෙහිදී HTML පාවිච්චි කරලා ලස්සනට විස්තර පෙන්වනවා)
-        lblDetails = new JLabel("<html><body style='color: gray;'>Search ID to see details before deleting.</body></html>");
-        lblDetails.setBorder(BorderFactory.createTitledBorder("Record Preview"));
+        // --- Preview Details Label ---
+        lblDetails = new JLabel("<html><body style='color: gray; text-align: center;'>"
+                + "Enter ID and Search to preview record details.</body></html>");
+        lblDetails.setPreferredSize(new Dimension(420, 180));
+        lblDetails.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Record Preview"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
-        gbc.ipady = 40; // උස පොඩ්ඩක් වැඩි කළා
         add(lblDetails, gbc);
 
-        // Buttons
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        // --- Buttons ---
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
         btnPanel.setBackground(Color.WHITE);
 
-        btnBack = new JButton("Back to Menu");
+        btnBack = new JButton("Back");
         btnBack.addActionListener(e -> parent.showMenu());
+
+        btnClear = new JButton("Clear");
+        btnClear.addActionListener(e -> clearFields());
 
         btnDelete = new JButton("Delete Permanently");
         btnDelete.setBackground(new Color(211, 47, 47));
         btnDelete.setForeground(Color.WHITE);
-        btnDelete.setEnabled(false); // මුලින්ම disable කරලා තියෙන්නේ (Search කරනකම්)
+        btnDelete.setFocusPainted(false);
+        btnDelete.setEnabled(false);
 
-        // --- Logic: Search Button ---
+        // --- Search Logic ---
         btnSearch.addActionListener(e -> {
             String id = txtId.getText().trim();
             if (id.isEmpty()) {
@@ -72,50 +81,62 @@ public class DeleteTimetable extends JPanel {
             }
 
             TimetableDAO dao = new TimetableDAO();
-            recordToDelete = dao.searchTimetableById(id); // DAO එකේ search method එක call කරනවා
+            // මෙතනදී DAO එකේ අපි අලුතින් හදපු searchTimetableById එක කෝල් වෙනවා
+            recordToDelete = dao.searchTimetableById(id);
 
             if (recordToDelete != null) {
-                // Record එක හම්බුණාම විස්තර label එකේ පෙන්වනවා
-                lblDetails.setText("<html><div style='padding: 10px;'>"
-                        + "<b>ID:</b> " + recordToDelete.getTimeTableId() + "<br>"
-                        + "<b>Course:</b> " + recordToDelete.getCourseCode() + "<br>"
-                        + "<b>Day:</b> " + recordToDelete.getDay() + "<br>"
-                        + "<b>Venue:</b> " + recordToDelete.getVenue() + "</div></html>");
-                btnDelete.setEnabled(true); // දැන් Delete කරන්න පුළුවන්
+                // Course Code එකෙන් Level සහ Semester Extract කරගැනීම (Smart Logic)
+                String code = recordToDelete.getCourseCode();
+                String level = "N/A", semester = "N/A";
+                if(code != null && code.length() >= 5) {
+                    level = "Level " + code.charAt(3);
+                    semester = "Semester " + code.charAt(4);
+                }
+
+                String details = "<html><div style='font-family: sans-serif; font-size: 11pt; padding: 5px;'>"
+                        + "<b style='color: #2E7DC0;'>ID:</b> " + recordToDelete.getTimeTableId() + "<br>"
+                        + "<b>Course Code:</b> " + recordToDelete.getCourseCode() + "<br>"
+                        + "<b>Batch:</b> <span style='color: green;'>" + level + " | " + semester + "</span><br>"
+                        + "<b>Schedule:</b> " + recordToDelete.getDay() + " (" + recordToDelete.getStartTime() + " - " + recordToDelete.getEndTime() + ")<br>"
+                        + "<b>Venue:</b> " + recordToDelete.getVenue() + "</div></html>";
+
+                lblDetails.setText(details);
+                btnDelete.setEnabled(true);
             } else {
-                lblDetails.setText("<html><body style='color: red;'>No record found with this ID!</body></html>");
+                lblDetails.setText("<html><body style='color: #D32F2F; text-align: center;'><b>No record found with ID: " + id + "</b></body></html>");
                 btnDelete.setEnabled(false);
             }
         });
 
-        // --- Logic: Delete Button ---
+        // --- Delete Logic ---
         btnDelete.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this,
-                    "Are you sure you want to delete this record?", "Confirm Deletion",
+                    "This action will permanently remove the record. Are you sure?",
+                    "Confirm Deletion",
                     JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                // Static method එක call කරනවා
+                // Timetable Model එකේ deleteTimeTable මෙතඩ් එක කෝල් කිරීම
                 if (Timetable.deleteTimeTable(txtId.getText().trim())) {
                     JOptionPane.showMessageDialog(this, "Record Deleted Successfully!");
                     clearFields();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Error! Record could not be deleted.");
+                    JOptionPane.showMessageDialog(this, "Error deleting record! Please try again.");
                 }
             }
         });
 
         btnPanel.add(btnBack);
+        btnPanel.add(btnClear);
         btnPanel.add(btnDelete);
 
         gbc.gridy = 3;
-        gbc.ipady = 0;
         add(btnPanel, gbc);
     }
 
     private void clearFields() {
         txtId.setText("");
-        lblDetails.setText("<html><body style='color: gray;'>Search ID to see details before deleting.</body></html>");
+        lblDetails.setText("<html><body style='color: gray; text-align: center;'>Enter ID and Search to preview record details.</body></html>");
         btnDelete.setEnabled(false);
         recordToDelete = null;
     }

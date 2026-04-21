@@ -1,7 +1,5 @@
 package GUI.to;
 
-import GUI.lecturer.LecturerDashboard;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -57,7 +55,7 @@ public class TechnicalOfficerDashboard extends JFrame {
         setVisible(true);
 
         contentPanel.add(new Notices(this), "Notices");
-        contentPanel.add(new Timetable(this), "Timetable");
+        contentPanel.add(new Timetables(this), "Timetable");
     }
 
     public void switchPage(String pageName) {
