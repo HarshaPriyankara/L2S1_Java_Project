@@ -4,13 +4,16 @@ import GUI.common.BaseDashboard;
 import GUI.common.ViewNotice;
 import javax.swing.*;
 import java.awt.*;
+import Models.User;
 
 // Inheritance: LecturerDashboard inherits common GUI logic from BaseDashboard
 public class LecturerDashboard extends BaseDashboard {
 
-    public LecturerDashboard(String loggedInID) {
-        // Calls the BaseDashboard constructor to set the title and user ID
-        super("Lecturer Dashboard - Faculty of Technology", loggedInID);
+
+
+    public LecturerDashboard(User user) {
+        // Pass the whole user object to the parent
+        super("Lecture Dashboard", user);
     }
 
     /**
@@ -79,7 +82,17 @@ public class LecturerDashboard extends BaseDashboard {
     // Main method to test this dashboard
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new LecturerDashboard("LEC001").setVisible(true);
+            // 1. Create a temporary User object for testing
+            User testUser = new User();
+
+            // 2. Set the necessary data
+            testUser.setUserID("adm001");
+            testUser.setRole("Admin");
+            testUser.setFname("Admin");
+            testUser.setLname("User");
+
+            // 3. Pass the object to the constructor
+            new LecturerDashboard(testUser).setVisible(true);
         });
     }
 }
