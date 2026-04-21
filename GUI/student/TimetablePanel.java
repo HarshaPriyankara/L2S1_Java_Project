@@ -38,8 +38,6 @@ public class TimetablePanel extends JPanel {
         topPanel.add(btnSearch);
 
         add(topPanel, BorderLayout.NORTH);
-
-        // --- වෙනස් කළ යුතු කොටස 1: "Course Name" column එක එකතු කිරීම ---
         String[] columns = {"Day", "Start Time", "End Time", "Course Code", "Course Name", "Venue", "Type"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -72,7 +70,6 @@ public class TimetablePanel extends JPanel {
         if (list == null || list.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No records found for Level " + level + " Semester " + sem);
         } else {
-            // --- වෙනස් කළ යුතු කොටස 2: Row එකට Course Name එක ඇතුළත් කිරීම ---
             for (Timetable tt : list) {
                 Object[] row = {
                         tt.getDay(),

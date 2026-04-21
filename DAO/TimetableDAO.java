@@ -1,14 +1,14 @@
 package DAO;
 
 import Models.Timetable;
-import Utils.DBConnection; // ඔයාගේ DBConnection එක තියෙන්නේ Utils පැකේජ් එකේ නිසා
+import Utils.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TimetableDAO {
 
-    // 1. කාලසටහනක් Database එකට ඇතුළත් කිරීම (Create)
+    // 1. Add timrtable database
     public boolean saveTimetable(Timetable tt) {
         String sql = "INSERT INTO timetable (Timetable_id, Start_time, End_time, Day, Session_type, Venue, Department_id, Course_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -31,7 +31,7 @@ public class TimetableDAO {
         }
     }
 
-    // 2. කාලසටහනක් යාවත්කාලීන කිරීම (Update)
+    // 2.update time table
     public boolean updateTimetable(Timetable tt) {
         String sql = "UPDATE timetable SET Start_time=?, End_time=?, Day=?, Session_type=?, Venue=?, Department_id=?, Course_code=? WHERE Timetable_id=?";
 
@@ -54,7 +54,7 @@ public class TimetableDAO {
         }
     }
 
-    // 3. කාලසටහනක් ඉවත් කිරීම (Delete)
+    // Delete time table
     public boolean deleteTimetable(String id) {
         String sql = "DELETE FROM timetable WHERE Timetable_id = ?";
 
@@ -69,14 +69,14 @@ public class TimetableDAO {
         }
     }
 
-    // 4. ශිෂ්‍යයාට අදාළ කාලසටහන ලබා ගැනීම (Read/View)
+    // 4. student get timetable
     public List<Timetable> getStudentTimetable(String deptId, String level, String semester) {
         List<Timetable> list = new ArrayList<>();
 
-        // මෙතනදී අපි timetable (t) සහ course (c) කියන table දෙක join කරනවා
+        //join timetable and course table
         String sql = "SELECT t.*, c.Course_name FROM timetable t " +
                 "INNER JOIN course c ON t.Course_code = c.Course_code " +
-                "WHERE t.Department_id = ? " + // මෙතන Dep_id වෙනුවට Department_id ලෙස වෙනස් කළා
+                "WHERE t.Department_id = ? " +
                 "AND SUBSTRING(t.Course_code, 4, 1) = ? " +
                 "AND SUBSTRING(t.Course_code, 5, 1) = ? " +
                 "ORDER BY FIELD(t.Day, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'), t.Start_time";
@@ -92,9 +92,6 @@ public class TimetableDAO {
             while (rs.next()) {
                 Timetable tt = new Timetable();
                 tt.setCourseCode(rs.getString("Course_code"));
-
-                // මෙන්න මෙතනදී Course Name එකත් සෙට් කරනවා
-                // හැබැයි මීට කලින් ඔයාගේ Models.Timetable එකේ 'courseName' කියලා field එකක් හදලා තියෙන්න ඕනේ
                 tt.setCourseName(rs.getString("Course_name"));
 
                 tt.setDay(rs.getString("Day"));
@@ -109,7 +106,7 @@ public class TimetableDAO {
         }
         return list;
     }
-    // ID එකෙන් කාලසටහනක් සෙවීම (Search Logic)
+    // searh timetable ..id (Search Logic)
     public Timetable searchTimetableById(String id) {
         String sql = "SELECT * FROM timetable WHERE Timetable_id = ?";
         try (Connection conn = Utils.DBConnection.getConnection();
@@ -133,7 +130,7 @@ public class TimetableDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null; // මුකුත් හම්බවුණේ නැත්නම් null යවනවා
+        return null;
     }
 }
 

@@ -18,7 +18,7 @@ public class Timetable {
     public Timetable() {}
 
     // --- Getters and Setters ---
-    // GUI එකේ txtId.getText() වගේ ඒවයින් එන data මේවට තමයි වැටෙන්නේ
+    //get GUI data
     public String getTimeTableId() { return timeTableId; }
     public void setTimeTableId(String timeTableId) { this.timeTableId = timeTableId; }
 
@@ -45,27 +45,27 @@ public class Timetable {
     public String getCourseName() { return courseName; }
     public void setCourseName(String courseName) { this.courseName = courseName; }
 
-    // --- GUI එකේ "Add Entry" එකට අදාළ Method එක ---
+    //Add entry
     public boolean createTimeTable() {
         TimetableDAO dao = new TimetableDAO();
-        // මෙතනදී success කියන variable එක define කරලා තියෙන්න ඕනේ
+        //success variable define
         boolean success = dao.saveTimetable(this);
         return success;
     }
 
-    // --- GUI එකේ "Update" එකට අදාළ Method එක ---
+    //update method
     public boolean updateTimeTable() {
         TimetableDAO dao = new TimetableDAO();
         return dao.updateTimetable(this);
     }
 
-    // --- GUI එකේ "Delete" එකට අදාළ Method එක ---
+    //gui delete button
     public static boolean deleteTimeTable(String id) {
         TimetableDAO dao = new TimetableDAO();
         return dao.deleteTimetable(id);
     }
 
-    // --- ශිෂ්‍යයාට Timetable එක පෙන්වන Method එක ---
+    // show student timetable
     public static List<Timetable> getTimeTableByDept(String deptId, String level, String semester) {
         TimetableDAO dao = new TimetableDAO();
         return dao.getStudentTimetable(deptId, level, semester);
