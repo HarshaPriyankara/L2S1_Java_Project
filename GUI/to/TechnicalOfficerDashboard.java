@@ -35,7 +35,7 @@ public class TechnicalOfficerDashboard extends JFrame {
 
         btnAttendance.addActionListener(e -> switchPage("Attendance"));
         btnMedical.addActionListener(e -> switchPage("Medical"));
-        btnNotices.addActionListener(e -> switchPage("Notices"));
+        btnNotices.addActionListener(e -> switchPage("View Notice"));
         btnTimetable.addActionListener(e -> switchPage("Timetable"));
         btnLogout.addActionListener(e -> System.exit(0));
 
@@ -56,8 +56,7 @@ public class TechnicalOfficerDashboard extends JFrame {
         add(contentPanel, BorderLayout.CENTER);
         setVisible(true);
 
-        contentPanel.add(new Notices(this), "Notices");
-        contentPanel.add(new Timetable(this), "Timetable");
+        contentPanel.add(new GUI.common.ViewNotice("Technical Officer", contentPanel, cardLayout), "View Notice");        contentPanel.add(new Timetable(this), "Timetable");
     }
 
     public void switchPage(String pageName) {
