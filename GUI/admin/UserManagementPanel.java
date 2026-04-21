@@ -85,6 +85,7 @@ public class UserManagementPanel extends JPanel {
         JTextField txtDob     = addField("Date of Birth (YYYY-MM-DD)");
         JTextField txtContact = addField("Contact No");
         JTextField txtAddr    = addField("Address");
+
         JComboBox<String> cmbRole = addRoleCombo();
         JPasswordField txtPw  = addPasswordField("Password");
 
@@ -461,6 +462,41 @@ public class UserManagementPanel extends JPanel {
             }
         }
         return false;
+    }
+
+    private JTextField addPhotoPicker(String label) {
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel row = new JPanel(new BorderLayout(10, 0));
+        row.setBackground(Color.WHITE);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JTextField txtPath = new JTextField();
+        txtPath.setEditable(false); // Admin shouldn't type the path manually
+
+        JButton btnBrowse = new JButton("Browse...");
+        btnBrowse.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            // Filter for images only
+            chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Images", "jpg", "png", "jpeg"));
+            if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                // Store path with forward slashes for DB compatibility
+                txtPath.setText(chooser.getSelectedFile().getAbsolutePath().replace("\\", "/"));
+            }
+        });
+
+        row.add(txtPath, BorderLayout.CENTER);
+        row.add(btnBrowse, BorderLayout.EAST);
+
+        contentPanel.add(lbl);
+        contentPanel.add(Box.createVerticalStrut(5));
+        contentPanel.add(row);
+        contentPanel.add(Box.createVerticalStrut(12));
+
+        return txtPath;
     }
 
     private void refresh() {
