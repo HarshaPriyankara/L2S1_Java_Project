@@ -1,83 +1,81 @@
 package GUI.admin;
 
-import GUI.common.LoginForm;
+import GUI.common.BaseDashboard;
 import javax.swing.*;
 import java.awt.*;
 
-public class AdminDashboard extends JFrame {
-
-    private static final Color DARK_BG      = new Color(0x2E2E2E);
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
-
-    private final CardLayout cardLayout = new CardLayout();
-    private final JPanel contentPanel   = new JPanel(cardLayout);
+// Inheritance: AdminDashboard inherits common features from BaseDashboard
+public class AdminDashboard extends BaseDashboard {
 
     public AdminDashboard(String loggedInID) {
-        setTitle("Admin Dashboard");
-        setSize(1000, 600);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        // Calls the constructor of BaseDashboard to set the title and ID
+        super("Admin Dashboard - Faculty of Technology", loggedInID);
+    }
 
-        add(buildSidebar(), BorderLayout.WEST);
-        add(contentPanel,   BorderLayout.CENTER);
-
-        // Register all top-level panels once
-        contentPanel.add(new UserManagementPanel(),   "UserManagement");
+    /**
+     * Abstraction: Implementing the mandatory method to register
+     * specific Admin panels into the CardLayout.
+     */
+    @Override
+    protected void setupUserPanels() {
+        // Adding the panels required by the project document [cite: 11, 18]
+        contentPanel.add(new UserManagementPanel(), "UserManagement");
         contentPanel.add(new AdminCourseManagementPanel(contentPanel, cardLayout), "CourseManagement");
-        contentPanel.add(new NoticeManagementPanel(),                "NoticeManagement");    // placeholder
+        contentPanel.add(new NoticeManagementPanel(), "NoticeManagement");
         contentPanel.add(new TimetableManagement(), "TimetableManagement");
-        contentPanel.add(buildHomePanel(),            "Home");
 
-        cardLayout.show(contentPanel, "Home");
+        // You can add more panels here as you develop them
     }
 
-    private JPanel buildSidebar() {
-        JPanel sidebar = new JPanel();
-        sidebar.setBackground(DARK_BG);
-        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setPreferredSize(new Dimension(220, 0));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(60, 16, 24, 16));
+    /**
+     * Abstraction: Implementing the mandatory method to add
+     * Admin-specific navigation buttons to the sidebar.
+     */
+    @Override
+    protected void addNavigationButtons(JPanel sidebar) {
+        // These buttons match the Admin requirements in your document [cite: 19, 20, 21, 22]
 
-        sidebar.add(navButton("User Management",      () -> cardLayout.show(contentPanel, "UserManagement")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Course Management",    () -> cardLayout.show(contentPanel, "CourseManagement")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Notice Management",    () -> cardLayout.show(contentPanel, "NoticeManagement")));
-        sidebar.add(Box.createVerticalStrut(12));
-        sidebar.add(navButton("Timetable Management", () -> cardLayout.show(contentPanel, "TimetableManagement")));
-        sidebar.add(Box.createVerticalGlue());
-        sidebar.add(navButton("Logout", () -> {
-            new LoginForm().setVisible(true); // open login form
-            dispose(); // close current window
-        }));
+        sidebar.add(createNavButton("User Management",
+                () -> cardLayout.show(contentPanel, "UserManagement")));
 
-        return sidebar;
+        sidebar.add(Box.createVerticalStrut(12)); // Spacing
+
+        sidebar.add(createNavButton("Course Management",
+                () -> cardLayout.show(contentPanel, "CourseManagement")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("Notice Management",
+                () -> cardLayout.show(contentPanel, "NoticeManagement")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("Timetable Management",
+                () -> cardLayout.show(contentPanel, "TimetableManagement")));
     }
 
-    private JButton navButton(String text, Runnable action) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setForeground(Color.WHITE);
-        btn.setBackground(BUTTON_COLOR);
-        btn.setFocusPainted(false);
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.addActionListener(e -> action.run());
-        return btn;
-    }
-
-    private JPanel buildHomePanel() {
+    /**
+     * Encapsulation: We can override the home panel if we want
+     * a specific welcome message for the Admin.
+     */
+    @Override
+    protected JPanel buildHomePanel() {
         JPanel p = new JPanel(new GridBagLayout());
         p.setBackground(Color.WHITE);
-        JLabel lbl = new JLabel("Welcome, Admin");
+
+        JLabel lbl = new JLabel("Admin Control Center");
         lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
-        lbl.setForeground(new Color(0x555555));
+        lbl.setForeground(new Color(0x333333));
+
         p.add(lbl);
         return p;
     }
 
+    // Main method for testing this specific dashboard
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new AdminDashboard("adm01").setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            // Assume "adm001" is passed from the Login Form
+            new AdminDashboard("adm001").setVisible(true);
+        });
     }
 }
