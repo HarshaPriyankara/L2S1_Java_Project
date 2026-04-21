@@ -11,7 +11,7 @@ public class MarksManagement extends JPanel {
     public MarksManagement() {
         setLayout(new BorderLayout());
 
-        // පැනල් 4ම Register කිරීම
+        // panels are register
         mainContainer.add(createMenuPanel(), "Menu");
         mainContainer.add(new MarksUploadPanel(this), "AddMarks");
         mainContainer.add(new MarksUpdatePanel(this), "UpdateMarks");
