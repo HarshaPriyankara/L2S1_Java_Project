@@ -85,6 +85,8 @@ public class UserManagementPanel extends JPanel {
         JTextField txtDob     = addField("Date of Birth (YYYY-MM-DD)");
         JTextField txtContact = addField("Contact No");
         JTextField txtAddr    = addField("Address");
+        JTextField txtPhoto = addPhotoPicker("Profile Picture"); // Add this above the buttons
+
         JComboBox<String> cmbRole = addRoleCombo();
         JPasswordField txtPw  = addPasswordField("Password");
 
@@ -116,6 +118,8 @@ public class UserManagementPanel extends JPanel {
             user.setPassword(new String(txtPw.getPassword()).trim());
 
             UserDAO dao = new UserDAO();
+
+            user.setProfilePicPath(txtPhoto.getText().trim()); // Pass photo path
             if (dao.createUser(user)) {
                 JOptionPane.showMessageDialog(this,
                         "User saved!\nID: " + txtId.getText(), "Success",
@@ -141,7 +145,7 @@ public class UserManagementPanel extends JPanel {
         addTitle("Update User Details", BUTTON_COLOR);
 
         // ── Step 1: ID lookup row ──────────────────────────────────────────
-        JLabel idLbl = new JLabel("User ID");
+        JLabel idLbl = new JLabel("User ID to Search");
         idLbl.setFont(new Font("SansSerif", Font.BOLD, 13));
         idLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -172,8 +176,8 @@ public class UserManagementPanel extends JPanel {
         contentPanel.add(idRow);
         contentPanel.add(Box.createVerticalStrut(16));
 
-        // ── Step 2: Editable fields (initially empty / disabled) ──────────
-        JTextField txtNewId   = addField("New User ID (leave blank to keep current)");
+        // ── Step 2: Editable fields ──────────────────────────────────────────
+        JTextField txtNewId   = addField("New User ID (Leave blank to keep current)");
         JTextField txtFN      = addField("First Name");
         JTextField txtLN      = addField("Last Name");
         JTextField txtEmail   = addField("Email");
@@ -181,10 +185,13 @@ public class UserManagementPanel extends JPanel {
         JTextField txtContact = addField("Contact No");
         JTextField txtAddr    = addField("Address");
         JComboBox<String> cmbRole = addRoleCombo();
-        JPasswordField txtPw  = addPasswordField("New Password (leave blank to keep current)");
+        JPasswordField txtPw  = addPasswordField("New Password (Leave blank to keep current)");
 
-        // Disable all fields until a user is loaded
-        setFieldsEnabled(false, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr);
+        // Photo Picker field
+        JTextField txtPhotoPath = addPhotoPicker("Profile Picture Path");
+
+        // Initially disable everything until user is found
+        setFieldsEnabled(false, txtNewId, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr, txtPhotoPath);
         cmbRole.setEnabled(false);
         txtPw.setEnabled(false);
 
@@ -200,38 +207,36 @@ public class UserManagementPanel extends JPanel {
         fetchBtn.addActionListener(e -> {
             String id = txtId.getText().trim();
             if (id.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter a User ID.",
-                        "Validation Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Please enter a User ID.", "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             UserDAO dao = new UserDAO();
             User existing = dao.getUserById(id);
             if (existing == null) {
-                JOptionPane.showMessageDialog(this, "No user found with that ID.",
-                        "Not Found", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No user found with that ID.", "Not Found", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // Populate fields with existing data
+            // Populate fields
             txtFN.setText(existing.getFname());
             txtLN.setText(existing.getLname());
             txtEmail.setText(existing.getEmail());
-            txtDob.setText(existing.getDateOfBirth() != null
-                    ? existing.getDateOfBirth().toString() : "");
+            txtDob.setText(existing.getDateOfBirth() != null ? existing.getDateOfBirth().toString() : "");
             txtContact.setText(existing.getContactNo());
             txtAddr.setText(existing.getAddress());
+            txtPhotoPath.setText(existing.getProfilePicPath()); // Set current photo path
+
             if (existing.getRole() != null) {
                 cmbRole.setSelectedItem(existing.getRole());
             }
-            txtPw.setText("");   // always blank — user types new one only if changing
 
             // Enable editing
-            setFieldsEnabled(true, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr);
+            setFieldsEnabled(true, txtNewId, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr, txtPhotoPath);
             cmbRole.setEnabled(true);
             txtPw.setEnabled(true);
             upd.setEnabled(true);
-            txtId.setEditable(false);   // lock ID once loaded
+            txtId.setEditable(false);
             fetchBtn.setEnabled(false);
         });
 
@@ -243,52 +248,45 @@ public class UserManagementPanel extends JPanel {
             try {
                 dob = LocalDate.parse(txtDob.getText().trim());
             } catch (DateTimeParseException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.",
-                        "Validation Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.", "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             UserDAO dao = new UserDAO();
-            User existing = dao.getUserById(txtId.getText().trim());
-
             String originalId = txtId.getText().trim();
             String newId = txtNewId.getText().trim();
             String effectiveId = newId.isEmpty() ? originalId : newId;
 
-// If ID is changing, check the new ID doesn't already exist
+            // ID existence check if changing ID
             if (!newId.isEmpty() && !newId.equals(originalId)) {
                 if (dao.userExists(newId)) {
-                    JOptionPane.showMessageDialog(this,
-                            "User ID " + newId + " already exists.",
-                            "Validation Error", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "User ID " + newId + " already exists.", "Error", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
             }
 
-            User user = new User();
-            user.setUserID(effectiveId);
-            user.setOriginalUserID(originalId);   // needed for WHERE clause — see below
-            user.setFname(txtFN.getText().trim());
-            user.setLname(txtLN.getText().trim());
-            user.setEmail(txtEmail.getText().trim());
-            user.setDob(dob);
-            user.setContactNo(txtContact.getText().trim());
-            user.setAddress(txtAddr.getText().trim());
-            user.setRole((String) cmbRole.getSelectedItem());
+            User existingUser = dao.getUserById(originalId);
+            User updatedUser = new User();
+            updatedUser.setUserID(effectiveId);
+            updatedUser.setOriginalUserID(originalId);
+            updatedUser.setFname(txtFN.getText().trim());
+            updatedUser.setLname(txtLN.getText().trim());
+            updatedUser.setEmail(txtEmail.getText().trim());
+            updatedUser.setDob(dob);
+            updatedUser.setContactNo(txtContact.getText().trim());
+            updatedUser.setAddress(txtAddr.getText().trim());
+            updatedUser.setRole((String) cmbRole.getSelectedItem());
+            updatedUser.setProfilePicPath(txtPhotoPath.getText().trim()); // Capture the path
 
-            // Keep old password if the field is left blank
+            // Handle password logic
             String newPw = new String(txtPw.getPassword()).trim();
-            user.setPassword(newPw.isEmpty() && existing != null
-                    ? existing.getPassword() : newPw);
+            updatedUser.setPassword(newPw.isEmpty() ? existingUser.getPassword() : newPw);
 
-            if (dao.updateUser(user)) {
-                JOptionPane.showMessageDialog(this,
-                        "User updated!\nID: " + txtId.getText(), "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
-                showCards();
+            if (dao.updateUser(updatedUser)) {
+                JOptionPane.showMessageDialog(this, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                showCards(); // Return to menu
             } else {
-                JOptionPane.showMessageDialog(this,
-                        "Update failed.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Update failed.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
     }
@@ -461,6 +459,41 @@ public class UserManagementPanel extends JPanel {
             }
         }
         return false;
+    }
+
+    private JTextField addPhotoPicker(String label) {
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel row = new JPanel(new BorderLayout(10, 0));
+        row.setBackground(Color.WHITE);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JTextField txtPath = new JTextField();
+        txtPath.setEditable(false); // Admin shouldn't type the path manually
+
+        JButton btnBrowse = new JButton("Browse...");
+        btnBrowse.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            // Filter for images only
+            chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Images", "jpg", "png", "jpeg"));
+            if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                // Store path with forward slashes for DB compatibility
+                txtPath.setText(chooser.getSelectedFile().getAbsolutePath().replace("\\", "/"));
+            }
+        });
+
+        row.add(txtPath, BorderLayout.CENTER);
+        row.add(btnBrowse, BorderLayout.EAST);
+
+        contentPanel.add(lbl);
+        contentPanel.add(Box.createVerticalStrut(5));
+        contentPanel.add(row);
+        contentPanel.add(Box.createVerticalStrut(12));
+
+        return txtPath;
     }
 
     private void refresh() {
