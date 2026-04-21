@@ -4,7 +4,10 @@ import Utils.DBConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CourseDAO {
     // add course
@@ -64,5 +67,29 @@ public class CourseDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public List<String[]> getStudentCourses(String regNo) throws SQLException {
+        List<String[]> courses = new ArrayList<>();
+        String sql = "SELECT c.Course_code, c.Course_name, c.Credits " +
+                "FROM course c " +
+                "JOIN enrollment e ON c.Course_code = e.Course_code " +
+                "WHERE e.Reg_no = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+
+            pst.setString(1, regNo);
+            ResultSet rs = pst.executeQuery();
+
+            while (rs.next()) {
+                courses.add(new String[]{
+                        rs.getString("Course_code"),
+                        rs.getString("Course_name"),
+                        rs.getString("Credits")
+                });
+            }
+        }
+        return courses;
     }
 }

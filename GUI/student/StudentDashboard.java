@@ -10,12 +10,13 @@ public class StudentDashboard extends JFrame {
 
     private static final Color DARK_BG      = new Color(0x2E2E2E);
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
-
+    private String loggedInStudentID;
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel contentPanel   = new JPanel(cardLayout);
 
 
     public StudentDashboard(String loggedInID) {
+        this.loggedInStudentID = loggedInID;
         setTitle("Student Dashboard");
         setSize(1000, 600);
         setLocationRelativeTo(null);
@@ -29,7 +30,7 @@ public class StudentDashboard extends JFrame {
         contentPanel.add(new UpdateProfilePanel(),"Update Profile");
         contentPanel.add(new AttendancePanel(), "Attendance Details");
         contentPanel.add(new MedicalPanel(),"Medical Details");
-        contentPanel.add(new CoursePanel(), "Course Details");
+        contentPanel.add(new CoursePanel(loggedInStudentID), "Course Details");
         contentPanel.add(new GradePanel(),"Grades/GPA");
         contentPanel.add(new TimetablePanel(), "Timetable Details");
         contentPanel.add(new ViewNotice("Undergraduate", contentPanel, cardLayout), "Notice");
