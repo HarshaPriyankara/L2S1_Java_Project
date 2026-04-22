@@ -25,7 +25,7 @@ public class StudentDashboard extends BaseDashboard {
         contentPanel.add(new AttendancePanel(loggedInID), "Attendance Details");
         contentPanel.add(new MedicalPanel(), "Medical Details");
         contentPanel.add(new CoursePanel(loggedInID), "Course Details");
-        contentPanel.add(new GradePanel(), "Grades/GPA");
+        contentPanel.add(new GradePanel(loggedInID), "Grades/GPA");
         contentPanel.add(new TimetablePanel(), "Timetable Details");
 
         // ViewNotice is a shared component used by multiple user roles
