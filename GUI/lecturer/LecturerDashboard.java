@@ -1,6 +1,7 @@
 package GUI.lecturer;
 
 import GUI.common.BaseDashboard;
+import GUI.common.ProfileManagementPanel;
 import GUI.common.ViewNotice;
 import javax.swing.*;
 import java.awt.*;
@@ -87,7 +88,7 @@ public class LecturerDashboard extends BaseDashboard {
 
             // 2. Set the necessary data
             testUser.setUserID("adm001");
-            testUser.setRole("Admin");
+            testUser.setRole("lecture");
             testUser.setFname("Admin");
             testUser.setLname("User");
 

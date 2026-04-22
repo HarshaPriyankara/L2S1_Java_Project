@@ -9,13 +9,12 @@ import java.awt.image.BufferedImage;
 // Using 'abstract' fulfills the Abstraction requirement
 public abstract class BaseDashboard extends JFrame {
 
-    // Encapsulation: Using protected allows child classes to access these [cite: 102]
+    // Encapsulation: Using protected allows child classes to access these
     protected final Color DARK_BG = new Color(0x2E2E2E);
     protected final Color BUTTON_COLOR = new Color(46, 125, 192);
     protected final CardLayout cardLayout = new CardLayout();
     protected final JPanel contentPanel = new JPanel(cardLayout);
     protected final String loggedInID;
-
     protected final User currentUser;
 
     public BaseDashboard(String title, User user) {
@@ -64,7 +63,7 @@ public abstract class BaseDashboard extends JFrame {
         sidebar.add(Box.createVerticalStrut(15));
 
         // 2. User ID Label
-        JLabel idLabel = new JLabel("User ID: " + loggedInID);
+        JLabel idLabel = new JLabel("Welcome " + currentUser.getFname());
         idLabel.setForeground(Color.LIGHT_GRAY);
         idLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
         idLabel.setAlignmentX(Component.CENTER_ALIGNMENT);

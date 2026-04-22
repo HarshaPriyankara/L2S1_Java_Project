@@ -6,12 +6,14 @@ import javax.swing.*;
 import java.awt.*;
 import Models.User;
 
+import GUI.common.ProfileManagementPanel; // Import the panel we built earlier
+
 // Inheritance: This class inherits all common GUI features from BaseDashboard
 public class TechnicalOfficerDashboard extends BaseDashboard {
 
     public TechnicalOfficerDashboard(User user) {
         // Pass the whole user object to the parent
-        super("Lecture Dashboard", user);
+        super("Technical Officer Dashboard", user);
     }
 
     /**
@@ -24,6 +26,8 @@ public class TechnicalOfficerDashboard extends BaseDashboard {
         contentPanel.add(new AttendanceManagement(this), "Attendance");
         contentPanel.add(new MedicalManagement(this), "Medical");
         contentPanel.add(new Timetable(this), "Timetable");
+
+        contentPanel.add(new ProfileManagementPanel(currentUser.getUserID()), "Profile");
 
         // Using the common ViewNotice panel used by other users
         contentPanel.add(new ViewNotice("Technical Officer", contentPanel, cardLayout), "Notices");
@@ -50,7 +54,15 @@ public class TechnicalOfficerDashboard extends BaseDashboard {
         sidebar.add(createNavButton("View Timetable",
                 () -> cardLayout.show(contentPanel, "Timetable")));
 
+
+
         sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("Profile Management",
+                () -> cardLayout.show(contentPanel, "Profile")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
 
         sidebar.add(createNavButton("View Notices",
                 () -> cardLayout.show(contentPanel, "Notices")));
