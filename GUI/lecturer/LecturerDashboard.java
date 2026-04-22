@@ -87,7 +87,7 @@ public class LecturerDashboard extends BaseDashboard {
 
             // 2. Set the necessary data
             testUser.setUserID("adm001");
-            testUser.setRole("Admin");
+            testUser.setRole("lecture");
             testUser.setFname("Admin");
             testUser.setLname("User");
 
