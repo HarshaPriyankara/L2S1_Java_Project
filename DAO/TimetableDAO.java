@@ -151,23 +151,24 @@ public class TimetableDAO {
             ps.setString(3, s);
 
             ResultSet rs = ps.executeQuery();
+
             while (rs.next()) {
                 Timetable tt = new Timetable();
                 tt.setTimeTableId(rs.getString("Timetable_id"));
 
-                //show Course
-                String cName = rs.getString("Course_name");
+
                 String cCode = rs.getString("Course_code");
-                tt.setCourseCode(cName != null ? cCode + " : " + cName : cCode);
+                String cName = rs.getString("Course_name");
+
+                tt.setCourseCode(cCode);      // කෝඩ් එක විතරක් සෙට් කරන්න
+                tt.setCourseName(cName);      // නම වෙනම සෙට් කරන්න (මේක තමයි වැදගත්ම ලයින් එක)
 
 
                 String dName = rs.getString("Dep_name");
                 tt.setDepartmentId(dName != null ? dName : rs.getString("Department_id"));
-
                 tt.setDay(rs.getString("Day"));
                 tt.setVenue(rs.getString("Venue"));
 
-                // show time
                 Time st = rs.getTime("Start_time");
                 Time et = rs.getTime("End_time");
                 if (st != null) tt.setStartTime(st.toLocalTime());
