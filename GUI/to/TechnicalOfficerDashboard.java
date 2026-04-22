@@ -55,7 +55,7 @@ public class TechnicalOfficerDashboard extends JFrame {
         setVisible(true);
 
         contentPanel.add(new Notices(this), "Notices");
-        contentPanel.add(new Timetables(this), "Timetable");
+        contentPanel.add(new Timetable(this), "Timetable");
     }
 
     public void switchPage(String pageName) {
