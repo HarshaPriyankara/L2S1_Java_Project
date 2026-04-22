@@ -1,13 +1,12 @@
 package GUI.common;
 
-import Controllers.ProfileController;
+import Controllers.LecTOProfileController;
 import Models.User;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 public class ProfileManagementPanel extends JPanel {
-    private final ProfileController controller = new ProfileController();
+    private final LecTOProfileController controller = new LecTOProfileController();
     private final JPanel contentPanel = new JPanel();
     private final String loggedInUserId;
 
@@ -33,7 +32,7 @@ public class ProfileManagementPanel extends JPanel {
         contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
         addTitle("Update My Profile", BUTTON_COLOR);
 
-        User existing = controller.getProfileData(loggedInUserId);
+        User existing = controller.getUserData(loggedInUserId);
 
         // --- READ ONLY FIELDS (Locked) ---
         addReadOnlyField("User ID", existing.getUserID());
@@ -72,7 +71,14 @@ public class ProfileManagementPanel extends JPanel {
             user.setRole((String) cmbRole.getSelectedItem());
             user.setProfilePicPath(txtPic.getText().trim());
 
-            String response = controller.updateLecturerProfile(user, txtDob.getText());
+            try {
+                user.setDob(java.time.LocalDate.parse(txtDob.getText().trim()));
+            } catch (java.time.format.DateTimeParseException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.");
+                return;
+            }
+
+            String response = controller.updateProfile(user);
             JOptionPane.showMessageDialog(this, response.split(":")[1].trim());
             if (response.startsWith("SUCCESS")) showUpdateForm();
         });

@@ -46,7 +46,7 @@ public class StudentProfilePanel extends JPanel {
 
         addTitle("Edit My Information", BUTTON_COLOR);
 
-        User u = controller.getStudentData(loggedInStudentId);
+        User u = controller.getUserData(loggedInStudentId);
 
         // READ-ONLY (Name and DOB stay locked)
         addReadOnlyField("Full Name", u.getFname() + " " + u.getLname());
@@ -67,13 +67,17 @@ public class StudentProfilePanel extends JPanel {
         JButton saveBtn = actionButton(row, "Save Changes", BUTTON_COLOR);
 
         saveBtn.addActionListener(e -> {
-            String response = controller.updateStudentProfile(
-                    loggedInStudentId,
-                    txtEmail.getText(),
-                    txtContact.getText(),
-                    txtAddr.getText(),
-                    txtPic.getText()
-            );
+            User user = controller.getUserData(loggedInStudentId);
+            if (user == null) {
+                JOptionPane.showMessageDialog(this, "User not found.");
+                return;
+            }
+            user.setEmail(txtEmail.getText().trim());
+            user.setContactNo(txtContact.getText().trim());
+            user.setAddress(txtAddr.getText().trim());
+            user.setProfilePicPath(txtPic.getText().trim());
+
+            String response = controller.updateProfile(user);
 
             JOptionPane.showMessageDialog(this, response.split(":")[1].trim());
             if (response.startsWith("SUCCESS")) showCards();

@@ -1,13 +1,13 @@
 package GUI.admin;
 
-import Controllers.UserController;
+import Controllers.AdminProfileController;
 import Models.User;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
 public class UserManagementPanel extends JPanel {
-    private final UserController controller = new UserController();
+    private final AdminProfileController controller = new AdminProfileController();
     private final JPanel contentPanel = new JPanel();
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
     private static final Color CARD_COLOR   = new Color(85, 179, 232);
@@ -63,7 +63,14 @@ public class UserManagementPanel extends JPanel {
             u.setPassword(new String(txtPw.getPassword()).trim());
             u.setProfilePicPath(txtPic.getText().trim());
 
-            handleResponse(controller.registerUser(u, txtDb.getText()));
+            try {
+                u.setDob(java.time.LocalDate.parse(txtDb.getText().trim()));
+            } catch (java.time.format.DateTimeParseException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.");
+                return;
+            }
+
+            handleResponse(controller.registerUser(u));
         });
         refresh();
     }
@@ -123,6 +130,7 @@ public class UserManagementPanel extends JPanel {
         updateBtn.addActionListener(e -> {
             User u = new User();
             u.setUserID(txtNewId.getText().trim());
+            u.setOriginalUserID(txtSearch.getText().trim());
             u.setFname(txtFN.getText().trim());
             u.setLname(txtLN.getText().trim());
             u.setEmail(txtEmail.getText().trim());
@@ -131,7 +139,21 @@ public class UserManagementPanel extends JPanel {
             u.setRole((String) cmbRole.getSelectedItem());
             u.setProfilePicPath(txtPic.getText().trim());
 
-            String res = controller.processUpdate(u, txtDb.getText(), txtSearch.getText(), new String(txtPw.getPassword()));
+            try {
+                u.setDob(java.time.LocalDate.parse(txtDb.getText().trim()));
+            } catch (java.time.format.DateTimeParseException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.");
+                return;
+            }
+
+            String newPw = new String(txtPw.getPassword()).trim();
+            if (newPw.isEmpty()) {
+                u.setPassword(controller.fetchUser(txtSearch.getText().trim()).getPassword());
+            } else {
+                u.setPassword(newPw);
+            }
+
+            String res = controller.updateProfile(u);
             handleResponse(res);
         });
         refresh();
