@@ -1,4 +1,4 @@
-package GUI.to;
+/*package GUI.to;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,4 +41,4 @@ public class DeleteAttendancePanel extends JPanel {
         gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
         add(pnl, gbc);
     }
-}
+}*/
