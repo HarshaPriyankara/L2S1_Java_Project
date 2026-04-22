@@ -85,8 +85,8 @@ public class MarksManagement extends JPanel {
         courseComboBox = new JComboBox<>();
         loadLecturerCourses();
 
-        // Marks Type එක තෝරන්න (DB එකේ Enum එකට අනුව)
-        String[] types = {"Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2", "Mid_theory", "Mid_practical", "End_theory", "End_practical"};
+        // Marks Type select
+        String[] types = {"Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2", "Mini_project", "Mid_theory", "Mid_practical", "End_theory", "End_practical"};
         typeComboBox = new JComboBox<>(types);
 
         JButton btnLoad = new JButton("Show Students");
@@ -100,7 +100,7 @@ public class MarksManagement extends JPanel {
         add(topPanel, BorderLayout.NORTH);
 
         // --- Table Panel ---
-        // Mark ID එක පෙන්වන්නේ නැත.
+        // Mark ID not showing
         String[] columns = {"Student ID", "Course Code", "Assessment Type", "Mark Value"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -148,7 +148,7 @@ public class MarksManagement extends JPanel {
 
         tableModel.setRowCount(0);
 
-        // LEFT JOIN භාවිතා කර ලකුණු නොමැති සිසුන්ද ලබා ගනී
+        // LEFT JOIN using and choose not adding mark student
         String query = "SELECT e.Reg_no, e.Course_code, m.Marks_value " +
                 "FROM enrollment e " +
                 "LEFT JOIN MARK m ON e.Reg_no = m.Reg_no AND e.Course_code = m.Course_code AND m.Marks_type = ? " +
@@ -180,8 +180,7 @@ public class MarksManagement extends JPanel {
         if (rowCount == 0) return;
 
         try (Connection conn = DBConnection.getConnection()) {
-            // "INSERT ... ON DUPLICATE KEY UPDATE" භාවිතයෙන් ලකුණු ඇතුළත් කිරීම හෝ යාවත්කාලීන කිරීම එකවර කළ හැක.
-            // නමුත් ඔබගේ DB එකේ Mark_id PK නිසා අපි පරීක්ෂා කර බලමු.
+
 
             for (int i = 0; i < rowCount; i++) {
                 String regNo = tableModel.getValueAt(i, 0).toString();
@@ -193,7 +192,7 @@ public class MarksManagement extends JPanel {
 
                 double markValue = Double.parseDouble(markStr);
 
-                // මුලින් බලනවා දැනටමත් record එකක් තියෙනවද කියලා
+                // first see, have record
                 String checkQuery = "SELECT Mark_id FROM MARK WHERE Reg_no=? AND Course_code=? AND Marks_type=?";
                 PreparedStatement checkPst = conn.prepareStatement(checkQuery);
                 checkPst.setString(1, regNo);
@@ -202,14 +201,14 @@ public class MarksManagement extends JPanel {
                 ResultSet rs = checkPst.executeQuery();
 
                 if (rs.next()) {
-                    // Update පවතින record එක
+                    // Update record
                     String updateQuery = "UPDATE MARK SET Marks_value=? WHERE Mark_id=?";
                     PreparedStatement upPst = conn.prepareStatement(updateQuery);
                     upPst.setDouble(1, markValue);
                     upPst.setInt(2, rs.getInt("Mark_id"));
                     upPst.executeUpdate();
                 } else {
-                    // Insert අලුත් record එක
+                    // Insert new record
                     String insertQuery = "INSERT INTO MARK (Reg_no, Course_code, Marks_type, Marks_value) VALUES (?, ?, ?, ?)";
                     PreparedStatement inPst = conn.prepareStatement(insertQuery);
                     inPst.setString(1, regNo);
