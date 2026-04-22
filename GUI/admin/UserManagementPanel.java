@@ -1,499 +1,303 @@
 package GUI.admin;
 
-import DAO.UserDAO;
+import Controllers.AdminProfileController;
 import Models.User;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 public class UserManagementPanel extends JPanel {
-
+    private final AdminProfileController controller = new AdminProfileController();
+    private final JPanel contentPanel = new JPanel();
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
     private static final Color CARD_COLOR   = new Color(85, 179, 232);
 
-    private final JPanel contentPanel = new JPanel();
-
     public UserManagementPanel() {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
-
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scroll = new JScrollPane(contentPanel);
         scroll.setBorder(null);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
         add(scroll, BorderLayout.CENTER);
-
         showCards();
     }
-
-    // ── Card menu ────────────────────────────────────────────────────────────
 
     private void showCards() {
         contentPanel.removeAll();
         contentPanel.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
-        contentPanel.add(makeCard("Create New User"));
-        contentPanel.add(Box.createVerticalStrut(24));
-        contentPanel.add(makeCard("Update User Details"));
-        contentPanel.add(Box.createVerticalStrut(24));
-        contentPanel.add(makeCard("Delete User"));
+        contentPanel.add(makeCard("Create New User", e -> showCreateForm()));
+        contentPanel.add(Box.createVerticalStrut(20));
+        contentPanel.add(makeCard("Update User Details", e -> showUpdateForm()));
+        contentPanel.add(Box.createVerticalStrut(20));
+        contentPanel.add(makeCard("Delete User", e -> showDeleteForm()));
         refresh();
     }
 
-    private JPanel makeCard(String title) {
+    // --- FORM METHODS ---
+
+    private void showCreateForm() {
+        prepareForm("Create New User", BUTTON_COLOR);
+
+        JTextField txtId = addField("User ID");
+        JTextField txtFN = addField("First Name");
+        JTextField txtLN = addField("Last Name");
+        JTextField txtEm = addField("Email");
+        JTextField txtDb = addField("DOB (YYYY-MM-DD)");
+        JTextField txtPh = addField("Contact No");
+        JTextField txtAd = addField("Address");
+        JTextField txtPic = addPhotoPicker("Profile Photo");
+        JComboBox<String> cmbRole = addRoleCombo();
+        JPasswordField txtPw = addPasswordField("Password");
+
+        JButton save = actionButton(buttonRow(), "Save User", BUTTON_COLOR);
+        save.addActionListener(e -> {
+            User u = new User();
+            u.setUserID(txtId.getText().trim());
+            u.setFname(txtFN.getText().trim());
+            u.setLname(txtLN.getText().trim());
+            u.setEmail(txtEm.getText().trim());
+            u.setContactNo(txtPh.getText().trim());
+            u.setAddress(txtAd.getText().trim());
+            u.setRole((String) cmbRole.getSelectedItem());
+            u.setPassword(new String(txtPw.getPassword()).trim());
+            u.setProfilePicPath(txtPic.getText().trim());
+
+            try {
+                u.setDob(java.time.LocalDate.parse(txtDb.getText().trim()));
+            } catch (java.time.format.DateTimeParseException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.");
+                return;
+            }
+
+            handleResponse(controller.registerUser(u));
+        });
+        refresh();
+    }
+
+
+    private void showUpdateForm() {
+        prepareForm("Update User Details", BUTTON_COLOR);
+
+        // --- SEARCH SECTION ---
+        JTextField txtSearch = addField("Search User ID");
+        JButton fetchBtn = actionButton(buttonRow(), "Load Data", BUTTON_COLOR);
+
+        contentPanel.add(Box.createVerticalStrut(15));
+        contentPanel.add(new JSeparator());
+        contentPanel.add(Box.createVerticalStrut(15));
+
+        // --- EDITABLE FIELDS (The missing ones are added here) ---
+        JTextField txtNewId   = addField("New User ID");
+        JTextField txtFN      = addField("First Name");
+        JTextField txtLN      = addField("Last Name");
+        JTextField txtEmail   = addField("Email Address");    // Added
+        JTextField txtDb      = addField("DOB (YYYY-MM-DD)");
+        JTextField txtContact = addField("Contact No");       // Added
+        JTextField txtAddr    = addField("Address");          // Added
+        JComboBox<String> cmbRole = addRoleCombo();           // Added
+        JTextField txtPic     = addPhotoPicker("Update Photo");
+        JPasswordField txtPw  = addPasswordField("New Password(optional)");
+
+        // Initially disable editing until data is loaded
+        setFieldsEnabled(false, txtNewId, txtFN, txtLN, txtEmail, txtDb, txtContact, txtAddr, txtPic, txtPw, cmbRole);
+
+        JButton updateBtn = actionButton(buttonRow(), "Update User", BUTTON_COLOR);
+        updateBtn.setEnabled(false);
+
+        // Load Logic
+        fetchBtn.addActionListener(e -> {
+            User u = controller.fetchUser(txtSearch.getText());
+            if (u != null) {
+                txtNewId.setText(u.getUserID());
+                txtFN.setText(u.getFname());
+                txtLN.setText(u.getLname());
+                txtEmail.setText(u.getEmail());
+                txtDb.setText(u.getDateOfBirth().toString());
+                txtContact.setText(u.getContactNo());
+                txtAddr.setText(u.getAddress());
+                txtPic.setText(u.getProfilePicPath());
+                cmbRole.setSelectedItem(u.getRole());
+
+                setFieldsEnabled(true, txtNewId, txtFN, txtLN, txtEmail, txtDb, txtContact, txtAddr, txtPic, txtPw, cmbRole);
+                updateBtn.setEnabled(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "User not found.");
+            }
+        });
+
+        // Update Logic
+        updateBtn.addActionListener(e -> {
+            User u = new User();
+            u.setUserID(txtNewId.getText().trim());
+            u.setOriginalUserID(txtSearch.getText().trim());
+            u.setFname(txtFN.getText().trim());
+            u.setLname(txtLN.getText().trim());
+            u.setEmail(txtEmail.getText().trim());
+            u.setContactNo(txtContact.getText().trim());
+            u.setAddress(txtAddr.getText().trim());
+            u.setRole((String) cmbRole.getSelectedItem());
+            u.setProfilePicPath(txtPic.getText().trim());
+
+            try {
+                u.setDob(java.time.LocalDate.parse(txtDb.getText().trim()));
+            } catch (java.time.format.DateTimeParseException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.");
+                return;
+            }
+
+            String newPw = new String(txtPw.getPassword()).trim();
+            if (newPw.isEmpty()) {
+                u.setPassword(controller.fetchUser(txtSearch.getText().trim()).getPassword());
+            } else {
+                u.setPassword(newPw);
+            }
+
+            String res = controller.updateProfile(u);
+            handleResponse(res);
+        });
+        refresh();
+    }
+
+    private void showDeleteForm() {
+        prepareForm("Delete User", Color.RED);
+        JTextField txtId = addField("Enter ID to Delete");
+        JButton del = actionButton(buttonRow(), "Delete Permanent", Color.RED);
+        del.addActionListener(e -> handleResponse(controller.deleteUser(txtId.getText())));
+        refresh();
+    }
+
+    // --- ALIGNED UI HELPERS ---
+
+    private void prepareForm(String title, Color c) {
+        contentPanel.removeAll();
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
+        JLabel lbl = new JLabel(title);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 22));
+        lbl.setForeground(c);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+        contentPanel.add(lbl);
+        contentPanel.add(Box.createVerticalStrut(20));
+        backButton(buttonRow());
+    }
+
+    private JTextField addField(String labelText) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        row.setBackground(Color.WHITE);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lbl = new JLabel(labelText);
+        lbl.setPreferredSize(new Dimension(150, 30));
+        JTextField f = new JTextField();
+        f.setPreferredSize(new Dimension(350, 30));
+
+        row.add(lbl); row.add(f);
+        contentPanel.add(row);
+        return f;
+    }
+
+    private JPasswordField addPasswordField(String labelText) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        row.setBackground(Color.WHITE);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lbl = new JLabel(labelText);
+        lbl.setPreferredSize(new Dimension(150, 30));
+        JPasswordField f = new JPasswordField();
+        f.setPreferredSize(new Dimension(350, 30));
+
+        row.add(lbl); row.add(f);
+        contentPanel.add(row);
+        return f;
+    }
+
+    private JComboBox<String> addRoleCombo() {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        row.setBackground(Color.WHITE);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lbl = new JLabel("Role");
+        lbl.setPreferredSize(new Dimension(150, 30));
+        JComboBox<String> c = new JComboBox<>(new String[]{"Admin", "Student", "Lecturer", "techofficer"});
+        c.setPreferredSize(new Dimension(350, 30));
+
+        row.add(lbl); row.add(c);
+        contentPanel.add(row);
+        return c;
+    }
+
+    private JTextField addPhotoPicker(String labelText) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        row.setBackground(Color.WHITE);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lbl = new JLabel(labelText);
+        lbl.setPreferredSize(new Dimension(150, 30));
+        JTextField path = new JTextField();
+        path.setPreferredSize(new Dimension(265, 30));
+        path.setEditable(false);
+        JButton btn = new JButton("Browse");
+        btn.setPreferredSize(new Dimension(80, 30));
+        btn.addActionListener(e -> {
+            JFileChooser jfc = new JFileChooser();
+            if (jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                path.setText(jfc.getSelectedFile().getAbsolutePath().replace("\\", "/"));
+            }
+        });
+
+        row.add(lbl); row.add(path); row.add(btn);
+        contentPanel.add(row);
+        return path;
+    }
+
+    private void handleResponse(String res) {
+        JOptionPane.showMessageDialog(this, res.split(":")[1].trim());
+        if (res.startsWith("SUCCESS")) showCards();
+    }
+
+    private JPanel makeCard(String title, ActionListener action) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(CARD_COLOR);
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
-        card.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        JLabel label = new JLabel(title, SwingConstants.CENTER);
-        label.setFont(new Font("SansSerif", Font.BOLD, 20));
-        label.setForeground(Color.WHITE);
-        card.add(label, BorderLayout.CENTER);
-
+        JLabel lbl = new JLabel(title, SwingConstants.CENTER);
+        lbl.setForeground(Color.WHITE);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 18));
+        card.add(lbl);
         card.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e)  { card.setBackground(new Color(65, 200, 255)); }
-            public void mouseExited(MouseEvent e)   { card.setBackground(CARD_COLOR); }
-            public void mouseClicked(MouseEvent e)  {
-                switch (title) {
-                    case "Create New User"     -> showCreateForm();
-                    case "Update User Details" -> showUpdateForm();
-                    case "Delete User"         -> showDeleteForm();
-                }
-            }
+            public void mouseClicked(MouseEvent e) { action.actionPerformed(null); }
         });
         return card;
     }
 
-    // ── Create form ──────────────────────────────────────────────────────────
-
-    private void showCreateForm() {
-        contentPanel.removeAll();
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
-
-        addTitle("Create New User", BUTTON_COLOR);
-
-        JTextField txtId      = addField("User ID");
-        JTextField txtFN      = addField("First Name");
-        JTextField txtLN      = addField("Last Name");
-        JTextField txtEmail   = addField("Email");
-        JTextField txtDob     = addField("Date of Birth (YYYY-MM-DD)");
-        JTextField txtContact = addField("Contact No");
-        JTextField txtAddr    = addField("Address");
-        JTextField txtPhoto = addPhotoPicker("Profile Picture"); // Add this above the buttons
-
-        JComboBox<String> cmbRole = addRoleCombo();
-        JPasswordField txtPw  = addPasswordField("Password");
-
-        JPanel row = buttonRow();
-        backButton(row);
-        JButton save = actionButton(row, "Save User", BUTTON_COLOR);
-
-        save.addActionListener(e -> {
-            if (anyEmpty(txtId, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr)) return;
-
-            LocalDate dob;
-            try {
-                dob = LocalDate.parse(txtDob.getText().trim());
-            } catch (DateTimeParseException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.",
-                        "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            User user = new User();
-            user.setUserID(txtId.getText().trim());
-            user.setFname(txtFN.getText().trim());
-            user.setLname(txtLN.getText().trim());
-            user.setEmail(txtEmail.getText().trim());
-            user.setDob(dob);
-            user.setContactNo(txtContact.getText().trim());
-            user.setAddress(txtAddr.getText().trim());
-            user.setRole((String) cmbRole.getSelectedItem());
-            user.setPassword(new String(txtPw.getPassword()).trim());
-
-            UserDAO dao = new UserDAO();
-
-            user.setProfilePicPath(txtPhoto.getText().trim()); // Pass photo path
-            if (dao.createUser(user)) {
-                JOptionPane.showMessageDialog(this,
-                        "User saved!\nID: " + txtId.getText(), "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
-                showCards();
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Failed to save user. ID or email may already exist.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        contentPanel.add(row);
-        refresh();
-    }
-
-    // ── Update form ──────────────────────────────────────────────────────────
-
-    private void showUpdateForm() {
-        contentPanel.removeAll();
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
-
-        addTitle("Update User Details", BUTTON_COLOR);
-
-        // ── Step 1: ID lookup row ──────────────────────────────────────────
-        JLabel idLbl = new JLabel("User ID to Search");
-        idLbl.setFont(new Font("SansSerif", Font.BOLD, 13));
-        idLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JPanel idRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        idRow.setBackground(Color.WHITE);
-        idRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-        idRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
-
-        JTextField txtId = new JTextField();
-        txtId.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        txtId.setPreferredSize(new Dimension(300, 35));
-
-        JButton fetchBtn = new JButton("Load User");
-        fetchBtn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        fetchBtn.setBackground(BUTTON_COLOR);
-        fetchBtn.setForeground(Color.WHITE);
-        fetchBtn.setFocusPainted(false);
-        fetchBtn.setBorderPainted(false);
-        fetchBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        fetchBtn.setPreferredSize(new Dimension(110, 35));
-
-        idRow.add(txtId);
-        idRow.add(Box.createHorizontalStrut(10));
-        idRow.add(fetchBtn);
-
-        contentPanel.add(idLbl);
-        contentPanel.add(Box.createVerticalStrut(5));
-        contentPanel.add(idRow);
-        contentPanel.add(Box.createVerticalStrut(16));
-
-        // ── Step 2: Editable fields ──────────────────────────────────────────
-        JTextField txtNewId   = addField("New User ID (Leave blank to keep current)");
-        JTextField txtFN      = addField("First Name");
-        JTextField txtLN      = addField("Last Name");
-        JTextField txtEmail   = addField("Email");
-        JTextField txtDob     = addField("Date of Birth (YYYY-MM-DD)");
-        JTextField txtContact = addField("Contact No");
-        JTextField txtAddr    = addField("Address");
-        JComboBox<String> cmbRole = addRoleCombo();
-        JPasswordField txtPw  = addPasswordField("New Password (Leave blank to keep current)");
-
-        // Photo Picker field
-        JTextField txtPhotoPath = addPhotoPicker("Profile Picture Path");
-
-        // Initially disable everything until user is found
-        setFieldsEnabled(false, txtNewId, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr, txtPhotoPath);
-        cmbRole.setEnabled(false);
-        txtPw.setEnabled(false);
-
-        // ── Step 3: Button row ─────────────────────────────────────────────
-        JPanel row = buttonRow();
-        backButton(row);
-        JButton upd = actionButton(row, "Update User", BUTTON_COLOR);
-        upd.setEnabled(false);
-        contentPanel.add(row);
-        refresh();
-
-        // ── Load user on fetch ─────────────────────────────────────────────
-        fetchBtn.addActionListener(e -> {
-            String id = txtId.getText().trim();
-            if (id.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter a User ID.", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            UserDAO dao = new UserDAO();
-            User existing = dao.getUserById(id);
-            if (existing == null) {
-                JOptionPane.showMessageDialog(this, "No user found with that ID.", "Not Found", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // Populate fields
-            txtFN.setText(existing.getFname());
-            txtLN.setText(existing.getLname());
-            txtEmail.setText(existing.getEmail());
-            txtDob.setText(existing.getDateOfBirth() != null ? existing.getDateOfBirth().toString() : "");
-            txtContact.setText(existing.getContactNo());
-            txtAddr.setText(existing.getAddress());
-            txtPhotoPath.setText(existing.getProfilePicPath()); // Set current photo path
-
-            if (existing.getRole() != null) {
-                cmbRole.setSelectedItem(existing.getRole());
-            }
-
-            // Enable editing
-            setFieldsEnabled(true, txtNewId, txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr, txtPhotoPath);
-            cmbRole.setEnabled(true);
-            txtPw.setEnabled(true);
-            upd.setEnabled(true);
-            txtId.setEditable(false);
-            fetchBtn.setEnabled(false);
-        });
-
-        // ── Save update ────────────────────────────────────────────────────
-        upd.addActionListener(e -> {
-            if (anyEmpty(txtFN, txtLN, txtEmail, txtDob, txtContact, txtAddr)) return;
-
-            LocalDate dob;
-            try {
-                dob = LocalDate.parse(txtDob.getText().trim());
-            } catch (DateTimeParseException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            UserDAO dao = new UserDAO();
-            String originalId = txtId.getText().trim();
-            String newId = txtNewId.getText().trim();
-            String effectiveId = newId.isEmpty() ? originalId : newId;
-
-            // ID existence check if changing ID
-            if (!newId.isEmpty() && !newId.equals(originalId)) {
-                if (dao.userExists(newId)) {
-                    JOptionPane.showMessageDialog(this, "User ID " + newId + " already exists.", "Error", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-            }
-
-            User existingUser = dao.getUserById(originalId);
-            User updatedUser = new User();
-            updatedUser.setUserID(effectiveId);
-            updatedUser.setOriginalUserID(originalId);
-            updatedUser.setFname(txtFN.getText().trim());
-            updatedUser.setLname(txtLN.getText().trim());
-            updatedUser.setEmail(txtEmail.getText().trim());
-            updatedUser.setDob(dob);
-            updatedUser.setContactNo(txtContact.getText().trim());
-            updatedUser.setAddress(txtAddr.getText().trim());
-            updatedUser.setRole((String) cmbRole.getSelectedItem());
-            updatedUser.setProfilePicPath(txtPhotoPath.getText().trim()); // Capture the path
-
-            // Handle password logic
-            String newPw = new String(txtPw.getPassword()).trim();
-            updatedUser.setPassword(newPw.isEmpty() ? existingUser.getPassword() : newPw);
-
-            if (dao.updateUser(updatedUser)) {
-                JOptionPane.showMessageDialog(this, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                showCards(); // Return to menu
-            } else {
-                JOptionPane.showMessageDialog(this, "Update failed.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-    }
-
-    // helper to bulk-enable/disable plain text fields
-    private void setFieldsEnabled(boolean enabled, JTextField... fields) {
-        for (JTextField f : fields) f.setEnabled(enabled);
-    }
-
-    // ── Delete form ──────────────────────────────────────────────────────────
-
-    private void showDeleteForm() {
-        contentPanel.removeAll();
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
-
-        addTitle("Delete User", new Color(0xCC0000));
-
-        JLabel desc = new JLabel("Enter the User ID of the user you want to delete.");
-        desc.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        desc.setForeground(Color.GRAY);
-        desc.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(desc);
-        contentPanel.add(Box.createVerticalStrut(20));
-
-        JTextField txtId = addField("User ID");
-
-        JPanel row = buttonRow();
-        backButton(row);
-        JButton del = actionButton(row, "Delete User", new Color(0xCC0000));
-
-        del.addActionListener(e -> {
-            String id = txtId.getText().trim();
-            if (id.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter a User ID.",
-                        "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            UserDAO dao = new UserDAO();
-            if (!dao.userExists(id)) {
-                JOptionPane.showMessageDialog(this, "No user found with that ID.",
-                        "Not Found", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            int ok = JOptionPane.showConfirmDialog(this,
-                    "Delete user ID: " + id + "?", "Confirm",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            if (ok == JOptionPane.YES_OPTION) {
-                if (dao.deleteUser(id)) {
-                    JOptionPane.showMessageDialog(this,
-                            "User " + id + " deleted.", "Deleted",
-                            JOptionPane.INFORMATION_MESSAGE);
-                    showCards();
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Delete failed.", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        contentPanel.add(row);
-        refresh();
-    }
-
-    // ── Helpers (unchanged) ──────────────────────────────────────────────────
-
-    private void addTitle(String text, Color color) {
-        JLabel lbl = new JLabel(text);
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 22));
-        lbl.setForeground(color);
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(lbl);
-        contentPanel.add(Box.createVerticalStrut(24));
-    }
-
-    private JTextField addField(String label) {
-        JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JTextField field = new JTextField();
-        field.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        field.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        contentPanel.add(lbl);
-        contentPanel.add(Box.createVerticalStrut(5));
-        contentPanel.add(field);
-        contentPanel.add(Box.createVerticalStrut(12));
-        return field;
-    }
-
-    private JPasswordField addPasswordField(String label) {
-        JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JPasswordField field = new JPasswordField();
-        field.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        field.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        contentPanel.add(lbl);
-        contentPanel.add(Box.createVerticalStrut(5));
-        contentPanel.add(field);
-        contentPanel.add(Box.createVerticalStrut(12));
-        return field;
-    }
-
-    private JComboBox<String> addRoleCombo() {
-        JLabel lbl = new JLabel("Role");
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JComboBox<String> combo = new JComboBox<>(
-                new String[]{"Admin", "Student", "Lecturer", "Technical Officer"});
-        combo.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        combo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        combo.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        contentPanel.add(lbl);
-        contentPanel.add(Box.createVerticalStrut(5));
-        contentPanel.add(combo);
-        contentPanel.add(Box.createVerticalStrut(12));
-        return combo;
-    }
-
     private JPanel buttonRow() {
-        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        row.setBackground(Color.WHITE);
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-        return row;
+        JPanel r = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        r.setBackground(Color.WHITE);
+        r.setAlignmentX(Component.LEFT_ALIGNMENT);
+        contentPanel.add(r);
+        return r;
     }
 
-    private void backButton(JPanel row) {
-        JButton btn = new JButton("Back");
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setBackground(new Color(0xAAAAAA));
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(100, 38));
-        btn.addActionListener(e -> showCards());
-        row.add(btn);
-        row.add(Box.createHorizontalStrut(12));
+    private void backButton(JPanel r) {
+        JButton b = new JButton("Back");
+        b.addActionListener(e -> showCards());
+        r.add(b);
     }
 
-    private JButton actionButton(JPanel row, String label, Color bg) {
-        JButton btn = new JButton(label);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(130, 38));
-        row.add(btn);
-        return btn;
+    private JButton actionButton(JPanel r, String label, Color bg) {
+        JButton b = new JButton(label);
+        b.setBackground(bg);
+        b.setForeground(Color.WHITE);
+        r.add(b);
+        return b;
     }
 
-    private boolean anyEmpty(JTextField... fields) {
-        for (JTextField f : fields) {
-            if (f.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill in all fields.",
-                        "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private JTextField addPhotoPicker(String label) {
-        JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JPanel row = new JPanel(new BorderLayout(10, 0));
-        row.setBackground(Color.WHITE);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JTextField txtPath = new JTextField();
-        txtPath.setEditable(false); // Admin shouldn't type the path manually
-
-        JButton btnBrowse = new JButton("Browse...");
-        btnBrowse.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            // Filter for images only
-            chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Images", "jpg", "png", "jpeg"));
-            if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                // Store path with forward slashes for DB compatibility
-                txtPath.setText(chooser.getSelectedFile().getAbsolutePath().replace("\\", "/"));
-            }
-        });
-
-        row.add(txtPath, BorderLayout.CENTER);
-        row.add(btnBrowse, BorderLayout.EAST);
-
-        contentPanel.add(lbl);
-        contentPanel.add(Box.createVerticalStrut(5));
-        contentPanel.add(row);
-        contentPanel.add(Box.createVerticalStrut(12));
-
-        return txtPath;
+    private void setFieldsEnabled(boolean en, JComponent... comps) {
+        for (JComponent c : comps) c.setEnabled(en);
     }
 
     private void refresh() {
