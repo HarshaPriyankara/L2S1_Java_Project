@@ -35,4 +35,12 @@ public class AttendanceController {
             return true;
         } catch (SQLException e) { return false; }
     }
+
+    public ArrayList<String> getStudentCourses(String studentId) {
+        try {
+            return dao.getStudentEnrolledCourses(studentId);
+        } catch (SQLException e) {
+            return new ArrayList<>();
+        }
+    }
 }
