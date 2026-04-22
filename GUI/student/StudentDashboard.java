@@ -11,7 +11,7 @@ public class StudentDashboard extends BaseDashboard {
 
     public StudentDashboard(User user) {
         // Pass the whole user object to the parent
-        super("Lecture Dashboard", user);
+        super("Student Dashboard", user);
     }
 
     /**

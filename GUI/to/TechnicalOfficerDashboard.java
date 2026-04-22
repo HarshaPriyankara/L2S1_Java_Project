@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import Models.User;
 
-import GUI.lecturer.ProfileManagementPanel; // Import the panel we built earlier
+import GUI.common.ProfileManagementPanel; // Import the panel we built earlier
 
 // Inheritance: This class inherits all common GUI features from BaseDashboard
 public class TechnicalOfficerDashboard extends BaseDashboard {

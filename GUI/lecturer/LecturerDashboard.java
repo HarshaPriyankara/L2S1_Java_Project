@@ -1,6 +1,7 @@
 package GUI.lecturer;
 
 import GUI.common.BaseDashboard;
+import GUI.common.ProfileManagementPanel;
 import GUI.common.ViewNotice;
 import javax.swing.*;
 import java.awt.*;
