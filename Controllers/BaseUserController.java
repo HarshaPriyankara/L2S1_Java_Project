@@ -13,7 +13,9 @@ public abstract class BaseUserController {
 
     // Inheritance: Common method for all user types
     public User getUserData(String userId) {
-        if (userId == null || userId.trim().isEmpty()) return null;
+        if (userId == null || userId.trim().isEmpty())
+            return null;
+
         return dao.getUserById(userId.trim());
     }
 
