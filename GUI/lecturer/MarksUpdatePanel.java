@@ -1,4 +1,4 @@
-package GUI.lecturer;
+/*package GUI.lecturer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -129,4 +129,4 @@ public class MarksUpdatePanel extends JPanel {
         cmbCourse.setSelectedIndex(0);
         cmbType.setSelectedIndex(0);
     }
-}
+}*/

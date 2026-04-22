@@ -12,6 +12,7 @@ public class User {
     private LocalDate dob;
     private String contactNo;
     private String address;
+    private String profilePic;
 
     private String originalUserID;
 
@@ -97,6 +98,13 @@ public class User {
         return this.contactNo;
     }
 
+    public String getProfilePicPath() {
+        return profilePic;
+    }
+
+    public void setProfilePicPath(String profilePic) {
+        this.profilePic = profilePic;
+    }
 
     public String getOriginalUserID() { return originalUserID; }
     public void setOriginalUserID(String id) { this.originalUserID = id; }

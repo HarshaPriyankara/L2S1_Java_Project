@@ -1,82 +1,93 @@
 package GUI.to;
 
+import GUI.common.BaseDashboard;
+import GUI.common.ViewNotice;
 import javax.swing.*;
 import java.awt.*;
+import Models.User;
 
-public class TechnicalOfficerDashboard extends JFrame {
-    private JPanel contentPanel;
-    private CardLayout cardLayout;
+// Inheritance: This class inherits all common GUI features from BaseDashboard
+public class TechnicalOfficerDashboard extends BaseDashboard {
 
-    public TechnicalOfficerDashboard(String loggedInID) {
-        setTitle("Technical Officer Dashboard - Faculty of Technology");
-        setSize(1300, 850);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
+    public TechnicalOfficerDashboard(User user) {
+        // Pass the whole user object to the parent
+        super("Lecture Dashboard", user);
+    }
 
-        // Sidebar (Dark Theme)
-        JPanel sidebar = new JPanel(new GridBagLayout());
-        sidebar.setBackground(new Color(40, 44, 52));
-        sidebar.setPreferredSize(new Dimension(320, 0));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 20, 10, 20);
-
-        JButton btnAttendance = createSidebarButton("Attendance Management");
-        JButton btnMedical = createSidebarButton("Medical Management");
-        JButton btnNotices = createSidebarButton("View Notices");
-        JButton btnTimetable = createSidebarButton("View Timetable");
-        JButton btnLogout = createSidebarButton("Logout");
-        btnLogout.setBackground(new Color(66, 133, 244));
-
-        btnAttendance.addActionListener(e -> switchPage("Attendance"));
-        btnMedical.addActionListener(e -> switchPage("Medical"));
-        btnNotices.addActionListener(e -> switchPage("Notices"));
-        btnTimetable.addActionListener(e -> switchPage("Timetable"));
-        btnLogout.addActionListener(e -> System.exit(0));
-
-        sidebar.add(btnAttendance, gbc);
-        sidebar.add(btnMedical, gbc);
-        sidebar.add(btnNotices, gbc);
-        sidebar.add(btnTimetable, gbc);
-        sidebar.add(btnLogout, gbc);
-
-        // Content Area
-        cardLayout = new CardLayout();
-        contentPanel = new JPanel(cardLayout);
-
+    /**
+     * Abstraction: Implementing the mandatory method to register
+     * Technical Officer specific panels as defined in the project requirements.
+     */
+    @Override
+    protected void setupUserPanels() {
+        // Adding the panels required by the project document [cite: 31, 33, 34]
         contentPanel.add(new AttendanceManagement(this), "Attendance");
         contentPanel.add(new MedicalManagement(this), "Medical");
-
-        add(sidebar, BorderLayout.WEST);
-        add(contentPanel, BorderLayout.CENTER);
-        setVisible(true);
-
-        contentPanel.add(new Notices(this), "Notices");
         contentPanel.add(new Timetable(this), "Timetable");
+
+        // Using the common ViewNotice panel used by other users
+        contentPanel.add(new ViewNotice("Technical Officer", contentPanel, cardLayout), "Notices");
     }
 
-    public void switchPage(String pageName) {
-        cardLayout.show(contentPanel, pageName);
+    /**
+     * Abstraction: Adding buttons to the sidebar that match the
+     * Technical Officer's job role.
+     */
+    @Override
+    protected void addNavigationButtons(JPanel sidebar) {
+        // Buttons are added in order from top to bottom
+
+        sidebar.add(createNavButton("Attendance Management",
+                () -> cardLayout.show(contentPanel, "Attendance")));
+
+        sidebar.add(Box.createVerticalStrut(12)); // Consistent spacing
+
+        sidebar.add(createNavButton("Medical Management",
+                () -> cardLayout.show(contentPanel, "Medical")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("View Timetable",
+                () -> cardLayout.show(contentPanel, "Timetable")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+        sidebar.add(createNavButton("View Notices",
+                () -> cardLayout.show(contentPanel, "Notices")));
+
+        // The Logout button is automatically added at the bottom by BaseDashboard
     }
 
-    private JButton createSidebarButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(280, 50));
-        btn.setBackground(new Color(66, 133, 244));
-        btn.setForeground(Color.WHITE); // අකුරු සුදු පාටයි
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setOpaque(true);
-        btn.setContentAreaFilled(true);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
+    /**
+     * Polymorphism: Providing a specific welcome screen for the Technical Officer.
+     */
+    @Override
+    protected JPanel buildHomePanel() {
+        JPanel p = new JPanel(new GridBagLayout());
+        p.setBackground(Color.WHITE);
+
+        JLabel lbl = new JLabel("Technical Officer Portal");
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
+        lbl.setForeground(new Color(0x444444));
+
+        p.add(lbl);
+        return p;
     }
 
+    // Main method for testing this dashboard independently
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new TechnicalOfficerDashboard("to001").setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            // 1. Create a temporary User object for testing
+            User testUser = new User();
+
+            // 2. Set the necessary data
+            testUser.setUserID("adm001");
+            testUser.setRole("Admin");
+            testUser.setFname("Admin");
+            testUser.setLname("User");
+
+            // 3. Pass the object to the constructor
+            new TechnicalOfficerDashboard(testUser).setVisible(true);
+        });
     }
 }
