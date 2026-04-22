@@ -11,6 +11,7 @@ public class CoursePanel extends JPanel {
     private JTable courseTable;
     private DefaultTableModel tableModel;
     private String studentID;
+    private JLabel lblStatus; // show error messages label
 
     public CoursePanel(String studentID) {
         this.studentID = studentID;
@@ -24,12 +25,16 @@ public class CoursePanel extends JPanel {
         lblTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         add(lblTitle, BorderLayout.NORTH);
 
-        // Table Columns
-        String[] columns = {"Course Code", "Course Name", "Credits"};
+        // Status Label - first hide
+        lblStatus = new JLabel("", SwingConstants.CENTER);
+        lblStatus.setFont(new Font("SansSerif", Font.ITALIC, 16));
+        lblStatus.setForeground(Color.RED);
+
+        // Table Setup
+        String[] columns = {"Course Code", "Course Name", "Type", "Credits", "Lecturer"};
         tableModel = new DefaultTableModel(columns, 0);
         courseTable = new JTable(tableModel);
-
-        // Table Style
+        //Table style
         courseTable.setRowHeight(30);
         courseTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
 
@@ -43,17 +48,28 @@ public class CoursePanel extends JPanel {
             CourseDAO dao = new CourseDAO();
             List<String[]> data = dao.getStudentCourses(studentID);
 
-            tableModel.setRowCount(0); // remove before content
-            for (String[] row : data) {
-                tableModel.addRow(row);
+            tableModel.setRowCount(0);
+
+            if (data == null || data.isEmpty()) {
+                // if not data show error label
+                courseTable.setVisible(false);
+                lblStatus.setText("You haven't registered for any courses yet.");
+                add(lblStatus, BorderLayout.SOUTH); // show message
+            } else {
+                courseTable.setVisible(true);
+                lblStatus.setText(""); // remove message
+                for (String[] row : data) {
+                    tableModel.addRow(row);
+                }
             }
 
-            if (data.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No courses found for ID: " + studentID);
-            }
+            this.revalidate();
+            this.repaint();
+
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error loading courses: " + e.getMessage());
+            lblStatus.setText("Error loading data: " + e.getMessage());
+            add(lblStatus, BorderLayout.SOUTH);
         }
     }
 }

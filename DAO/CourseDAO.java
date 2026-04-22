@@ -71,9 +71,12 @@ public class CourseDAO {
 
     public List<String[]> getStudentCourses(String regNo) throws SQLException {
         List<String[]> courses = new ArrayList<>();
-        String sql = "SELECT c.Course_code, c.Course_name, c.Credits " +
+        String sql = "SELECT c.Course_code, c.Course_name, c.Type, c.Credits, " +
+                "CONCAT(u.F_name, ' ', u.L_name) AS Lecturer_Name " +
                 "FROM course c " +
                 "JOIN enrollment e ON c.Course_code = e.Course_code " +
+                "JOIN lecturer l ON c.Lecturer_in_charge = l.Lecturer_id " +
+                "JOIN user u ON l.Lecturer_id = u.User_id " +
                 "WHERE e.Reg_no = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -86,7 +89,9 @@ public class CourseDAO {
                 courses.add(new String[]{
                         rs.getString("Course_code"),
                         rs.getString("Course_name"),
-                        rs.getString("Credits")
+                        rs.getString("Type"),
+                        rs.getString("Credits"),
+                        rs.getString("Lecturer_Name")
                 });
             }
         }

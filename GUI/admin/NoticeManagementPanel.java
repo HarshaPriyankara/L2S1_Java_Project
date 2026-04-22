@@ -3,12 +3,13 @@ package GUI.admin;
 import javax.swing.*;
 import java.awt.*;
 
+// INHERITANCE: Inheriting from the standard JPanel to act as a container
 public class NoticeManagementPanel extends JPanel {
 
+    // ENCAPSULATION: Encapsulated constants and internal state
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
 
     public NoticeManagementPanel() {
-
         setBackground(Color.WHITE);
         showMainButtons();
     }
@@ -30,8 +31,6 @@ public class NoticeManagementPanel extends JPanel {
         });
 
         add(btnCreate, gbc);
-       // add(createNoticeButton("Update Notice"), gbc);
-       // add(createNoticeButton("Delete Notice"), gbc);
 
         JButton btnView = createNoticeButton("View & Modify Notice");
         btnView.addActionListener(e -> loadViewNoticePanel());
@@ -41,23 +40,22 @@ public class NoticeManagementPanel extends JPanel {
         this.repaint();
     }
 
+    // ABSTRACTION: Loading complex inner panels independently of the main buttons 
     private void loadCreateNoticePanel() {
-        this.removeAll(); // remove buttons
+        this.removeAll(); 
         this.setLayout(new BorderLayout());
-        this.add(new CreateNotice(this)); // add White Space  to new panel
+        this.add(new CreateNotice(this)); 
         this.revalidate();
         this.repaint();
     }
-
 
     private void loadViewNoticePanel() {
         this.removeAll();
         this.setLayout(new BorderLayout());
-        this.add(new ViewNotice(this)); // 'this' pass කරන්න අමතක කරන්න එපා
+        this.add(new ViewNotice(this)); 
         this.revalidate();
         this.repaint();
     }
-
 
     private JButton createNoticeButton(String text) {
         JButton btn = new JButton(text);
@@ -68,18 +66,14 @@ public class NoticeManagementPanel extends JPanel {
         btn.setFont(new Font("SansSerif", Font.BOLD, 22));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-
-
         return btn;
     }
-
 
     public void showUpdateNotice(int id, String title) {
         this.removeAll();
         this.setLayout(new BorderLayout());
-
-        // Assuming you have a class named UpdateNotice
-        // that takes (NoticeManagementPanel, id, title) as arguments
+        
+        // Using Polymorphic GUI transition by reusing UI via UpdateNotice which extends CreateNotice
         this.add(new UpdateNotice(this, id, title));
 
         this.revalidate();

@@ -23,7 +23,7 @@ public class LecturerDashboard extends BaseDashboard {
     @Override
     protected void setupUserPanels() {
         // These are the panels for tasks a lecturer must perform
-        contentPanel.add(new MarksManagement(), "MarksManagement");
+        contentPanel.add(new MarksManagement(loggedInID), "MarksManagement");
         contentPanel.add(new AddCourseMaterialPanel(), "AddMaterial");
         contentPanel.add(new ProfileManagementPanel(loggedInID), "UpdateProfile");
 
