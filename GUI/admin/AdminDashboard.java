@@ -1,9 +1,7 @@
 package GUI.admin;
 
-
 import GUI.common.BaseDashboard;
 import Models.User;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -20,7 +18,7 @@ public class AdminDashboard extends BaseDashboard {
      */
     @Override
     protected void setupUserPanels() {
-        // Adding the panels required by the project document [cite: 11, 18]
+        // Adding the panels required by the project document
         contentPanel.add(new UserManagementPanel(), "UserManagement");
         contentPanel.add(new AdminCourseManagementPanel(contentPanel, cardLayout), "CourseManagement");
         contentPanel.add(new NoticeManagementPanel(), "NoticeManagement");
