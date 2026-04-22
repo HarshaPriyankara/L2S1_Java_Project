@@ -1,6 +1,7 @@
 package GUI.lecturer;
 
 import GUI.common.BaseDashboard;
+import GUI.common.ProfileManagementPanel;
 import GUI.common.ViewNotice;
 import javax.swing.*;
 import java.awt.*;
@@ -23,7 +24,7 @@ public class LecturerDashboard extends BaseDashboard {
     @Override
     protected void setupUserPanels() {
         // These are the panels for tasks a lecturer must perform
-        contentPanel.add(new MarksManagement(), "MarksManagement");
+        contentPanel.add(new MarksManagement(loggedInID), "MarksManagement");
         contentPanel.add(new AddCourseMaterialPanel(), "AddMaterial");
         contentPanel.add(new ProfileManagementPanel(loggedInID), "UpdateProfile");
 
@@ -87,7 +88,7 @@ public class LecturerDashboard extends BaseDashboard {
 
             // 2. Set the necessary data
             testUser.setUserID("adm001");
-            testUser.setRole("Admin");
+            testUser.setRole("lecture");
             testUser.setFname("Admin");
             testUser.setLname("User");
 
