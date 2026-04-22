@@ -87,4 +87,28 @@ public class AttendanceDAO {
         }
         return pst.executeQuery();
     }
+
+    public ArrayList<String> getStudentEnrolledCourses(String studentId) throws SQLException {
+        ArrayList<String> courses = new ArrayList<>();
+        String sql = "SELECT Course_code FROM enrollment WHERE Reg_no = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, studentId);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                courses.add(rs.getString("Course_code"));
+            }
+        }
+        return courses;
+    }
+
+    public ResultSet getStudentAttendance(String studentId, String courseCode) throws SQLException {
+        Connection conn = DBConnection.getConnection();
+        String sql = "SELECT Session_date, Session_type, Session_hours, Status FROM attendance " +
+                "WHERE Reg_no = ? AND Course_code = ? ORDER BY Session_date DESC";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, studentId);
+        pst.setString(2, courseCode);
+        return pst.executeQuery();
+    }
 }
