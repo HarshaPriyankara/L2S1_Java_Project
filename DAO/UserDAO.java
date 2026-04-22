@@ -34,37 +34,13 @@ public class UserDAO {
         return null;
     }
 
-    // ── Update profile ───────────────────────────────────────────────────────
 
-    public boolean updateProfile(User user) {
-        String sql = "UPDATE user SET F_name=?, L_name=?, date_of_birth=?, Address=?, " +
-                "Email=?, contact_no=? WHERE User_id=?";
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, user.getFname());
-            pst.setString(2, user.getLname());
-            pst.setDate  (3, user.getDateOfBirth() != null
-                    ? Date.valueOf(user.getDateOfBirth()) : null);
-            pst.setString(4, user.getAddress());
-            pst.setString(5, user.getEmail());
-            pst.setString(6, user.getContactNo());
-            pst.setString(7, user.getUserID());
-
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // Inside UserDAO.java
-
-    // Update CREATE USER
+    // user create method
     public boolean createUser(User user) {
         String sql = "INSERT INTO user (User_id, F_name, L_name, Email, Password, " +
                 "Role, date_of_birth, Address, contact_no, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
+        try (
+                Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
 
             pst.setString(1, user.getUserID());
@@ -76,11 +52,13 @@ public class UserDAO {
             pst.setDate(7, user.getDateOfBirth() != null ? Date.valueOf(user.getDateOfBirth()) : null);
             pst.setString(8, user.getAddress());
             pst.setString(9, user.getContactNo());
-            pst.setString(10, user.getProfilePicPath()); // Added this line
+            pst.setString(10, user.getProfilePicPath());
 
-            return pst.executeUpdate() > 0;
+
+            return pst.executeUpdate() > 0;  //check affected rows and return true or false
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             return false;
         }
     }
@@ -167,7 +145,7 @@ public class UserDAO {
                 return user;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error: " + e.getMessage());
         }
         return null;
     }

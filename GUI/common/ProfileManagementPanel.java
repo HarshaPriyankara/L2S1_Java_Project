@@ -182,6 +182,7 @@ public class ProfileManagementPanel extends JPanel {
         return row;
     }
 
+
 //    private void backButton(JPanel row) {
 //        JButton btn = new JButton("Back");
 //        btn.setPreferredSize(new Dimension(100, 38));
