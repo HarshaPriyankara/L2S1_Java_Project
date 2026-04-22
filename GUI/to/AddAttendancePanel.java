@@ -1,59 +1,55 @@
-/*package GUI.to;
+package GUI.to;
 
+import Controllers.AttendanceController;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
 
 public class AddAttendancePanel extends JPanel {
-    public AddAttendancePanel(CardLayout cardLayout, JPanel mainContainer) {
-        setLayout(new GridBagLayout());
+    private AttendanceController controller = new AttendanceController();
+    private JComboBox<String> courseBox = new JComboBox<>();
+    private JComboBox<String> typeBox = new JComboBox<>(new String[]{"Theory", "Practical"});
+    private JTable table;
+    private DefaultTableModel model;
+
+    public AddAttendancePanel(AttendanceManagement parent) {
+        setLayout(new BorderLayout(15, 15));
         setBackground(Color.WHITE);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel lblTitle = new JLabel("ADD NEW ATTENDANCE");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        lblTitle.setForeground(new Color(52, 152, 219));
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(lblTitle, gbc);
+        // Top panel
+        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btnBack = new JButton("← Back");
+        btnBack.addActionListener(e -> parent.showPanel("Menu"));
 
-        gbc.gridwidth = 1;
-        //Student Index
-        gbc.gridy = 1; gbc.gridx = 0; add(new JLabel("Student Index (Reg_no):"), gbc);
-        gbc.gridx = 1; add(new JTextField(20), gbc);
+        for (String c : controller.getCourseList()) courseBox.addItem(c);
+        JButton btnLoad = new JButton("Load Students");
 
-        //Course Code
-        gbc.gridy = 2; gbc.gridx = 0; add(new JLabel("Course Code:"), gbc);
-        gbc.gridx = 1; add(new JTextField(20), gbc);
+        top.add(btnBack); top.add(new JLabel("Course:")); top.add(courseBox);
+        top.add(new JLabel("Type:")); top.add(typeBox); top.add(btnLoad);
 
-        //Date
-        gbc.gridy = 3; gbc.gridx = 0; add(new JLabel("Date (yyyy-mm-dd):"), gbc);
-        gbc.gridx = 1; add(new JTextField(new SimpleDateFormat("yyyy-MM-dd").format(new Date()), 20), gbc);
+        // Table
+        model = new DefaultTableModel(new String[]{"Student ID", "Course", "Status", "Hours"}, 0);
+        table = new JTable(model);
+        JComboBox<String> statusCombo = new JComboBox<>(new String[]{"Present", "Absent", "Medical"});
+        table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(statusCombo));
 
-        //Type
-        gbc.gridy = 4; gbc.gridx = 0; add(new JLabel("Session Type:"), gbc);
-        gbc.gridx = 1; add(new JComboBox<>(new String[]{"Theory", "Practical"}), gbc);
+        // Listeners
+        btnLoad.addActionListener(e -> controller.loadEnrolledToTable(courseBox.getSelectedItem().toString(), model));
 
-        //Hours
-        gbc.gridy = 5; gbc.gridx = 0; add(new JLabel("Hours:"), gbc);
-        gbc.gridx = 1; add(new JTextField(20), gbc);
+        // Bottom save button
+        JButton btnSave = new JButton("Submit All Records");
+        btnSave.setBackground(new Color(40, 167, 69));
+        btnSave.setForeground(Color.WHITE);
+        btnSave.addActionListener(e -> {
+            boolean success = controller.saveAttendance(courseBox.getSelectedItem().toString(),
+                               LocalDate.now().toString(), typeBox.getSelectedItem().toString(), model.getDataVector());
+            if(success) JOptionPane.showMessageDialog(this, "Attendance Saved!");
+        });
 
-        //Status
-        gbc.gridy = 6; gbc.gridx = 0; add(new JLabel("Status:"), gbc);
-        gbc.gridx = 1; add(new JComboBox<>(new String[]{"Present", "Absent", "Medical"}), gbc);
-
-        //Buttons
-        JPanel btnPnl = new JPanel();
-        btnPnl.setBackground(Color.WHITE);
-        JButton btnSave = new JButton("Save Record");
-        JButton btnBack = new JButton("Back");
-        btnBack.addActionListener(e -> cardLayout.show(mainContainer, "AttendanceMenu"));
-
-        btnPnl.add(btnSave); btnPnl.add(btnBack);
-        gbc.gridy = 7; gbc.gridx = 0; gbc.gridwidth = 2;
-        add(btnPnl, gbc);
+        add(top, BorderLayout.NORTH);
+        add(new JScrollPane(table), BorderLayout.CENTER);
+        add(btnSave, BorderLayout.SOUTH);
     }
-}*/
+}
