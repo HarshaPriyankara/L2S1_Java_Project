@@ -32,6 +32,8 @@ public class LecturerDashboard extends BaseDashboard {
         contentPanel.add(new ViewNotice("Lecturer", contentPanel, cardLayout), "ViewNotice");
 
         // Add other panels like StudentDetails or Eligibility as you create them
+        contentPanel.add(new StudentDetails(), "StudentDetails");
+
     }
 
     /**
@@ -62,6 +64,12 @@ public class LecturerDashboard extends BaseDashboard {
         // Requirement: Update profile
         sidebar.add(createNavButton("Update Profile",
                 () -> cardLayout.show(contentPanel, "UpdateProfile")));
+
+        sidebar.add(Box.createVerticalStrut(12));
+
+
+        sidebar.add(createNavButton("Student Details",
+                () -> cardLayout.show(contentPanel, "StudentDetails")));
     }
 
     /**
