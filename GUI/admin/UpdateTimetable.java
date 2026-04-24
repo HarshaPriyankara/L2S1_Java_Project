@@ -1,3 +1,4 @@
+/*
 package GUI.admin;
 
 import Models.Timetable;
@@ -165,3 +166,4 @@ public class UpdateTimetable extends JPanel {
         updateCourseDropdown();
     }
 }
+*/

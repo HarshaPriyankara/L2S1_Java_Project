@@ -1,3 +1,4 @@
+/*
 package GUI.admin;
 
 import Models.Timetable;
@@ -141,3 +142,5 @@ public class DeleteTimetable extends JPanel {
         recordToDelete = null;
     }
 }
+
+ */

@@ -1,3 +1,4 @@
+/*
 package GUI.admin;
 
 import Models.Timetable;
@@ -155,3 +156,5 @@ public class AddTimetable extends JPanel {
         return arr;
     }
 }
+
+ */
