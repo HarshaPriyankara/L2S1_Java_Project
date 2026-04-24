@@ -1,53 +1,324 @@
 package GUI.to;
 
+import DAO.MedicalRecordDAO;
+import Models.MedicalRecord;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.LocalDate;
+import java.util.List;
 
 public class MedicalManagement extends JPanel {
-    private CardLayout cardLayout = new CardLayout();
-    private JPanel mainContainer;
+    private final MedicalRecordDAO medicalRecordDAO = new MedicalRecordDAO();
+    private final DefaultTableModel tableModel;
+    private final JTable medicalTable;
+    private final JTextField txtMedicalId;
+    private final JTextField txtRegNo;
+    private final JTextField txtSessionDate;
+    private final JComboBox<String> cmbSessionType;
+    private final JTextField txtExamCourse;
+    private final JTextArea txtReason;
+    private final JCheckBox chkApproved;
 
     public MedicalManagement(TechnicalOfficerDashboard dashboard) {
-        setLayout(new BorderLayout());
-        mainContainer = new JPanel(cardLayout);
+        setLayout(new BorderLayout(15, 15));
+        setBackground(Color.WHITE);
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        mainContainer.add(createMenuPanel(), "MedicalMenu");
-        mainContainer.add(new AddMedicalPanel(cardLayout, mainContainer), "AddForm");
-        mainContainer.add(new UpdateMedicalPanel(cardLayout, mainContainer), "UpdateForm");
-        mainContainer.add(new DeleteMedicalPanel(cardLayout, mainContainer), "DeleteForm");
+        JLabel title = new JLabel("Medical Management");
+        title.setFont(new Font("SansSerif", Font.BOLD, 24));
+        add(title, BorderLayout.NORTH);
 
-        add(mainContainer, BorderLayout.CENTER);
-    }
+        String[] columns = {"Medical ID", "Reg No", "Session Date", "Type", "Exam Course", "Reason", "Approved"};
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
-    private JPanel createMenuPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(Color.WHITE);
+        medicalTable = new JTable(tableModel);
+        medicalTable.setRowHeight(28);
+        medicalTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        medicalTable.getTableHeader().setBackground(new Color(46, 125, 192));
+        medicalTable.getTableHeader().setForeground(Color.WHITE);
+        add(new JScrollPane(medicalTable), BorderLayout.CENTER);
+
+        JPanel editorPanel = new JPanel(new GridBagLayout());
+        editorPanel.setBackground(Color.WHITE);
+        editorPanel.setBorder(BorderFactory.createTitledBorder("Selected Medical"));
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.insets = new Insets(20, 0, 20, 0);
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JButton btnAdd = createBigButton("Add New Medical");
-        JButton btnUpdate = createBigButton("Update Medical");
-        JButton btnDelete = createBigButton("Delete Medical Record");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        editorPanel.add(new JLabel("Medical ID:"), gbc);
+        gbc.gridx = 1;
+        txtMedicalId = new JTextField(12);
+        txtMedicalId.setEditable(false);
+        editorPanel.add(txtMedicalId, gbc);
 
-        btnAdd.addActionListener(e -> cardLayout.show(mainContainer, "AddForm"));
-        btnUpdate.addActionListener(e -> cardLayout.show(mainContainer, "UpdateForm"));
-        btnDelete.addActionListener(e -> cardLayout.show(mainContainer, "DeleteForm"));
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        editorPanel.add(new JLabel("Registration No:"), gbc);
+        gbc.gridx = 1;
+        txtRegNo = new JTextField(12);
+        editorPanel.add(txtRegNo, gbc);
 
-        panel.add(btnAdd, gbc);
-        panel.add(btnUpdate, gbc);
-        panel.add(btnDelete, gbc);
-        return panel;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        editorPanel.add(new JLabel("Session Date (yyyy-mm-dd):"), gbc);
+        gbc.gridx = 1;
+        txtSessionDate = new JTextField(LocalDate.now().toString(), 12);
+        editorPanel.add(txtSessionDate, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        editorPanel.add(new JLabel("Session Type:"), gbc);
+        gbc.gridx = 1;
+        cmbSessionType = new JComboBox<>(new String[]{"NormalDay", "Exam"});
+        editorPanel.add(cmbSessionType, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        editorPanel.add(new JLabel("Exam Course:"), gbc);
+        gbc.gridx = 1;
+        txtExamCourse = new JTextField(12);
+        editorPanel.add(txtExamCourse, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        editorPanel.add(new JLabel("Reason:"), gbc);
+        gbc.gridx = 1;
+        txtReason = new JTextArea(4, 18);
+        txtReason.setLineWrap(true);
+        txtReason.setWrapStyleWord(true);
+        editorPanel.add(new JScrollPane(txtReason), gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.anchor = GridBagConstraints.WEST;
+        editorPanel.add(new JLabel("Approved:"), gbc);
+        gbc.gridx = 1;
+        chkApproved = new JCheckBox("Approve this medical");
+        chkApproved.setBackground(Color.WHITE);
+        editorPanel.add(chkApproved, gbc);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        JButton btnRefresh = new JButton("Refresh");
+        JButton btnClear = new JButton("Clear");
+        JButton btnAdd = new JButton("Add");
+        JButton btnUpdate = new JButton("Update");
+        JButton btnApprove = new JButton("Approve");
+        JButton btnDelete = new JButton("Delete");
+
+        for (JButton button : new JButton[]{btnAdd, btnUpdate, btnApprove, btnDelete}) {
+            button.setBackground(new Color(46, 125, 192));
+            button.setForeground(Color.WHITE);
+        }
+
+        buttonPanel.add(btnRefresh);
+        buttonPanel.add(btnClear);
+        buttonPanel.add(btnAdd);
+        buttonPanel.add(btnUpdate);
+        buttonPanel.add(btnApprove);
+        buttonPanel.add(btnDelete);
+
+        gbc.gridx = 0;
+        gbc.gridy = 7;
+        gbc.gridwidth = 2;
+        editorPanel.add(buttonPanel, gbc);
+
+        add(editorPanel, BorderLayout.SOUTH);
+
+        medicalTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                populateFromSelectedRow();
+            }
+        });
+        cmbSessionType.addActionListener(e -> updateExamCourseState());
+        btnRefresh.addActionListener(e -> loadRecords());
+        btnClear.addActionListener(e -> clearForm());
+        btnAdd.addActionListener(e -> addMedical());
+        btnUpdate.addActionListener(e -> updateMedical());
+        btnApprove.addActionListener(e -> approveMedical());
+        btnDelete.addActionListener(e -> deleteMedical());
+
+        updateExamCourseState();
+        loadRecords();
     }
 
-    private JButton createBigButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(600, 100));
-        btn.setBackground(new Color(52, 152, 219));
-        btn.setForeground(Color.WHITE);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        return btn;
+    private void loadRecords() {
+        tableModel.setRowCount(0);
+        try {
+            List<MedicalRecord> records = medicalRecordDAO.getAllMedicalRecords();
+            for (MedicalRecord record : records) {
+                tableModel.addRow(new Object[]{
+                        record.getMedicalId(),
+                        record.getRegNo(),
+                        record.getSessionDate(),
+                        record.getSessionType(),
+                        record.getExamCourse(),
+                        record.getReason(),
+                        record.isApproved() ? "Yes" : "No"
+                });
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Unable to load medical records: " + ex.getMessage());
+        }
+    }
+
+    private void populateFromSelectedRow() {
+        int row = medicalTable.getSelectedRow();
+        if (row < 0) {
+            return;
+        }
+
+        txtMedicalId.setText(String.valueOf(tableModel.getValueAt(row, 0)));
+        txtRegNo.setText(String.valueOf(tableModel.getValueAt(row, 1)));
+        txtSessionDate.setText(String.valueOf(tableModel.getValueAt(row, 2)));
+        cmbSessionType.setSelectedItem(String.valueOf(tableModel.getValueAt(row, 3)));
+        txtExamCourse.setText(valueOrEmpty(tableModel.getValueAt(row, 4)));
+        txtReason.setText(valueOrEmpty(tableModel.getValueAt(row, 5)));
+        chkApproved.setSelected("Yes".equalsIgnoreCase(String.valueOf(tableModel.getValueAt(row, 6))));
+        updateExamCourseState();
+        if ("Exam".equals(cmbSessionType.getSelectedItem())) {
+            txtExamCourse.setText(valueOrEmpty(tableModel.getValueAt(row, 4)));
+        }
+    }
+
+    private void updateExamCourseState() {
+        boolean isExam = "Exam".equals(cmbSessionType.getSelectedItem());
+        txtExamCourse.setEnabled(isExam);
+        if (!isExam) {
+            txtExamCourse.setText("");
+        }
+    }
+
+    private void addMedical() {
+        if (!validateFields(false)) {
+            return;
+        }
+
+        try {
+            medicalRecordDAO.addMedical(
+                    txtRegNo.getText().trim(),
+                    LocalDate.parse(txtSessionDate.getText().trim()),
+                    (String) cmbSessionType.getSelectedItem(),
+                    txtExamCourse.getText().trim(),
+                    txtReason.getText().trim()
+            );
+            loadRecords();
+            clearForm();
+            JOptionPane.showMessageDialog(this, "Medical record added successfully.");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Unable to add medical record: " + ex.getMessage());
+        }
+    }
+
+    private void updateMedical() {
+        if (txtMedicalId.getText().isBlank()) {
+            JOptionPane.showMessageDialog(this, "Please select a medical record to update.");
+            return;
+        }
+
+        if (!validateFields(true)) {
+            return;
+        }
+
+        try {
+            medicalRecordDAO.updateMedical(
+                    Integer.parseInt(txtMedicalId.getText().trim()),
+                    txtRegNo.getText().trim(),
+                    LocalDate.parse(txtSessionDate.getText().trim()),
+                    (String) cmbSessionType.getSelectedItem(),
+                    txtExamCourse.getText().trim(),
+                    txtReason.getText().trim(),
+                    chkApproved.isSelected()
+            );
+            loadRecords();
+            JOptionPane.showMessageDialog(this, "Medical record updated successfully.");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Unable to update medical record: " + ex.getMessage());
+        }
+    }
+
+    private void approveMedical() {
+        if (txtMedicalId.getText().isBlank()) {
+            JOptionPane.showMessageDialog(this, "Please select a medical record to approve.");
+            return;
+        }
+
+        chkApproved.setSelected(true);
+        updateMedical();
+    }
+
+    private void deleteMedical() {
+        if (txtMedicalId.getText().isBlank()) {
+            JOptionPane.showMessageDialog(this, "Please select a medical record to delete.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this, "Delete selected medical record?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            medicalRecordDAO.deleteMedical(Integer.parseInt(txtMedicalId.getText().trim()));
+            loadRecords();
+            clearForm();
+            JOptionPane.showMessageDialog(this, "Medical record deleted successfully.");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Unable to delete medical record: " + ex.getMessage());
+        }
+    }
+
+    private boolean validateFields(boolean updating) {
+        if (txtRegNo.getText().trim().isBlank()) {
+            JOptionPane.showMessageDialog(this, "Registration number is required.");
+            return false;
+        }
+
+        if (txtReason.getText().trim().isBlank()) {
+            JOptionPane.showMessageDialog(this, "Reason is required.");
+            return false;
+        }
+
+        try {
+            LocalDate.parse(txtSessionDate.getText().trim());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Session date must be in yyyy-mm-dd format.");
+            return false;
+        }
+
+        if ("Exam".equals(cmbSessionType.getSelectedItem()) && txtExamCourse.getText().trim().isBlank()) {
+            JOptionPane.showMessageDialog(this, "Exam course is required for exam medicals.");
+            return false;
+        }
+
+        return !updating || !txtMedicalId.getText().trim().isBlank();
+    }
+
+    private void clearForm() {
+        txtMedicalId.setText("");
+        txtRegNo.setText("");
+        txtSessionDate.setText(LocalDate.now().toString());
+        cmbSessionType.setSelectedItem("NormalDay");
+        txtExamCourse.setText("");
+        txtReason.setText("");
+        chkApproved.setSelected(false);
+        medicalTable.clearSelection();
+        updateExamCourseState();
+    }
+
+    private String valueOrEmpty(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 }

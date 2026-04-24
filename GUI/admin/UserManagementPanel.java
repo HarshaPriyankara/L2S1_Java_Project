@@ -84,7 +84,7 @@ public class UserManagementPanel extends JPanel {
             u.setEmail(txtEm.getText().trim());
             u.setContactNo(txtPh.getText().trim());
             u.setAddress(txtAd.getText().trim());
-            u.setRole((String) cmbRole.getSelectedItem());
+            u.setRole(toRoleValue((String) cmbRole.getSelectedItem()));
             u.setPassword(new String(txtPw.getPassword()).trim());
             u.setProfilePicPath(txtPic.getText().trim());
 
@@ -142,7 +142,7 @@ public class UserManagementPanel extends JPanel {
                 txtContact.setText(u.getContactNo());
                 txtAddr.setText(u.getAddress());
                 txtPic.setText(u.getProfilePicPath());
-                cmbRole.setSelectedItem(u.getRole());
+                cmbRole.setSelectedItem(toRoleLabel(u.getRole()));
 
                 setFieldsEnabled(true, txtNewId, txtFN, txtLN, txtEmail, txtDb, txtContact, txtAddr, txtPic, txtPw, cmbRole);
                 updateBtn.setEnabled(true);
@@ -161,7 +161,7 @@ public class UserManagementPanel extends JPanel {
             u.setEmail(txtEmail.getText().trim());
             u.setContactNo(txtContact.getText().trim());
             u.setAddress(txtAddr.getText().trim());
-            u.setRole((String) cmbRole.getSelectedItem());
+            u.setRole(toRoleValue((String) cmbRole.getSelectedItem()));
             u.setProfilePicPath(txtPic.getText().trim());
 
             try {
@@ -253,12 +253,48 @@ public class UserManagementPanel extends JPanel {
 
         JLabel lbl = new JLabel("Role");
         lbl.setPreferredSize(new Dimension(150, 30));
-        JComboBox<String> c = new JComboBox<>(new String[]{"Admin", "Student", "Lecturer", "techofficer"});
+        JComboBox<String> c = new JComboBox<>(new String[]{"Admin", "Student", "Lecturer", "Technical Officer"});
         c.setPreferredSize(new Dimension(350, 30));
 
         row.add(lbl); row.add(c);
         contentPanel.add(row);
         return c;
+    }
+
+    private String toRoleValue(String label) {
+        if (label == null) return "";
+        switch (label) {
+            case "Admin":
+                return "admin";
+            case "Student":
+                return "student";
+            case "Lecturer":
+                return "lecturer";
+            case "Technical Officer":
+                return "techofficer";
+            default:
+                return label.trim().toLowerCase();
+        }
+    }
+
+    private String toRoleLabel(String role) {
+        if (role == null) return "Student";
+        String value = role.trim().toLowerCase();
+        switch (value) {
+            case "admin":
+                return "Admin";
+            case "student":
+            case "undergraduate":
+                return "Student";
+            case "lecture":
+            case "lecturer":
+                return "Lecturer";
+            case "technical officer":
+            case "techofficer":
+                return "Technical Officer";
+            default:
+                return "Student";
+        }
     }
 
 
