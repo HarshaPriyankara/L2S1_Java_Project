@@ -1,6 +1,6 @@
 package GUI.admin;
 
-import Controllers.AdminProfileController;
+import Controllers.ProfileControllers.AdminProfileController;
 import Models.User;
 import javax.swing.*;
 import java.awt.*;

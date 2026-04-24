@@ -1,6 +1,6 @@
 package GUI.student;
 
-import Controllers.AttendanceController;
+import Controllers.AttendanceControllers.AttendanceController;
 import DAO.AttendanceDAO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

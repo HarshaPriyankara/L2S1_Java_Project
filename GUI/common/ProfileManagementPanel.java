@@ -1,6 +1,6 @@
 package GUI.common;
 
-import Controllers.LecTOProfileController;
+import Controllers.ProfileControllers.LecTOProfileController;
 import Models.User;
 import javax.swing.*;
 import java.awt.*;

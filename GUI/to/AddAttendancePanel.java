@@ -1,6 +1,6 @@
 package GUI.to;
 
-import Controllers.AttendanceController;
+import Controllers.AttendanceControllers.AttendanceController;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
