@@ -122,12 +122,15 @@ public class LoginForm extends JFrame {
             case "admin":
                 new AdminDashboard(user).setVisible(true);
                 break;
+            case "lecture":
             case "lecturer":
                 new LecturerDashboard(user).setVisible(true);
                 break;
             case "student":
+            case "undergraduate":
                 new StudentDashboard(user).setVisible(true);
                 break;
+            case "technical officer":
             case "techofficer":
                 new TechnicalOfficerDashboard(user).setVisible(true);
                 break;

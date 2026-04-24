@@ -1,6 +1,7 @@
 package GUI.student;
 
 import Models.Timetable;
+import DAO.UndergraduateDAO;
 import DAO.TimetableDAO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -13,8 +14,11 @@ public class TimetablePanel extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private JButton btnSearch;
+    private final String studentId;
+    private final UndergraduateDAO undergraduateDAO = new UndergraduateDAO();
 
-    public TimetablePanel() {
+    public TimetablePanel(String studentId) {
+        this.studentId = studentId;
         setBackground(Color.WHITE);
         setLayout(new BorderLayout(15, 15));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -70,7 +74,11 @@ public class TimetablePanel extends JPanel {
         String sem = cmbSemester.getSelectedItem().toString();
 
 
-        String deptId = "D1";
+        String deptId = undergraduateDAO.getStudentDepartmentId(studentId);
+        if (deptId == null || deptId.isBlank()) {
+            JOptionPane.showMessageDialog(this, "Unable to find your department details.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         TimetableDAO dao = new TimetableDAO();
 

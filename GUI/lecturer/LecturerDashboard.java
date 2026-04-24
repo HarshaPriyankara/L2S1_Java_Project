@@ -25,14 +25,13 @@ public class LecturerDashboard extends BaseDashboard {
     protected void setupUserPanels() {
         // These are the panels for tasks a lecturer must perform
         contentPanel.add(new MarksManagement(loggedInID), "MarksManagement");
-        contentPanel.add(new AddCourseMaterialPanel(), "AddMaterial");
-        contentPanel.add(new ProfileManagementPanel(loggedInID), "UpdateProfile");
+        contentPanel.add(new AddCourseMaterialPanel(loggedInID), "AddMaterial");
+        contentPanel.add(new ProfileManagementPanel(loggedInID, false), "UpdateProfile");
 
         // Common panel for viewing notices
         contentPanel.add(new ViewNotice("Lecturer", contentPanel, cardLayout), "ViewNotice");
 
-        // Add other panels like StudentDetails or Eligibility as you create them
-        contentPanel.add(new StudentDetails(), "StudentDetails");
+        contentPanel.add(new StudentDetails(loggedInID), "StudentDetails");
 
     }
 
@@ -68,7 +67,7 @@ public class LecturerDashboard extends BaseDashboard {
         sidebar.add(Box.createVerticalStrut(12));
 
 
-        sidebar.add(createNavButton("Student Details",
+        sidebar.add(createNavButton("Student Records",
                 () -> cardLayout.show(contentPanel, "StudentDetails")));
     }
 
