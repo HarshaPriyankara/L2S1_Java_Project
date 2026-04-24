@@ -1,4 +1,4 @@
-package Controllers;
+package Controllers.ProfileControllers;
 
 import DAO.UserDAO;
 import Models.User;
