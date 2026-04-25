@@ -1,6 +1,6 @@
 package GUI.to;
 
-import DAO.TimetableDAO;
+import Controllers.TimetableControllers.TimetableController;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -11,6 +11,7 @@ public class Timetable extends JPanel {
     private JTable table;
     private DefaultTableModel model;
     private JComboBox<String> levelCombo, semesterCombo, deptCombo;
+    private final TimetableController timetableController = new TimetableController();
 
     public Timetable(TechnicalOfficerDashboard dashboard) {
         setLayout(new BorderLayout());
@@ -97,8 +98,7 @@ public class Timetable extends JPanel {
         }
 
         // get filter data using DAO
-        TimetableDAO dao = new TimetableDAO();
-        List<Models.Timetable> list = dao.getTOTimetableFiltered(selectedLevel, selectedSem, deptId);
+        List<Models.Timetable> list = timetableController.loadTimetable(selectedLevel, selectedSem, deptId);
 
         if (list != null && !list.isEmpty()) {
             for (Models.Timetable tt : list) {

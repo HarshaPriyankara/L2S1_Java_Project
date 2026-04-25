@@ -1,20 +1,16 @@
 package GUI.common;
 
-import DAO.UserDAO;
-import GUI.admin.AdminDashboard;
-import GUI.lecturer.LecturerDashboard;
-import GUI.student.StudentDashboard;
-import GUI.to.TechnicalOfficerDashboard;
-import Models.User;
+import Controllers.AuthControllers.LoginController;
+import Controllers.AuthControllers.LoginResult;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.SQLException;
 
 public class LoginForm extends JFrame {
     private JTextField txtUsername;
     private JPasswordField txtPassword;
     private JButton btnLogin;
+    private final LoginController loginController = new LoginController();
 
     public LoginForm() {
         setTitle("Student Management System - Login");
@@ -85,55 +81,23 @@ public class LoginForm extends JFrame {
 
 
         // Button Click Event
-        btnLogin.addActionListener(e -> {
-            try {
-                loginAction();
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+        btnLogin.addActionListener(e -> loginAction());
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
 
-    private void loginAction() throws SQLException {
+    private void loginAction() {
         String username = txtUsername.getText();
         String password = new String(txtPassword.getPassword());
 
-        UserDAO dao = new UserDAO();
-        User user = dao.validateUser(username, password);
-
-        if (user != null) {
-            String role = user.getRole();
-            JOptionPane.showMessageDialog(this, "Login Successful! Role: " + role);
-
-            // go to dashboard
-            openDashboard(role, user);
-            this.dispose(); // close Login window
+        LoginResult result = loginController.authenticate(username, password);
+        if (result.isSuccess()) {
+            JOptionPane.showMessageDialog(this, result.getMessage());
+            result.getDashboard().setVisible(true);
+            this.dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Invalid Username or Password!", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void openDashboard(String role, User user) {
-        String loggedInID = user.getUserID();
-        switch (role.toLowerCase()) {
-            case "admin":
-                new AdminDashboard(user).setVisible(true);
-                break;
-            case "lecture":
-            case "lecturer":
-                new LecturerDashboard(user).setVisible(true);
-                break;
-            case "student":
-            case "undergraduate":
-                new StudentDashboard(user).setVisible(true);
-                break;
-            case "technical officer":
-            case "techofficer":
-                new TechnicalOfficerDashboard(user).setVisible(true);
-                break;
+            JOptionPane.showMessageDialog(this, result.getMessage(), "Login", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }

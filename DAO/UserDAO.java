@@ -11,25 +11,17 @@ public class UserDAO {
 
     public User validateUser(String username, String password) {
         String sql = "SELECT * FROM user WHERE User_id = ? AND Password = ?";
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement pst = conn.prepareStatement(sql);
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, username);
             pst.setString(2, password);
 
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                User user = new User();
-                user.setUserID(rs.getString("User_id"));
-                user.setFname(rs.getString("F_name"));
-                user.setLname(rs.getString("L_name"));
-                user.setEmail(rs.getString("Email"));
-                user.setRole(rs.getString("Role"));
-                user.setProfilePicPath(rs.getString("profile_pic"));
-                return user;
+                return mapUser(rs);
             }
         } catch (SQLException e) {
-            System.out.println("Login Error: " + e.getMessage());
+            throw new IllegalStateException("Login Error: " + e.getMessage(), e);
         }
         return null;
     }
@@ -136,28 +128,15 @@ public class UserDAO {
 
     public User getUserById(String userId) {
         String sql = "SELECT * FROM user WHERE User_id = ?";
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement pst = conn.prepareStatement(sql);
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, userId);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                User user = new User();
-                user.setUserID(rs.getString("User_id"));
-                user.setFname(rs.getString("F_name"));
-                user.setLname(rs.getString("L_name"));
-                user.setEmail(rs.getString("Email"));
-                user.setRole(rs.getString("Role"));
-                user.setContactNo(rs.getString("contact_no"));
-                user.setAddress(rs.getString("Address"));
-                user.setPassword(rs.getString("Password"));
-                user.setProfilePicPath(rs.getString("profile_pic"));
-                Date dob = rs.getDate("date_of_birth");
-                if (dob != null) user.setDob(dob.toLocalDate());
-                return user;
+                return mapUser(rs);
             }
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            throw new IllegalStateException("Error: " + e.getMessage(), e);
         }
         return null;
     }
@@ -188,9 +167,8 @@ public class UserDAO {
         String idColumn;
         switch (role) {
             case "admin":
-                tableName = "admin";
-                idColumn = "Admin_id";
-                break;
+                // The current schema stores admins only in the user table.
+                return;
             case "student":
                 tableName = "student";
                 idColumn = "Reg_no";
@@ -200,9 +178,8 @@ public class UserDAO {
                 idColumn = "Lecturer_id";
                 break;
             case "techofficer":
-                tableName = "technical_officer";
-                idColumn = "To_id";
-                break;
+                // The current schema stores technical officers only in the user table.
+                return;
             default:
                 return;
         }
@@ -242,5 +219,24 @@ public class UserDAO {
             default:
                 return value;
         }
+    }
+
+    private User mapUser(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setUserID(rs.getString("User_id"));
+        user.setFname(rs.getString("F_name"));
+        user.setLname(rs.getString("L_name"));
+        user.setEmail(rs.getString("Email"));
+        user.setRole(rs.getString("Role"));
+        user.setContactNo(rs.getString("contact_no"));
+        user.setAddress(rs.getString("Address"));
+        user.setPassword(rs.getString("Password"));
+        user.setProfilePicPath(rs.getString("profile_pic"));
+
+        Date dob = rs.getDate("date_of_birth");
+        if (dob != null) {
+            user.setDob(dob.toLocalDate());
+        }
+        return user;
     }
 }

@@ -1,8 +1,7 @@
 package GUI.student;
 
+import Controllers.TimetableControllers.TimetableController;
 import Models.Timetable;
-import DAO.UndergraduateDAO;
-import DAO.TimetableDAO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -15,7 +14,7 @@ public class TimetablePanel extends JPanel {
     private DefaultTableModel tableModel;
     private JButton btnSearch;
     private final String studentId;
-    private final UndergraduateDAO undergraduateDAO = new UndergraduateDAO();
+    private final TimetableController timetableController = new TimetableController();
 
     public TimetablePanel(String studentId) {
         this.studentId = studentId;
@@ -74,16 +73,13 @@ public class TimetablePanel extends JPanel {
         String sem = cmbSemester.getSelectedItem().toString();
 
 
-        String deptId = undergraduateDAO.getStudentDepartmentId(studentId);
-        if (deptId == null || deptId.isBlank()) {
-            JOptionPane.showMessageDialog(this, "Unable to find your department details.", "Error", JOptionPane.ERROR_MESSAGE);
+        TimetableController.TimetableStudentResult result = timetableController.loadStudentTimetable(studentId, level, sem);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        TimetableDAO dao = new TimetableDAO();
-
-        // DAO එකෙන් ඩේටාබේස් එකේ නැති Level/Sem දත්ත අරගෙන එනවා (Course Code එක පාවිච්චි කරලා)
-        List<Timetable> list = dao.getStudentTimetable(deptId, level, sem);
+        List<Timetable> list = result.getTimetables();
 
         tableModel.setRowCount(0);
 
