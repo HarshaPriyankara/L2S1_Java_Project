@@ -34,6 +34,10 @@ public class MarksManagementController {
         return CourseMarkScheme.forCourse(courseCode).getAllowedMarkTypes();
     }
 
+    public boolean hasEndAssessment(String courseCode) {
+        return CourseMarkScheme.forCourse(courseCode).hasEndAssessment();
+    }
+
     public MarksLoadResult loadEnrolledStudents(String selectedCourse, String selectedType) {
         if (!isAllowedMarkType(selectedCourse, selectedType)) {
             return new MarksLoadResult(null, null, null, null,
@@ -123,13 +127,14 @@ public class MarksManagementController {
                 String type = String.valueOf(row[2]);
                 String markStr = String.valueOf(row[3]).trim();
                 String endStr = String.valueOf(row[5]).trim();
+                CourseMarkScheme scheme = CourseMarkScheme.forCourse(course);
 
                 if (!isAllowedMarkType(course, type)) {
                     return new MarksSaveResult(false, type + " is not valid for " + course);
                 }
 
                 if ((markStr.isEmpty() || "null".equalsIgnoreCase(markStr)) &&
-                        (endStr.isEmpty() || "null".equalsIgnoreCase(endStr))) {
+                        (!scheme.hasEndAssessment() || isBlankValue(endStr))) {
                     continue;
                 }
 
@@ -141,12 +146,8 @@ public class MarksManagementController {
                     saveSingleAssessmentMark(conn, regNo, course, type, markValue);
                 }
 
-                if (!endStr.isEmpty() && !"null".equalsIgnoreCase(endStr)) {
+                if (scheme.hasEndAssessment() && !isBlankValue(endStr)) {
                     double endMark = Double.parseDouble(endStr);
-                    CourseMarkScheme scheme = CourseMarkScheme.forCourse(course);
-                    if (!scheme.hasEndAssessment()) {
-                        return new MarksSaveResult(false, course + " does not have END marks.");
-                    }
                     if (endMark < 0 || endMark > scheme.getEndWeight()) {
                         return new MarksSaveResult(false, "END marks must be between 0 and "
                                 + (int) scheme.getEndWeight() + " for " + regNo);
@@ -195,11 +196,12 @@ public class MarksManagementController {
             return;
         }
 
+        CourseMarkScheme scheme = CourseMarkScheme.forCourse(breakdown.getCourseCode());
         row.add(breakdown.getCaMarks());
-        row.add(breakdown.getEndMarks());
+        row.add(scheme.hasEndAssessment() ? breakdown.getEndMarks() : "N/A");
         row.add(breakdown.getTotalMarks());
         row.add(breakdown.getGrade());
-        row.add(breakdown.getGpa());
+        row.add(breakdown.getGradePoint());
     }
 
     private void saveSingleAssessmentMark(Connection conn, String regNo, String course,
@@ -263,5 +265,12 @@ public class MarksManagementController {
 
     private String createStudentCourseKey(String regNo, String course) {
         return regNo + "|" + course;
+    }
+
+    private boolean isBlankValue(String value) {
+        return value == null
+                || value.isEmpty()
+                || "null".equalsIgnoreCase(value)
+                || "N/A".equalsIgnoreCase(value);
     }
 }

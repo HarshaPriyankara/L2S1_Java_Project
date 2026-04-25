@@ -3,6 +3,8 @@ package GUI.lecturer;
 import Controllers.StudentControllers.StudentDetailsController;
 import Controllers.StudentControllers.StudentDetailsResult;
 import Models.MedicalRecord;
+import Utils.CourseMarkScheme;
+import Utils.GpaCalculator;
 import Utils.MarksCalculator;
 
 import javax.swing.*;
@@ -19,7 +21,7 @@ public class StudentDetails extends JPanel {
     private final JComboBox<String> studentComboBox = new JComboBox<>();
     private final JPanel profilePanel = new JPanel();
     private final JLabel lblEligibility = new JLabel("Eligibility: -");
-    private final JLabel lblGpa = new JLabel("Overall GPA: -");
+    private final JLabel lblGpa = new JLabel("SGPA: - | CGPA: -");
     private final DefaultTableModel marksModel;
     private final DefaultTableModel attendanceModel;
     private final DefaultTableModel medicalModel;
@@ -48,13 +50,13 @@ public class StudentDetails extends JPanel {
         profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
         profilePanel.setBackground(Color.WHITE);
 
-        marksModel = createModel(new String[]{"Course", "Course Name", "CA", "END", "Total", "Grade", "GPA"});
+        marksModel = createModel(new String[]{"Course", "Course Name", "CA", "END", "Total", "Grade", "Grade Value"});
         attendanceModel = createModel(new String[]{"Date", "Type", "Hours", "Status"});
         medicalModel = createModel(new String[]{"Medical ID", "Date", "Type", "Reason", "Status"});
 
         JTabbedPane tabs = new JTabbedPane();
         tabs.addTab("Profile", new JScrollPane(profilePanel));
-        tabs.addTab("Marks / Grades / GPA", new JScrollPane(new JTable(marksModel)));
+        tabs.addTab("Marks / Grades", new JScrollPane(new JTable(marksModel)));
         tabs.addTab("Attendance", new JScrollPane(new JTable(attendanceModel)));
         tabs.addTab("Medical", new JScrollPane(new JTable(medicalModel)));
         add(tabs, BorderLayout.CENTER);
@@ -148,21 +150,27 @@ public class StudentDetails extends JPanel {
                     breakdown.getCourseName(),
                     breakdown.getCaMarks(),
                     breakdown.getEndMarks(),
-                    breakdown.getTotalMarks(),
+                    breakdown.hasMarks() ? breakdown.getTotalMarks() : "Pending",
                     breakdown.getGrade(),
-                    breakdown.getGpa()
+                    breakdown.hasMarks() ? breakdown.getGradePoint() : "Pending"
             });
         }
 
         if (selectedCourse == null) {
             lblEligibility.setText("Eligibility: No marks yet for selected course");
         } else {
-            boolean eligible = selectedCourse.getCaMarks() >= 15.0;
+            double caPassMark = CourseMarkScheme.forCourse(selectedCourse.getCourseCode()).getCaPassMark();
+            boolean eligible = selectedCourse.hasMarks() && selectedCourse.getCaMarks() >= caPassMark;
             lblEligibility.setText("Eligibility: " + (eligible ? "Eligible for end assessment" : "Not eligible for end assessment"));
         }
 
-        double sgpa = MarksCalculator.calculateSGPA(breakdowns);
-        lblGpa.setText(String.format("Overall GPA: %.2f", sgpa));
+        GpaCalculator.GpaResult gpaResult = GpaCalculator.calculate(breakdowns);
+        if (gpaResult.isSgpaAvailable() && gpaResult.isCgpaAvailable()) {
+            lblGpa.setText(String.format("SGPA: %.2f | CGPA: %.2f",
+                    gpaResult.getSgpa(), gpaResult.getCgpa()));
+        } else {
+            lblGpa.setText("SGPA: Not available | CGPA: Not available");
+        }
     }
 
     private void loadAttendance(List<Object[]> attendanceRows) {
