@@ -1,6 +1,7 @@
 package GUI.lecturer;
 
 import DAO.CourseMaterialDAO;
+import GUI.common.UITheme;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -22,15 +23,15 @@ public class AddCourseMaterialPanel extends JPanel {
     private JTextField txtMaterialId;
     private DefaultTableModel tableModel;
     private JTable materialTable;
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
-    private static final Color CLEAR_BTN_COLOR = new Color(120, 120, 120);
+    private static final Color BUTTON_COLOR = UITheme.PRIMARY;
+    private static final Color CLEAR_BTN_COLOR = UITheme.SURFACE_MUTED;
 
     public AddCourseMaterialPanel(String lecturerId) {
         this.lecturerId = lecturerId;
 
         setLayout(new BorderLayout(15, 15));
-        setBackground(Color.WHITE);
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setBackground(UITheme.APP_BACKGROUND);
+        setBorder(UITheme.createContentBorder());
 
         add(buildFormPanel(), BorderLayout.NORTH);
         add(buildTablePanel(), BorderLayout.CENTER);
@@ -40,8 +41,8 @@ public class AddCourseMaterialPanel extends JPanel {
 
     private JPanel buildFormPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createTitledBorder("Add / Modify Course Materials"));
+        panel.setBackground(UITheme.SURFACE);
+        panel.setBorder(UITheme.createSectionBorder("Add / Modify Course Materials"));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
@@ -54,6 +55,7 @@ public class AddCourseMaterialPanel extends JPanel {
         gbc.gridx = 1;
         txtMaterialId = new JTextField(12);
         txtMaterialId.setEditable(false);
+        txtMaterialId.setBackground(UITheme.SURFACE_MUTED);
         panel.add(txtMaterialId, gbc);
 
         gbc.gridx = 0;
@@ -61,6 +63,7 @@ public class AddCourseMaterialPanel extends JPanel {
         panel.add(new JLabel("Material Title:"), gbc);
         gbc.gridx = 1;
         txtTitle = new JTextField(22);
+        UITheme.styleTextField(txtTitle);
         panel.add(txtTitle, gbc);
 
         gbc.gridx = 0;
@@ -68,6 +71,7 @@ public class AddCourseMaterialPanel extends JPanel {
         panel.add(new JLabel("Course Code:"), gbc);
         gbc.gridx = 1;
         txtCourseCode = new JTextField(22);
+        UITheme.styleTextField(txtCourseCode);
         panel.add(txtCourseCode, gbc);
 
         gbc.gridx = 0;
@@ -76,6 +80,7 @@ public class AddCourseMaterialPanel extends JPanel {
         gbc.gridx = 1;
         txtUploadedBy = new JTextField(lecturerId, 22);
         txtUploadedBy.setEditable(false);
+        txtUploadedBy.setBackground(UITheme.SURFACE_MUTED);
         panel.add(txtUploadedBy, gbc);
 
         gbc.gridx = 0;
@@ -86,6 +91,7 @@ public class AddCourseMaterialPanel extends JPanel {
         txtLink = new JTextArea(4, 22);
         txtLink.setLineWrap(true);
         txtLink.setWrapStyleWord(true);
+        UITheme.styleTextArea(txtLink);
         txtLink.setTransferHandler(new TransferHandler() {
             @Override
             public boolean canImport(TransferSupport support) {
@@ -110,12 +116,12 @@ public class AddCourseMaterialPanel extends JPanel {
         panel.add(new JScrollPane(txtLink), gbc);
 
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        row.setBackground(Color.WHITE);
+        row.setBackground(UITheme.SURFACE);
         JButton btnSave = new JButton("Upload Material");
         JButton btnUpdate = new JButton("Update Material");
         JButton btnClear = new JButton("Clear");
         styleButton(btnSave, BUTTON_COLOR);
-        styleButton(btnUpdate, new Color(40, 167, 69));
+        styleButton(btnUpdate, UITheme.SUCCESS);
         styleButton(btnClear, CLEAR_BTN_COLOR);
         row.add(btnSave);
         row.add(btnUpdate);
@@ -144,6 +150,7 @@ public class AddCourseMaterialPanel extends JPanel {
 
         materialTable = new JTable(tableModel);
         materialTable.setRowHeight(28);
+        UITheme.styleTable(materialTable);
         materialTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         materialTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -239,13 +246,14 @@ public class AddCourseMaterialPanel extends JPanel {
     }
 
     private void styleButton(JButton btn, Color bg) {
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(150, 38));
+        if (UITheme.SURFACE_MUTED.equals(bg)) {
+            UITheme.styleNeutralButton(btn);
+        } else if (UITheme.SUCCESS.equals(bg)) {
+            UITheme.styleSuccessButton(btn);
+        } else {
+            UITheme.stylePrimaryButton(btn);
+        }
+        UITheme.setWideButtonSize(btn);
     }
 
     private String saveFileToFolder(String sourcePath, String title) {

@@ -11,8 +11,8 @@ public class ProfileManagementPanel extends JPanel {
     private final String loggedInUserId;
     private final boolean allowRoleEdit;
 
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
-    private static final Color CARD_COLOR   = new Color(85, 179, 232);
+    private static final Color BUTTON_COLOR = UITheme.PRIMARY;
+    private static final Color CARD_COLOR   = UITheme.ACCENT;
 
     public ProfileManagementPanel(String loggedInUserId) {
         this(loggedInUserId, true);
@@ -22,7 +22,8 @@ public class ProfileManagementPanel extends JPanel {
         this.loggedInUserId = loggedInUserId;
         this.allowRoleEdit = allowRoleEdit;
         setLayout(new BorderLayout());
-        contentPanel.setBackground(Color.WHITE);
+        setBackground(UITheme.APP_BACKGROUND);
+        contentPanel.setBackground(UITheme.APP_BACKGROUND);
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scroll = new JScrollPane(contentPanel);
@@ -106,6 +107,7 @@ public class ProfileManagementPanel extends JPanel {
         row.add(createLabel(labelText));
         JTextField f = new JTextField(value);
         f.setPreferredSize(new Dimension(350, 30));
+        UITheme.styleTextField(f);
         row.add(f);
         contentPanel.add(row);
         return f;
@@ -117,7 +119,7 @@ public class ProfileManagementPanel extends JPanel {
         JTextField f = new JTextField(value);
         f.setPreferredSize(new Dimension(350, 30));
         f.setEditable(false);
-        f.setBackground(new Color(240, 240, 240));
+        f.setBackground(UITheme.SURFACE_MUTED);
         row.add(f);
         contentPanel.add(row);
     }
@@ -128,6 +130,7 @@ public class ProfileManagementPanel extends JPanel {
         JComboBox<String> combo = new JComboBox<>(new String[]{"lecture", "Technical Officer", "Admin", "Student"});
         combo.setSelectedItem(currentRole);
         combo.setPreferredSize(new Dimension(350, 30));
+        UITheme.styleComboBox(combo);
         row.add(combo);
         contentPanel.add(row);
         return combo;
@@ -138,8 +141,10 @@ public class ProfileManagementPanel extends JPanel {
         row.add(createLabel(labelText));
         JTextField path = new JTextField(currentPath);
         path.setPreferredSize(new Dimension(265, 30));
+        UITheme.styleTextField(path);
         JButton btn = new JButton("Browse");
         btn.setPreferredSize(new Dimension(80, 30));
+        UITheme.styleNeutralButton(btn);
         btn.addActionListener(e -> {
             JFileChooser jfc = new JFileChooser();
             if(jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -153,7 +158,7 @@ public class ProfileManagementPanel extends JPanel {
 
     private JPanel createRow() {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
-        row.setBackground(Color.WHITE);
+        row.setBackground(UITheme.APP_BACKGROUND);
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         return row;
@@ -163,6 +168,7 @@ public class ProfileManagementPanel extends JPanel {
         JLabel lbl = new JLabel(text);
         lbl.setPreferredSize(new Dimension(150, 30));
         lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
         return lbl;
     }
 
@@ -189,7 +195,7 @@ public class ProfileManagementPanel extends JPanel {
 
     private JPanel buttonRow() {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 20));
-        row.setBackground(Color.WHITE);
+        row.setBackground(UITheme.APP_BACKGROUND);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         return row;
     }
@@ -204,9 +210,14 @@ public class ProfileManagementPanel extends JPanel {
 
     private JButton actionButton(JPanel row, String label, Color bg) {
         JButton btn = new JButton(label);
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
         btn.setPreferredSize(new Dimension(140, 38));
+        if (UITheme.DANGER.equals(bg)) {
+            UITheme.styleDangerButton(btn);
+        } else if (UITheme.SURFACE_MUTED.equals(bg)) {
+            UITheme.styleNeutralButton(btn);
+        } else {
+            UITheme.stylePrimaryButton(btn);
+        }
         row.add(btn);
         return btn;
     }

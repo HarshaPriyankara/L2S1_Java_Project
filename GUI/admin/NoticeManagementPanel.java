@@ -1,5 +1,7 @@
 package GUI.admin;
 
+import GUI.common.UITheme;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -7,16 +9,15 @@ import java.awt.*;
 public class NoticeManagementPanel extends JPanel {
 
     // ENCAPSULATION: Encapsulated constants and internal state
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
-
     public NoticeManagementPanel() {
-        setBackground(Color.WHITE);
+        setBackground(UITheme.APP_BACKGROUND);
         showMainButtons();
     }
 
     public void showMainButtons() {
         this.removeAll();
         this.setLayout(new GridBagLayout());
+        this.setBackground(UITheme.APP_BACKGROUND);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -59,12 +60,7 @@ public class NoticeManagementPanel extends JPanel {
 
     private JButton createNoticeButton(String text) {
         JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(500, 80));
-        btn.setBackground(BUTTON_COLOR);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 22));
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        UITheme.styleLargeMenuButton(btn);
 
         return btn;
     }

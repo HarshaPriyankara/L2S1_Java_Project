@@ -1,11 +1,11 @@
 package GUI.admin;
 
+import GUI.common.UITheme;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class AdminCourseManagementPanel extends JPanel {
-
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
 
     // Sub-card names
     private static final String MENU   = "CourseMenu";
@@ -18,7 +18,7 @@ public class AdminCourseManagementPanel extends JPanel {
 
     public AdminCourseManagementPanel(JPanel rootContent, CardLayout rootCard) {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setBackground(UITheme.APP_BACKGROUND);
 
         // Build sub-panels
         innerPanel.add(buildMenuPanel(),  MENU);
@@ -33,7 +33,7 @@ public class AdminCourseManagementPanel extends JPanel {
     private JPanel buildMenuPanel() {
         // NoticeManagementPanel eke wage GridBagLayout use kara
         JPanel menu = new JPanel(new GridBagLayout());
-        menu.setBackground(Color.WHITE);
+        menu.setBackground(UITheme.APP_BACKGROUND);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -52,12 +52,7 @@ public class AdminCourseManagementPanel extends JPanel {
     private JButton courseButton(String text, Runnable action) {
         // NoticeManagementPanel eke createNoticeButton ekatama samana kara
         JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(500, 80)); // Size eka 80 ta adu kara
-        btn.setBackground(BUTTON_COLOR);
-        btn.setForeground(Color.WHITE);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 22));
-        btn.setFocusPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        UITheme.styleLargeMenuButton(btn);
 
         btn.addActionListener(e -> action.run());
         return btn;

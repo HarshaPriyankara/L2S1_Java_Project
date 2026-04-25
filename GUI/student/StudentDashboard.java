@@ -1,6 +1,7 @@
 package GUI.student;
 
 import GUI.common.BaseDashboard;
+import GUI.common.UITheme;
 import GUI.common.ViewNotice;
 import javax.swing.*;
 import java.awt.*;
@@ -79,11 +80,11 @@ public class StudentDashboard extends BaseDashboard {
     @Override
     protected JPanel buildHomePanel() {
         JPanel p = new JPanel(new GridBagLayout());
-        p.setBackground(Color.WHITE);
+        p.setBackground(UITheme.APP_BACKGROUND);
 
         JLabel lbl = new JLabel("Welcome to Student Portal");
         lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
-        lbl.setForeground(new Color(0x555555));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
 
         p.add(lbl);
         return p;

@@ -3,19 +3,20 @@ package GUI.admin;
 import Controllers.CourseControllers.CourseController;
 import Controllers.CourseControllers.CourseFormData;
 import Controllers.CourseControllers.CourseOperationResult;
+import GUI.common.UITheme;
 import javax.swing.*;
 import java.awt.*;
 
 class AddNewCoursePanel extends JPanel {
 
     private JTextField txtCode, txtName, txtType, txtCredits, txtLecturer, txtDep;
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
+    private static final Color BUTTON_COLOR = UITheme.PRIMARY;
     private final CourseController courseController = new CourseController();
 
     public AddNewCoursePanel(JPanel parentPanel, CardLayout cardLayout) {
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(Color.WHITE);
+        setBackground(UITheme.SURFACE);
         setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
 
         addTitle("Create New Course", BUTTON_COLOR);
@@ -28,13 +29,13 @@ class AddNewCoursePanel extends JPanel {
         txtDep      = addField("Department ID");
 
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        row.setBackground(Color.WHITE);
+        row.setBackground(UITheme.SURFACE);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
         // Back Button
         JButton btnBack = new JButton("Back");
-        styleButton(btnBack, new Color(0xAAAAAA));
+        styleButton(btnBack, UITheme.SURFACE_MUTED);
         btnBack.addActionListener(e -> cardLayout.show(parentPanel, "CourseMenu"));
 
         // Save Button
@@ -62,12 +63,14 @@ class AddNewCoursePanel extends JPanel {
     private JTextField addField(String label) {
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JTextField field = new JTextField();
         field.setFont(new Font("SansSerif", Font.PLAIN, 13));
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
         field.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.styleTextField(field);
 
         add(lbl);
         add(Box.createVerticalStrut(5));
@@ -77,12 +80,11 @@ class AddNewCoursePanel extends JPanel {
     }
 
     private void styleButton(JButton btn, Color bg) {
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        if (UITheme.SURFACE_MUTED.equals(bg)) {
+            UITheme.styleNeutralButton(btn);
+        } else {
+            UITheme.stylePrimaryButton(btn);
+        }
         btn.setPreferredSize(new Dimension(130, 38));
     }
 
