@@ -1,5 +1,6 @@
 package Controllers.StudentControllers;
 
+import DAO.AttendanceDAO;
 import DAO.MarkDAO;
 import Utils.CourseMarkScheme;
 import Utils.MarksCalculator;
@@ -7,8 +8,10 @@ import Utils.MarksCalculator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.sql.ResultSet;
 
 public class Eng2122CaMarksController {
+    private static final double ATTENDANCE_ELIGIBILITY_PERCENT = 80.0;
     private static final String[] ENG2122_COLUMNS = {
             "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz Part (10)", "Assignment 1",
             "Assignment 2", "Assignment Part (10)", "Mid Theory", "Mid Part (20)", "CA Marks (40)", "CA Eligible"
@@ -50,6 +53,7 @@ public class Eng2122CaMarksController {
     };
 
     private final MarkDAO markDAO = new MarkDAO();
+    private final AttendanceDAO attendanceDAO = new AttendanceDAO();
 
     public Eng2122CaMarksResult loadCaMarks(String courseCode, String studentId, boolean individualView) {
         if (!supportsCourse(courseCode)) {
@@ -160,6 +164,52 @@ public class Eng2122CaMarksController {
         }
     }
 
+    public Eng2122CaMarksResult loadEndEligibilityByAttendanceAndCa(String courseCode, String studentId, boolean individualView) {
+        if (!supportsCourse(courseCode)) {
+            return new Eng2122CaMarksResult(null, null, null, null,
+                    "This step supports selected configured courses only.");
+        }
+
+        try {
+            CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
+            if (!scheme.hasEndAssessment()) {
+                return buildNoEndExamAttendanceEligibility(courseCode, studentId, individualView, scheme);
+            }
+
+            List<Object[]> rows = new ArrayList<>();
+            if (individualView) {
+                if (studentId == null || studentId.isBlank()) {
+                    return new Eng2122CaMarksResult(null, null, null, null, "Please enter a registration number.");
+                }
+                rows.add(buildAttendanceAndCaRow(courseCode, studentId.trim()));
+            } else {
+                List<AttendanceSummary> summaries = new ArrayList<>();
+                try (ResultSet summaryRs = attendanceDAO.getCourseAttendanceSummary(courseCode, null, "Overall")) {
+                    while (summaryRs.next()) {
+                        summaries.add(new AttendanceSummary(
+                                summaryRs.getString("Reg_no"),
+                                calculateAttendancePercentage(summaryRs.getDouble("attended_hours"), summaryRs.getDouble("total_hours"))
+                        ));
+                    }
+                }
+                for (AttendanceSummary summary : summaries) {
+                    rows.add(buildAttendanceAndCaRow(courseCode, summary.regNo, summary.attendancePercentage));
+                }
+            }
+
+            return new Eng2122CaMarksResult(
+                    new String[]{"Reg No", "Attendance %", "Required Attendance %", "CA Marks", "Required CA Mark", "End Assessment", "Eligibility"},
+                    rows,
+                    buildAttendanceEligibilityTitle(courseCode, studentId, individualView),
+                    buildAttendanceEligibilityNote(courseCode),
+                    null
+            );
+        } catch (Exception ex) {
+            return new Eng2122CaMarksResult(null, null, null, null,
+                    "Unable to load end exam eligibility by attendance + CA: " + ex.getMessage());
+        }
+    }
+
     private Object[] buildRow(String courseCode, String regNo, Map<String, Double> marks) {
         double passMark = CourseMarkScheme.forCourse(courseCode).getCaPassMark();
         if ("ICT2113".equalsIgnoreCase(courseCode)) {
@@ -229,6 +279,94 @@ public class Eng2122CaMarksController {
                 breakdown.hasMarks() ? breakdown.getTotalMarks() : "-",
                 breakdown.getGrade()
         };
+    }
+
+    private Eng2122CaMarksResult buildNoEndExamAttendanceEligibility(String courseCode, String studentId,
+                                                                      boolean individualView, CourseMarkScheme scheme) throws Exception {
+        List<Object[]> rows = new ArrayList<>();
+
+        if (individualView) {
+            if (studentId == null || studentId.isBlank()) {
+                return new Eng2122CaMarksResult(null, null, null, null, "Please enter a registration number.");
+            }
+            Map<String, Double> marks = markDAO.getStudentCourseMarks(studentId.trim(), courseCode);
+            rows.add(new Object[]{
+                    studentId.trim(),
+                    "-",
+                    ATTENDANCE_ELIGIBILITY_PERCENT,
+                    round(scheme.calculateCA(marks)),
+                    scheme.getCaPassMark(),
+                    "No End Exam",
+                    "No End Exam"
+            });
+        } else {
+            Map<String, Map<String, Double>> groupedMarks = markDAO.getCourseMarksByStudent(courseCode);
+            for (Map.Entry<String, Map<String, Double>> entry : groupedMarks.entrySet()) {
+                rows.add(new Object[]{
+                        entry.getKey(),
+                        "-",
+                        ATTENDANCE_ELIGIBILITY_PERCENT,
+                        round(scheme.calculateCA(entry.getValue())),
+                        scheme.getCaPassMark(),
+                        "No End Exam",
+                        "No End Exam"
+                });
+            }
+        }
+
+        return new Eng2122CaMarksResult(
+                new String[]{"Reg No", "Attendance %", "Required Attendance %", "CA Marks", "Required CA Mark", "End Assessment", "Eligibility"},
+                rows,
+                buildAttendanceEligibilityTitle(courseCode, studentId, individualView),
+                courseCode.toUpperCase() + " has no end exam. Attendance + CA end-exam eligibility is not required for this subject.",
+                null
+        );
+    }
+
+    private Object[] buildAttendanceAndCaRow(String courseCode, String regNo) throws Exception {
+        CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
+        double caMarks = round(scheme.calculateCA(markDAO.getStudentCourseMarks(regNo, courseCode)));
+        double attendancePercentage = loadAttendancePercentage(courseCode, regNo);
+        return buildAttendanceAndCaRow(courseCode, regNo, caMarks, attendancePercentage);
+    }
+
+    private Object[] buildAttendanceAndCaRow(String courseCode, String regNo, double attendancePercentage) throws Exception {
+        CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
+        double caMarks = round(scheme.calculateCA(markDAO.getStudentCourseMarks(regNo, courseCode)));
+        return buildAttendanceAndCaRow(courseCode, regNo, caMarks, attendancePercentage);
+    }
+
+    private Object[] buildAttendanceAndCaRow(String courseCode, String regNo, double caMarks, double attendancePercentage) {
+        CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
+        boolean attendanceEligible = attendancePercentage >= ATTENDANCE_ELIGIBILITY_PERCENT;
+        boolean caEligible = caMarks >= scheme.getCaPassMark();
+
+        return new Object[]{
+                regNo,
+                attendancePercentage,
+                ATTENDANCE_ELIGIBILITY_PERCENT,
+                caMarks,
+                scheme.getCaPassMark(),
+                resolveEndAssessmentLabel(courseCode),
+                attendanceEligible && caEligible ? "Eligible" : "Not Eligible"
+        };
+    }
+
+    private double loadAttendancePercentage(String courseCode, String regNo) throws Exception {
+        try (ResultSet summaryRs = attendanceDAO.getCourseAttendanceSummary(courseCode, regNo, "Overall")) {
+            if (!summaryRs.next()) {
+                return 0.0;
+            }
+
+            return calculateAttendancePercentage(summaryRs.getDouble("attended_hours"), summaryRs.getDouble("total_hours"));
+        }
+    }
+
+    private double calculateAttendancePercentage(double attendedHours, double totalHours) {
+        if (totalHours <= 0) {
+            return 0.0;
+        }
+        return round((attendedHours / totalHours) * 100.0);
     }
 
     private Object[] buildEng2122Row(String regNo, Map<String, Double> marks, double passMark) {
@@ -500,6 +638,12 @@ public class Eng2122CaMarksController {
                 : courseCode.toUpperCase() + " Final Marks (CA + END) - Whole Batch";
     }
 
+    private String buildAttendanceEligibilityTitle(String courseCode, String studentId, boolean individualView) {
+        return individualView
+                ? courseCode.toUpperCase() + " End Exam Eligibility by Attendance + CA - " + studentId
+                : courseCode.toUpperCase() + " End Exam Eligibility by Attendance + CA - Whole Batch";
+    }
+
     private String[] resolveFinalMarksColumns(String courseCode) {
         if ("TCS2122".equalsIgnoreCase(courseCode)) {
             return new String[]{"Reg No", "CA Marks", "End Exam", "Final Marks", "Grade"};
@@ -569,6 +713,15 @@ public class Eng2122CaMarksController {
                 courseCode.toUpperCase(), scheme.getCaPassMark(), scheme.getCaWeight());
     }
 
+    private String buildAttendanceEligibilityNote(String courseCode) {
+        CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
+        if (!scheme.hasEndAssessment()) {
+            return courseCode.toUpperCase() + " has no end exam. Final result is based on CA only.";
+        }
+        return String.format("%s attendance + CA rule: attendance should be at least %.2f%% and CA marks should be at least %.2f out of %.2f",
+                courseCode.toUpperCase(), ATTENDANCE_ELIGIBILITY_PERCENT, scheme.getCaPassMark(), scheme.getCaWeight());
+    }
+
     private String resolveEndAssessmentLabel(String courseCode) {
         CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
         if (!scheme.hasEndAssessment()) {
@@ -615,5 +768,15 @@ public class Eng2122CaMarksController {
 
     private double round(double value) {
         return Math.round(value * 100.0) / 100.0;
+    }
+
+    private static class AttendanceSummary {
+        private final String regNo;
+        private final double attendancePercentage;
+
+        private AttendanceSummary(String regNo, double attendancePercentage) {
+            this.regNo = regNo;
+            this.attendancePercentage = attendancePercentage;
+        }
     }
 }

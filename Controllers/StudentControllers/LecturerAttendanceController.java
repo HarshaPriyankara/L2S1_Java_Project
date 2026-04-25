@@ -41,7 +41,7 @@ public class LecturerAttendanceController {
                 ));
             }
 
-            String detailStudentId = resolveDetailStudentId(summaryRows, studentId);
+            String detailStudentId = resolveDetailStudentId(studentId);
             if (detailStudentId != null) {
                 try (ResultSet detailRs = attendanceDAO.getStudentAttendanceDetails(courseCode, detailStudentId, sessionFilter)) {
                     while (detailRs.next()) {
@@ -61,14 +61,11 @@ public class LecturerAttendanceController {
         }
     }
 
-    private String resolveDetailStudentId(List<LecturerAttendanceSummaryRow> summaryRows, String studentId) {
+    private String resolveDetailStudentId(String studentId) {
         if (studentId != null && !studentId.isBlank()) {
             return studentId.trim();
         }
-        if (summaryRows == null || summaryRows.isEmpty()) {
-            return null;
-        }
-        return summaryRows.get(0).getRegNo();
+        return null;
     }
 
     private double round(double value) {

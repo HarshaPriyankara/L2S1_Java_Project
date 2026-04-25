@@ -153,12 +153,8 @@ public class StudentAttendancePanel extends JPanel {
             });
         }
 
-        String detailStudent = studentId;
-        if ((detailStudent == null || detailStudent.isBlank()) && !result.getSummaryRows().isEmpty()) {
-            detailStudent = result.getSummaryRows().get(0).getRegNo();
-        }
-
-        if (detailStudent != null && !detailStudent.isBlank()) {
+        if (studentId != null && !studentId.isBlank()) {
+            String detailStudent = studentId;
             selectedStudentLabel.setText("Student Details: " + detailStudent);
         }
 

@@ -31,14 +31,18 @@ public class StudentMarksPanel extends JPanel {
     private final JPanel centerCardPanel = new JPanel(centerCardLayout);
     private DefaultTableModel caMarksModel;
     private DefaultTableModel eligibilityModel;
+    private DefaultTableModel attendanceEligibilityModel;
     private DefaultTableModel finalMarksModel;
     private JTable caTable;
     private JTable eligibilityTable;
+    private JTable attendanceEligibilityTable;
     private JTable finalMarksTable;
     private final JLabel caViewTitleLabel = new JLabel("ENG2122 CA Marks");
     private final JLabel caNoteLabel = new JLabel();
     private final JLabel eligibilityTitleLabel = new JLabel("End Exam Eligibility by CA");
     private final JLabel eligibilityNoteLabel = new JLabel();
+    private final JLabel attendanceEligibilityTitleLabel = new JLabel("End Exam Eligibility by Attendance + CA");
+    private final JLabel attendanceEligibilityNoteLabel = new JLabel();
     private final JLabel finalMarksTitleLabel = new JLabel("Final Marks (CA + END)");
     private final JLabel finalMarksNoteLabel = new JLabel();
 
@@ -55,12 +59,14 @@ public class StudentMarksPanel extends JPanel {
 
         caMarksModel = createCaMarksModel(new String[]{"Reg No"});
         eligibilityModel = createCaMarksModel(new String[]{"Reg No"});
+        attendanceEligibilityModel = createCaMarksModel(new String[]{"Reg No"});
         finalMarksModel = createCaMarksModel(new String[]{"Reg No", "CA Marks", "End Marks", "Final Marks", "Grade"});
 
         centerCardPanel.setBackground(UITheme.APP_BACKGROUND);
         centerCardPanel.add(buildOverviewPanel(), "Overview");
         centerCardPanel.add(buildCaMarksPanel(), "CA");
         centerCardPanel.add(buildEligibilityPanel(), "EligibilityByCa");
+        centerCardPanel.add(buildAttendanceEligibilityPanel(), "EligibilityByAttendanceAndCa");
         centerCardPanel.add(buildFinalMarksPanel(), "FinalMarks");
         add(centerCardPanel, BorderLayout.CENTER);
 
@@ -150,7 +156,7 @@ public class StudentMarksPanel extends JPanel {
         actionCardsPanel.add(Box.createVerticalStrut(18));
         actionCardsPanel.add(createActionCard("End Exam Eligibility by CA", this::showEligibilityByCaView));
         actionCardsPanel.add(Box.createVerticalStrut(18));
-        actionCardsPanel.add(createActionCard("End Exam Eligibility by Attendance + CA", this::showNextStepMessage));
+        actionCardsPanel.add(createActionCard("End Exam Eligibility by Attendance + CA", this::showEligibilityByAttendanceAndCaView));
         actionCardsPanel.add(Box.createVerticalStrut(18));
         actionCardsPanel.add(createActionCard("Final Marks (CA + END)", this::showFinalMarksBaseView));
 
@@ -244,6 +250,34 @@ public class StudentMarksPanel extends JPanel {
         return panel;
     }
 
+    private JPanel buildAttendanceEligibilityPanel() {
+        JPanel panel = new JPanel(new BorderLayout(0, 12));
+        panel.setBackground(UITheme.APP_BACKGROUND);
+
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(UITheme.APP_BACKGROUND);
+
+        attendanceEligibilityTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        attendanceEligibilityTitleLabel.setForeground(UITheme.TEXT_PRIMARY);
+        headerPanel.add(attendanceEligibilityTitleLabel, BorderLayout.WEST);
+
+        JButton backToOverviewButton = new JButton("Back to Marks Menu");
+        UITheme.styleNeutralButton(backToOverviewButton);
+        backToOverviewButton.addActionListener(e -> centerCardLayout.show(centerCardPanel, "Overview"));
+        headerPanel.add(backToOverviewButton, BorderLayout.EAST);
+
+        attendanceEligibilityTable = new JTable(attendanceEligibilityModel);
+        attendanceEligibilityTable.setRowHeight(28);
+        UITheme.styleTable(attendanceEligibilityTable);
+
+        attendanceEligibilityNoteLabel.setForeground(UITheme.TEXT_MUTED);
+
+        panel.add(headerPanel, BorderLayout.NORTH);
+        panel.add(new JScrollPane(attendanceEligibilityTable), BorderLayout.CENTER);
+        panel.add(attendanceEligibilityNoteLabel, BorderLayout.SOUTH);
+        return panel;
+    }
+
     private void loadInitialData() {
         LecturerMarksOverviewResult result = overviewController.loadOverview(lecturerId, null);
         if (result.hasError()) {
@@ -280,7 +314,7 @@ public class StudentMarksPanel extends JPanel {
                 scheme.getCaPassMark(), scheme.getCaWeight()
         ));
         attendanceRuleLabel.setText(
-                "Attendance + CA Rule: base prepared for the next step using this course and selected scope"
+                "Attendance + CA Rule: attendance should be at least 80.00% and CA should reach the course CA pass mark"
         );
     }
 
@@ -330,6 +364,30 @@ public class StudentMarksPanel extends JPanel {
         eligibilityTitleLabel.setText(result.getTitle());
         eligibilityNoteLabel.setText(result.getNote());
         centerCardLayout.show(centerCardPanel, "EligibilityByCa");
+    }
+
+    private void showEligibilityByAttendanceAndCaView() {
+        String courseCode = (String) courseComboBox.getSelectedItem();
+        boolean individualView = "Individual Student".equals(scopeComboBox.getSelectedItem());
+        String studentId = studentSearchField.getText().trim();
+
+        Eng2122CaMarksResult result = caMarksController.loadEndEligibilityByAttendanceAndCa(courseCode, studentId, individualView);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage(), "End Exam Eligibility by Attendance + CA", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        attendanceEligibilityTable.setModel(createCaMarksModel(result.getColumns()));
+        attendanceEligibilityModel = (DefaultTableModel) attendanceEligibilityTable.getModel();
+        UITheme.styleTable(attendanceEligibilityTable);
+        attendanceEligibilityModel.setRowCount(0);
+        for (Object[] row : result.getRows()) {
+            attendanceEligibilityModel.addRow(row);
+        }
+
+        attendanceEligibilityTitleLabel.setText(result.getTitle());
+        attendanceEligibilityNoteLabel.setText(result.getNote());
+        centerCardLayout.show(centerCardPanel, "EligibilityByAttendanceAndCa");
     }
 
     private void showFinalMarksBaseView() {
@@ -395,12 +453,4 @@ public class StudentMarksPanel extends JPanel {
         return card;
     }
 
-    private void showNextStepMessage() {
-        JOptionPane.showMessageDialog(
-                this,
-                "This logic will be implemented in the next step.",
-                "Student Marks",
-                JOptionPane.INFORMATION_MESSAGE
-        );
-    }
 }
