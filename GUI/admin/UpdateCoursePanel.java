@@ -1,7 +1,8 @@
 package GUI.admin;
 
-import Models.Course;
-import DAO.CourseDAO;
+import Controllers.CourseControllers.CourseController;
+import Controllers.CourseControllers.CourseFormData;
+import Controllers.CourseControllers.CourseOperationResult;
 import javax.swing.*;
 import java.awt.*;
 
@@ -9,6 +10,7 @@ class UpdateCoursePanel extends JPanel {
 
     private JTextField txtCode, txtName, txtType, txtCredits, txtLecturer, txtDep;
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
+    private final CourseController courseController = new CourseController();
 
     public UpdateCoursePanel(JPanel parentPanel, CardLayout cardLayout) {
         // Layout eka BoxLayout (Y_AXIS) ekata maru kara
@@ -48,31 +50,7 @@ class UpdateCoursePanel extends JPanel {
         add(row);
 
         // Update button action (Oyaage original logic eka - method wenas kale ne)
-        btnUpdate.addActionListener(e -> {
-            try {
-                String code = txtCode.getText().trim();
-                String name = txtName.getText().trim();
-                String credit = txtCredits.getText().trim();
-
-                if (code.isEmpty() || name.isEmpty() || credit.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Required fields are empty!", "Warning", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                int credits = Integer.parseInt(credit);
-                Course updatedCourse = new Course(code, name, credits, txtType.getText().trim(), txtLecturer.getText().trim(), txtDep.getText().trim());
-
-                CourseDAO courseDao = new CourseDAO();
-                if (courseDao.updateCourse(updatedCourse)) {
-                    JOptionPane.showMessageDialog(this, "Course Updated Successfully!");
-                    clearFields();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Update Failed!", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Credits must be a number!", "Input Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+        btnUpdate.addActionListener(e -> updateCourse());
     }
 
     // ── UserManagement eke thibba Styling Methods (Copy-Paste) ──
@@ -120,5 +98,24 @@ class UpdateCoursePanel extends JPanel {
         txtCredits.setText("");
         txtLecturer.setText("");
         txtDep.setText("");
+    }
+
+    private void updateCourse() {
+        CourseFormData formData = new CourseFormData(
+                txtCode.getText(),
+                txtName.getText(),
+                txtCredits.getText(),
+                txtType.getText(),
+                txtLecturer.getText(),
+                txtDep.getText()
+        );
+
+        CourseOperationResult result = courseController.updateCourse(formData);
+        if (result.isSuccess()) {
+            JOptionPane.showMessageDialog(this, result.getMessage());
+            clearFields();
+        } else {
+            JOptionPane.showMessageDialog(this, result.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

@@ -1,6 +1,6 @@
 package GUI.student;
 
-import DAO.MedicalRecordDAO;
+import Controllers.MedicalControllers.StudentMedicalController;
 import Models.MedicalRecord;
 
 import javax.swing.*;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class MedicalPanel extends JPanel {
     private final String studentId;
-    private final MedicalRecordDAO medicalRecordDAO = new MedicalRecordDAO();
+    private final StudentMedicalController medicalController = new StudentMedicalController();
     private final DefaultTableModel tableModel;
     private final JTextArea txtReason;
     private final JComboBox<String> cmbSessionType;
@@ -137,46 +137,44 @@ public class MedicalPanel extends JPanel {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        if (reason.isBlank()) {
-            JOptionPane.showMessageDialog(this, "Please enter the medical reason.");
-            return;
-        }
+        StudentMedicalController.MedicalActionResult result =
+                medicalController.submitMedical(studentId, sessionDate, sessionType, examCourse, reason);
 
-        if ("Exam".equals(sessionType) && examCourse.isBlank()) {
-            JOptionPane.showMessageDialog(this, "Please enter the exam course code for exam medicals.");
-            return;
-        }
-
-        try {
-            medicalRecordDAO.addMedical(studentId, sessionDate, sessionType, examCourse, reason);
+        if (result.isSuccess()) {
             txtReason.setText("");
             if (!"Exam".equals(sessionType)) {
                 txtExamCourse.setText("");
             }
             loadMedicalRecords();
-            JOptionPane.showMessageDialog(this, "Medical submitted successfully.");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to submit medical: " + ex.getMessage());
         }
+
+        JOptionPane.showMessageDialog(
+                this,
+                result.getMessage(),
+                result.isSuccess() ? "Success" : "Error",
+                result.isSuccess() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE
+        );
     }
 
     private void loadMedicalRecords() {
         tableModel.setRowCount(0);
 
-        try {
-            List<MedicalRecord> records = medicalRecordDAO.getMedicalRecordsByStudent(studentId);
-            for (MedicalRecord record : records) {
-                tableModel.addRow(new Object[]{
-                        record.getMedicalId(),
-                        record.getSessionDate(),
-                        record.getSessionType(),
-                        record.getExamCourse(),
-                        record.getReason(),
-                        record.isApproved() ? "Approved" : "Pending"
-                });
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to load medical records: " + ex.getMessage());
+        StudentMedicalController.MedicalRecordsResult result = medicalController.loadMedicalRecords(studentId);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage());
+            return;
+        }
+
+        List<MedicalRecord> records = result.getRecords();
+        for (MedicalRecord record : records) {
+            tableModel.addRow(new Object[]{
+                    record.getMedicalId(),
+                    record.getSessionDate(),
+                    record.getSessionType(),
+                    record.getExamCourse(),
+                    record.getReason(),
+                    record.isApproved() ? "Approved" : "Pending"
+            });
         }
     }
 }

@@ -1,5 +1,8 @@
 package GUI.admin;
 
+import Controllers.CourseControllers.CourseController;
+import Controllers.CourseControllers.CourseOperationResult;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -7,6 +10,7 @@ class DeleteCoursePanel extends JPanel {
     private JTextField txtCode;
     private static final Color DELETE_COLOR = new Color(0xCC0000); // Red color for delete
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
+    private final CourseController courseController = new CourseController();
 
     public DeleteCoursePanel(JPanel parentPanel, CardLayout cardLayout) {
         // Layout and Styling setup
@@ -62,12 +66,12 @@ class DeleteCoursePanel extends JPanel {
                     JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                DAO.CourseDAO dao = new DAO.CourseDAO();
-                if (dao.deleteCourse(code)) {
-                    JOptionPane.showMessageDialog(this, "Course Deleted Successfully!");
+                CourseOperationResult result = courseController.deleteCourse(code);
+                if (result.isSuccess()) {
+                    JOptionPane.showMessageDialog(this, result.getMessage());
                     txtCode.setText("");
                 } else {
-                    JOptionPane.showMessageDialog(this, "Delete Failed! Course Code not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, result.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });

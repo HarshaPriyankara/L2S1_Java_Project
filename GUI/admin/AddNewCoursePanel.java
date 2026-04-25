@@ -1,7 +1,8 @@
 package GUI.admin;
 
-import Models.Course;
-import DAO.CourseDAO;
+import Controllers.CourseControllers.CourseController;
+import Controllers.CourseControllers.CourseFormData;
+import Controllers.CourseControllers.CourseOperationResult;
 import javax.swing.*;
 import java.awt.*;
 
@@ -9,6 +10,7 @@ class AddNewCoursePanel extends JPanel {
 
     private JTextField txtCode, txtName, txtType, txtCredits, txtLecturer, txtDep;
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
+    private final CourseController courseController = new CourseController();
 
     public AddNewCoursePanel(JPanel parentPanel, CardLayout cardLayout) {
 
@@ -45,9 +47,7 @@ class AddNewCoursePanel extends JPanel {
         add(row);
 
         // Save Button Action
-        btnSave.addActionListener(e -> {
-            saveCourse();
-        });
+        btnSave.addActionListener(e -> saveCourse());
     }
 
     private void addTitle(String text, Color color) {
@@ -87,31 +87,21 @@ class AddNewCoursePanel extends JPanel {
     }
 
     private void saveCourse() {
-        try {
-            String code = txtCode.getText().trim();
-            String name = txtName.getText().trim();
-            String creditStr = txtCredits.getText().trim();
-            String type = txtType.getText().trim();
-            String lecturer = txtLecturer.getText().trim();
-            String department = txtDep.getText().trim();
+        CourseFormData formData = new CourseFormData(
+                txtCode.getText(),
+                txtName.getText(),
+                txtCredits.getText(),
+                txtType.getText(),
+                txtLecturer.getText(),
+                txtDep.getText()
+        );
 
-            if (code.isEmpty() || name.isEmpty() || creditStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill all required fields!", "Warning", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            int credits = Integer.parseInt(creditStr);
-            Course newCourse = new Course(code, name, credits, type, lecturer, department);
-            CourseDAO courseDao = new CourseDAO();
-
-            if (courseDao.addCourse(newCourse)) {
-                JOptionPane.showMessageDialog(this, "Course Added Successfully!");
-                clearFields();
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to add course. Code might already exist.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Credits must be a number!", "Input Error", JOptionPane.ERROR_MESSAGE);
+        CourseOperationResult result = courseController.addCourse(formData);
+        if (result.isSuccess()) {
+            JOptionPane.showMessageDialog(this, result.getMessage());
+            clearFields();
+        } else {
+            JOptionPane.showMessageDialog(this, result.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

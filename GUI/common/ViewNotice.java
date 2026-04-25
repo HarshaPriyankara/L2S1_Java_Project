@@ -1,15 +1,12 @@
 package GUI.common;
 
-import DAO.NoticeDAO;
+import Controllers.NoticeControllers.NoticeContentResult;
+import Controllers.NoticeControllers.NoticeViewController;
 import Models.Notice;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
 
 // INHERITANCE: Extending JPanel 
@@ -22,6 +19,7 @@ public class ViewNotice extends JPanel {
     private String userRole;
     private JPanel mainContentPanel;
     private CardLayout cardLayout;
+    private final NoticeViewController noticeController = new NoticeViewController();
 
     public ViewNotice(String userRole, JPanel mainContentPanel, CardLayout cardLayout) {
         this.userRole = userRole;
@@ -77,7 +75,7 @@ public class ViewNotice extends JPanel {
                     int noticeId = noticeList.get(row).getId();
                     String title = noticeList.get(row).getTitle();
 
-                    openNoticeFile(String.valueOf(noticeId), title);
+                    openNoticeFile(noticeId, title);
                 }
             }
         });
@@ -86,9 +84,7 @@ public class ViewNotice extends JPanel {
     }
 
     public void refreshTable() {
-        // ABSTRACTION: Complex DB logic encapsulated in NoticeDAO
-        NoticeDAO dao = new NoticeDAO();
-        noticeList = dao.getNoticesByRole(userRole);
+        noticeList = noticeController.getNoticesByRole(userRole);
         model.setRowCount(0);
 
         if (noticeList != null) {
@@ -102,7 +98,7 @@ public class ViewNotice extends JPanel {
         }
     }
 
-    private void openNoticeFile(String noticeId, String title) {
+    private void openNoticeFile(int noticeId, String title) {
         JFrame viewFrame = new JFrame("Notice: " + title);
         viewFrame.setSize(600, 500);
         viewFrame.setLayout(new BorderLayout());
@@ -112,29 +108,13 @@ public class ViewNotice extends JPanel {
         textArea.setMargin(new Insets(10, 10, 10, 10));
         viewFrame.add(new JScrollPane(textArea), BorderLayout.CENTER);
 
-        // ABSTRACTION: Replaced direct JDBC queries with NoticeDAO methods
-        NoticeDAO dao = new NoticeDAO();
-        String path = dao.getNoticeContentPath(Integer.parseInt(noticeId));
-
-        if (path != null) {
-            File file = new File(path);
-
-            if (file.exists()) {
-                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        textArea.append(line + "\n");
-                    }
-                    viewFrame.setLocationRelativeTo(null);
-                    viewFrame.setVisible(true);
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, "Error reading file.");
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "File not found: " + path);
-            }
+        NoticeContentResult result = noticeController.loadNoticeContent(noticeId);
+        if (result.isSuccess()) {
+            textArea.setText(result.getContent());
+            viewFrame.setLocationRelativeTo(null);
+            viewFrame.setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(this, "Notice content not found in database.");
+            JOptionPane.showMessageDialog(this, result.getMessage(), "Notice", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }
