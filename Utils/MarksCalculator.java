@@ -1,14 +1,9 @@
 package Utils;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class MarksCalculator {
-    private static final double CA_PASS_MARK = 15.0;
-    private static final double END_PASS_MARK = 35.0;
-
     public static final String[] MARK_TYPES = {
             "Quiz_1", "Quiz_2", "Quiz_3",
             "Assignment_1", "Assignment_2",
@@ -19,65 +14,24 @@ public class MarksCalculator {
 
     public static MarkBreakdown calculate(String regNo, String courseCode, String courseName,
                                           int credits, Map<String, Double> marks) {
-        double caMarks = calculateCA(marks);
-        double endMarks = calculateEnd(marks);
+        CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
+        double caMarks = scheme.calculateCA(marks);
+        double endMarks = scheme.calculateEnd(marks);
         double totalMarks = round(Math.min(100.0, caMarks + endMarks));
-        String grade = calculateGrade(caMarks, endMarks, totalMarks);
+        String grade = calculateGrade(caMarks, endMarks, totalMarks, scheme);
         double gpa = calculateGradePoint(grade);
 
         return new MarkBreakdown(regNo, courseCode, courseName, credits,
                 caMarks, endMarks, totalMarks, grade, gpa);
     }
 
-    private static double calculateCA(Map<String, Double> marks) {
-        double ca = 0.0;
-
-        List<Double> quizzes = new ArrayList<>();
-        addIfPresent(quizzes, marks, "Quiz_1");
-        addIfPresent(quizzes, marks, "Quiz_2");
-        addIfPresent(quizzes, marks, "Quiz_3");
-        quizzes.sort(Collections.reverseOrder());
-        for (int i = 0; i < Math.min(2, quizzes.size()); i++) {
-            ca += percentage(quizzes.get(i), 5.0);
-        }
-
-        ca += percentage(getMark(marks, "Assignment_1"), 5.0);
-        ca += percentage(getMark(marks, "Assignment_2"), 5.0);
-
-        Double midTheory = getMark(marks, "Mid_theory");
-        Double midPractical = getMark(marks, "Mid_practical");
-        if (midTheory != null && midPractical != null) {
-            ca += percentage(midTheory, 5.0);
-            ca += percentage(midPractical, 5.0);
-        } else if (midTheory != null) {
-            ca += percentage(midTheory, 10.0);
-        } else if (midPractical != null) {
-            ca += percentage(midPractical, 10.0);
-        }
-
-        return round(Math.min(30.0, ca));
-    }
-
-    private static double calculateEnd(Map<String, Double> marks) {
-        Double endTheory = getMark(marks, "End_theory");
-        Double endPractical = getMark(marks, "End_practical");
-        double end = 0.0;
-
-        if (endTheory != null && endPractical != null) {
-            end += percentage(endTheory, 35.0);
-            end += percentage(endPractical, 35.0);
-        } else if (endTheory != null) {
-            end += percentage(endTheory, 70.0);
-        } else if (endPractical != null) {
-            end += percentage(endPractical, 70.0);
-        }
-
-        return round(Math.min(70.0, end));
-    }
-
     public static String calculateGrade(double caMarks, double endMarks, double totalMarks) {
-        boolean caFailed = caMarks < CA_PASS_MARK;
-        boolean endFailed = endMarks < END_PASS_MARK;
+        return calculateGrade(caMarks, endMarks, totalMarks, CourseMarkScheme.forCourse(null));
+    }
+
+    public static String calculateGrade(double caMarks, double endMarks, double totalMarks, CourseMarkScheme scheme) {
+        boolean caFailed = caMarks < scheme.getCaPassMark();
+        boolean endFailed = scheme.hasEndAssessment() && endMarks < scheme.getEndPassMark();
 
         if (caFailed && endFailed) return "E(CA & ESA)";
         if (caFailed) return "E(CA)";
@@ -137,19 +91,6 @@ public class MarksCalculator {
         }
 
         return totalCredits == 0 ? 0.0 : round(weightedPoints / totalCredits);
-    }
-
-    private static void addIfPresent(List<Double> values, Map<String, Double> marks, String type) {
-        Double value = getMark(marks, type);
-        if (value != null) values.add(value);
-    }
-
-    private static Double getMark(Map<String, Double> marks, String type) {
-        return marks == null ? null : marks.get(type);
-    }
-
-    private static double percentage(Double mark, double weight) {
-        return mark == null ? 0.0 : mark * weight / 100.0;
     }
 
     private static double round(double value) {

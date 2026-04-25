@@ -1,6 +1,7 @@
 package Controllers.MarksControllers;
 
 import DAO.MarkDAO;
+import Utils.CourseMarkScheme;
 import Utils.DBConnection;
 import Utils.MarksCalculator;
 
@@ -29,7 +30,16 @@ public class MarksManagementController {
         return courses;
     }
 
+    public String[] getAllowedMarkTypes(String courseCode) {
+        return CourseMarkScheme.forCourse(courseCode).getAllowedMarkTypes();
+    }
+
     public MarksLoadResult loadEnrolledStudents(String selectedCourse, String selectedType) {
+        if (!isAllowedMarkType(selectedCourse, selectedType)) {
+            return new MarksLoadResult(null, null, null, null,
+                    selectedType + " is not valid for " + selectedCourse);
+        }
+
         Map<String, MarksCalculator.MarkBreakdown> breakdowns = loadBreakdownMap(selectedCourse);
         Map<String, Double> loadedEndMarks = new HashMap<>();
         List<String> studentIds = new ArrayList<>();
@@ -78,6 +88,10 @@ public class MarksManagementController {
             return new MarksSaveResult(false, "Please load students first.");
         }
 
+        if (!isAllowedMarkType(course, type)) {
+            return new MarksSaveResult(false, type + " is not valid for " + course);
+        }
+
         if (markText == null || markText.trim().isEmpty()) {
             return new MarksSaveResult(false, "Please enter a mark value.");
         }
@@ -110,6 +124,10 @@ public class MarksManagementController {
                 String markStr = String.valueOf(row[3]).trim();
                 String endStr = String.valueOf(row[5]).trim();
 
+                if (!isAllowedMarkType(course, type)) {
+                    return new MarksSaveResult(false, type + " is not valid for " + course);
+                }
+
                 if ((markStr.isEmpty() || "null".equalsIgnoreCase(markStr)) &&
                         (endStr.isEmpty() || "null".equalsIgnoreCase(endStr))) {
                     continue;
@@ -125,10 +143,15 @@ public class MarksManagementController {
 
                 if (!endStr.isEmpty() && !"null".equalsIgnoreCase(endStr)) {
                     double endMark = Double.parseDouble(endStr);
-                    if (endMark < 0 || endMark > 70) {
-                        return new MarksSaveResult(false, "END marks must be between 0 and 70 for " + regNo);
+                    CourseMarkScheme scheme = CourseMarkScheme.forCourse(course);
+                    if (!scheme.hasEndAssessment()) {
+                        return new MarksSaveResult(false, course + " does not have END marks.");
                     }
-                    saveEndMarkIfChanged(conn, regNo, course, endMark, loadedEndMarks);
+                    if (endMark < 0 || endMark > scheme.getEndWeight()) {
+                        return new MarksSaveResult(false, "END marks must be between 0 and "
+                                + (int) scheme.getEndWeight() + " for " + regNo);
+                    }
+                    saveEndMarkIfChanged(conn, regNo, course, type, endMark, loadedEndMarks);
                 }
             }
 
@@ -150,6 +173,16 @@ public class MarksManagementController {
         } catch (SQLException ignored) {
         }
         return breakdowns;
+    }
+
+    private boolean isAllowedMarkType(String course, String type) {
+        if (course == null || type == null) return false;
+        for (String allowedType : CourseMarkScheme.forCourse(course).getAllowedMarkTypes()) {
+            if (allowedType.equals(type)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void addBreakdownColumns(List<Object> row, MarksCalculator.MarkBreakdown breakdown) {
@@ -200,41 +233,32 @@ public class MarksManagementController {
         }
     }
 
-    private void saveEndMarkIfChanged(Connection conn, String regNo, String course, double endMark,
+    private void saveEndMarkIfChanged(Connection conn, String regNo, String course, String selectedType, double endMark,
                                       Map<String, Double> loadedEndMarks) throws SQLException {
         Double loadedEndMark = loadedEndMarks.get(createStudentCourseKey(regNo, course));
         if (loadedEndMark != null && Math.abs(loadedEndMark - endMark) < 0.01) {
             return;
         }
 
-        double rawEndMark = Math.round((endMark * 100.0 / 70.0) * 100.0) / 100.0;
+        CourseMarkScheme scheme = CourseMarkScheme.forCourse(course);
+        String endType = selectedType != null && selectedType.startsWith("End_")
+                ? selectedType
+                : scheme.getDefaultEndMarkType();
+        double endWeight = scheme.getAssessmentWeight(endType);
+        if (endWeight <= 0.0) {
+            endType = scheme.getDefaultEndMarkType();
+            endWeight = scheme.getAssessmentWeight(endType);
+        }
+        if (endWeight <= 0.0) {
+            return;
+        }
+
+        double rawEndMark = Math.round((endMark * 100.0 / endWeight) * 100.0) / 100.0;
         if (rawEndMark > 100) {
             rawEndMark = 100;
         }
 
-        boolean hasTheory = hasAssessmentMark(conn, regNo, course, "End_theory");
-        boolean hasPractical = hasAssessmentMark(conn, regNo, course, "End_practical");
-
-        if (hasTheory && hasPractical) {
-            saveSingleAssessmentMark(conn, regNo, course, "End_theory", rawEndMark);
-            saveSingleAssessmentMark(conn, regNo, course, "End_practical", rawEndMark);
-        } else if (hasPractical) {
-            saveSingleAssessmentMark(conn, regNo, course, "End_practical", rawEndMark);
-        } else {
-            saveSingleAssessmentMark(conn, regNo, course, "End_theory", rawEndMark);
-        }
-    }
-
-    private boolean hasAssessmentMark(Connection conn, String regNo, String course, String type) throws SQLException {
-        String query = "SELECT Mark_id FROM MARK WHERE Reg_no=? AND Course_code=? " +
-                "AND LOWER(REPLACE(TRIM(Marks_type), ' ', '_')) = LOWER(?)";
-        try (PreparedStatement pst = conn.prepareStatement(query)) {
-            pst.setString(1, regNo);
-            pst.setString(2, course);
-            pst.setString(3, type);
-            ResultSet rs = pst.executeQuery();
-            return rs.next();
-        }
+        saveSingleAssessmentMark(conn, regNo, course, endType, rawEndMark);
     }
 
     private String createStudentCourseKey(String regNo, String course) {
