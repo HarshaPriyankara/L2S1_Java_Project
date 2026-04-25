@@ -19,6 +19,7 @@ public class StudentDetails extends JPanel {
 
         contentPanel.add(buildMenuPanel(), "Menu");
         contentPanel.add(new StudentAttendancePanel(lecturerId, () -> cardLayout.show(contentPanel, "Menu")), "Attendance");
+        contentPanel.add(new StudentMarksPanel(lecturerId, () -> cardLayout.show(contentPanel, "Menu")), "Marks");
 
         add(contentPanel, BorderLayout.CENTER);
         cardLayout.show(contentPanel, "Menu");
@@ -50,7 +51,7 @@ public class StudentDetails extends JPanel {
 
         content.add(createMenuCard("Student Attendance", () -> cardLayout.show(contentPanel, "Attendance")));
         content.add(Box.createVerticalStrut(20));
-        content.add(createMenuCard("Student Marks", this::showNextStepMessage));
+        content.add(createMenuCard("Student Marks", () -> cardLayout.show(contentPanel, "Marks")));
         content.add(Box.createVerticalStrut(20));
         content.add(createMenuCard("Student Eligibility", this::showNextStepMessage));
 
