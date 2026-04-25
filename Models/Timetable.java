@@ -57,29 +57,26 @@ public class Timetable {
     public String getSemester() { return semester; }
     public void setSemester(String semester) { this.semester = semester; }
 
-    // --- Database Operations (New Table Sync Logic) ---
+    // --- Database Operations (Updated to match DAO) ---
 
-    /**
-     * මුළු ටේබල් එකම එකවර Sync කිරීම (Update/Delete/Add සියල්ලම මෙතනින් සිදුවේ)
-     */
-    public static boolean syncFullTimetable(List<Timetable> list, String level, String semester, String deptId) {
+
+    public static boolean syncFullTimetable(List<Timetable> list, String deptId) {
         TimetableDAO dao = new TimetableDAO();
-        return dao.syncTimetable(list, level, semester, deptId);
+        return dao.syncTimetable(list, deptId);
+    }
+
+    //student can view table data
+
+    public static List<Timetable> getTimeTableByDept(String deptId) {
+        TimetableDAO dao = new TimetableDAO();
+        return dao.getStudentTimetable(deptId);
     }
 
     /**
-     * ශිෂ්‍යයාට තමන්ගේ අංශයේ කාලසටහන පෙන්වීමට
+     * TO show all data
      */
-    public static List<Timetable> getTimeTableByDept(String deptId, String level, String semester) {
+    public static List<Timetable> getAllTimetables(String deptId) {
         TimetableDAO dao = new TimetableDAO();
-        return dao.getStudentTimetable(deptId, level, semester);
-    }
-
-    /**
-     * TO හට සියලු දත්ත පෙන්වීමට/ලෝඩ් කිරීමට
-     */
-    public static List<Timetable> getAllTimetables(String level, String semester, String deptId) {
-        TimetableDAO dao = new TimetableDAO();
-        return dao.getTOTimetableFiltered(level, semester, deptId);
+        return dao.getTOTimetableFiltered(deptId);
     }
 }
