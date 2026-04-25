@@ -113,7 +113,7 @@ public class LoginForm extends JFrame {
 
         LoginResult result = loginController.authenticate(username, password);
         if (result.isSuccess()) {
-            JOptionPane.showMessageDialog(this, result.getMessage());
+
             result.getDashboard().setVisible(true);
             this.dispose();
         } else {
