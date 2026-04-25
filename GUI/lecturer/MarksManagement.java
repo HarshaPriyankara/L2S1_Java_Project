@@ -51,11 +51,19 @@ public class MarksManagement extends JPanel {
         topPanel.add(btnLoad);
         add(topPanel, BorderLayout.NORTH);
 
-        String[] columns = {"Student ID", "Course Code", "Assessment Type", "Mark Value", "CA", "END", "Total Marks", "Grade", "GPA"};
+        String[] columns = {"Student ID", "Course Code", "Assessment Type", "Mark Value", "CA", "END", "Total Marks", "Grade", "Grade Value"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 3 || column == 5;
+                if (column == 3) {
+                    return true;
+                }
+                if (column != 5) {
+                    return false;
+                }
+
+                Object course = getValueAt(row, 1);
+                return course != null && marksController.hasEndAssessment(String.valueOf(course));
             }
         };
         marksTable = new JTable(tableModel);
