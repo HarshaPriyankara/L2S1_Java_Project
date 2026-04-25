@@ -11,6 +11,11 @@ public class StudentMedicalController {
 
     public MedicalActionResult submitMedical(String studentId, LocalDate sessionDate, String sessionType,
                                              String examCourse, String reason) {
+        return submitMedical(studentId, sessionDate, sessionType, examCourse, reason, null);
+    }
+
+    public MedicalActionResult submitMedical(String studentId, LocalDate sessionDate, String sessionType,
+                                             String examCourse, String reason, String medicalFilePath) {
         String normalizedReason = reason == null ? "" : reason.trim();
         String normalizedSessionType = sessionType == null ? "" : sessionType.trim();
         String normalizedExamCourse = examCourse == null ? "" : examCourse.trim();
@@ -24,7 +29,8 @@ public class StudentMedicalController {
         }
 
         try {
-            medicalRecordDAO.addMedical(studentId, sessionDate, normalizedSessionType, normalizedExamCourse, normalizedReason);
+            medicalRecordDAO.addMedical(studentId, sessionDate, normalizedSessionType, normalizedExamCourse,
+                    normalizedReason, medicalFilePath);
             return new MedicalActionResult(true, "Medical submitted successfully.");
         } catch (Exception ex) {
             return new MedicalActionResult(false, "Unable to submit medical: " + ex.getMessage());

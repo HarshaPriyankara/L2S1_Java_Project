@@ -7,16 +7,23 @@ public class MedicalManagementFormData {
     private final String sessionType;
     private final String examCourse;
     private final String reason;
+    private final String medicalFilePath;
     private final boolean approved;
 
     public MedicalManagementFormData(String medicalId, String regNo, String sessionDate, String sessionType,
                                      String examCourse, String reason, boolean approved) {
+        this(medicalId, regNo, sessionDate, sessionType, examCourse, reason, null, approved);
+    }
+
+    public MedicalManagementFormData(String medicalId, String regNo, String sessionDate, String sessionType,
+                                     String examCourse, String reason, String medicalFilePath, boolean approved) {
         this.medicalId = normalize(medicalId);
         this.regNo = normalize(regNo);
         this.sessionDate = normalize(sessionDate);
         this.sessionType = normalize(sessionType);
         this.examCourse = normalize(examCourse);
         this.reason = normalize(reason);
+        this.medicalFilePath = normalize(medicalFilePath);
         this.approved = approved;
     }
 
@@ -42,6 +49,10 @@ public class MedicalManagementFormData {
 
     public String getReason() {
         return reason;
+    }
+
+    public String getMedicalFilePath() {
+        return medicalFilePath;
     }
 
     public boolean isApproved() {
