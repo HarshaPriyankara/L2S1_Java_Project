@@ -7,35 +7,30 @@ import java.awt.*;
 
 // INHERITANCE: Inheriting from the standard JPanel to act as a container
 public class NoticeManagementPanel extends JPanel {
+    private static final Color CARD_COLOR = new Color(85, 179, 232);
 
     // ENCAPSULATION: Encapsulated constants and internal state
     public NoticeManagementPanel() {
-        setBackground(UITheme.APP_BACKGROUND);
+        setLayout(new BorderLayout());
+        setBackground(Color.WHITE);
         showMainButtons();
     }
 
     public void showMainButtons() {
         this.removeAll();
-        this.setLayout(new GridBagLayout());
-        this.setBackground(UITheme.APP_BACKGROUND);
+        this.setLayout(new BorderLayout());
+        this.setBackground(Color.WHITE);
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = GridBagConstraints.RELATIVE;
-        gbc.insets = new Insets(15, 0, 15, 0);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JPanel menu = new JPanel();
+        menu.setBackground(Color.WHITE);
+        menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
+        menu.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
 
-        JButton btnCreate = createNoticeButton("Create Notice");
+        menu.add(createNoticeCard("Create Notice", this::loadCreateNoticePanel));
+        menu.add(Box.createVerticalStrut(20));
+        menu.add(createNoticeCard("View & Modify Notice", this::loadViewNoticePanel));
 
-        btnCreate.addActionListener(e -> {
-            loadCreateNoticePanel();
-        });
-
-        add(btnCreate, gbc);
-
-        JButton btnView = createNoticeButton("View & Modify Notice");
-        btnView.addActionListener(e -> loadViewNoticePanel());
-        add(btnView, gbc);
+        add(menu, BorderLayout.CENTER);
 
         this.revalidate();
         this.repaint();
@@ -58,11 +53,25 @@ public class NoticeManagementPanel extends JPanel {
         this.repaint();
     }
 
-    private JButton createNoticeButton(String text) {
-        JButton btn = new JButton(text);
-        UITheme.styleLargeMenuButton(btn);
+    private JPanel createNoticeCard(String text, Runnable action) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(CARD_COLOR);
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        return btn;
+        JLabel label = new JLabel(text, SwingConstants.CENTER);
+        label.setForeground(Color.WHITE);
+        label.setFont(new Font("SansSerif", Font.BOLD, 18));
+        card.add(label, BorderLayout.CENTER);
+
+        card.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                action.run();
+            }
+        });
+
+        return card;
     }
 
     public void showUpdateNotice(int id, String title) {

@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class AdminCourseManagementPanel extends JPanel {
+    private static final Color CARD_COLOR = new Color(85, 179, 232);
 
     // Sub-card names
     private static final String MENU   = "CourseMenu";
@@ -19,6 +20,7 @@ public class AdminCourseManagementPanel extends JPanel {
     public AdminCourseManagementPanel(JPanel rootContent, CardLayout rootCard) {
         setLayout(new BorderLayout());
         setBackground(UITheme.APP_BACKGROUND);
+        innerPanel.setBackground(Color.WHITE);
 
         // Build sub-panels
         innerPanel.add(buildMenuPanel(),  MENU);
@@ -31,30 +33,36 @@ public class AdminCourseManagementPanel extends JPanel {
     }
 
     private JPanel buildMenuPanel() {
-        // NoticeManagementPanel eke wage GridBagLayout use kara
-        JPanel menu = new JPanel(new GridBagLayout());
-        menu.setBackground(UITheme.APP_BACKGROUND);
+        JPanel menu = new JPanel();
+        menu.setBackground(Color.WHITE);
+        menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
+        menu.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = GridBagConstraints.RELATIVE;
-        gbc.insets = new Insets(15, 0, 15, 0); // Buttons athara gap eka
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        // Buttons tika add kirima
-        menu.add(courseButton("Add New Course",  () -> innerLayout.show(innerPanel, ADD)), gbc);
-        menu.add(courseButton("Update Course",   () -> innerLayout.show(innerPanel, UPDATE)), gbc);
-        menu.add(courseButton("Delete Course",   () -> innerLayout.show(innerPanel, DELETE)), gbc);
-
+        menu.add(courseCard("Add New Course", () -> innerLayout.show(innerPanel, ADD)));
+        menu.add(Box.createVerticalStrut(20));
+        menu.add(courseCard("Update Course", () -> innerLayout.show(innerPanel, UPDATE)));
+        menu.add(Box.createVerticalStrut(20));
+        menu.add(courseCard("Delete Course", () -> innerLayout.show(innerPanel, DELETE)));
         return menu;
     }
 
-    private JButton courseButton(String text, Runnable action) {
-        // NoticeManagementPanel eke createNoticeButton ekatama samana kara
-        JButton btn = new JButton(text);
-        UITheme.styleLargeMenuButton(btn);
+    private JPanel courseCard(String text, Runnable action) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(CARD_COLOR);
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        btn.addActionListener(e -> action.run());
-        return btn;
+        JLabel label = new JLabel(text, SwingConstants.CENTER);
+        label.setForeground(Color.WHITE);
+        label.setFont(new Font("SansSerif", Font.BOLD, 18));
+        card.add(label, BorderLayout.CENTER);
+
+        card.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                action.run();
+            }
+        });
+        return card;
     }
 }
