@@ -53,7 +53,7 @@ public class StudentDetails extends JPanel {
         content.add(Box.createVerticalStrut(20));
         content.add(createMenuCard("Student Marks", () -> cardLayout.show(contentPanel, "Marks")));
         content.add(Box.createVerticalStrut(20));
-        content.add(createMenuCard("Student Eligibility", this::showNextStepMessage));
+        content.add(createMenuCard("SGPA and CGPA", this::showNextStepMessage));
 
         menuPanel.add(content, BorderLayout.CENTER);
         return menuPanel;
