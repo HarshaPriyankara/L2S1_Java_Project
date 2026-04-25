@@ -32,13 +32,7 @@ public class AdminProfileController extends BaseUserController {
             return "DATABASE_ERROR: User not found.";
         }
 
-        if (!existing.getUserID().equals(user.getUserID())) {
-            return "VALIDATION_ERROR: Changing User ID is not supported here.";
-        }
 
-        if (!normalizeRole(existing.getRole()).equals(normalizeRole(user.getRole()))) {
-            return "VALIDATION_ERROR: Changing user role is not supported here.";
-        }
 
         return dao.updateUser(user) ? "SUCCESS: All details updated!" : "DATABASE_ERROR: Failed to save.";
     }
