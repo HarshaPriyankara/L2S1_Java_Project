@@ -10,39 +10,55 @@ import java.awt.event.MouseEvent;
 public class StudentDetails extends JPanel {
     private static final Color CARD_COLOR = new Color(85, 179, 232);
 
+    private final CardLayout cardLayout = new CardLayout();
+    private final JPanel contentPanel = new JPanel(cardLayout);
+
     public StudentDetails(String lecturerId) {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        JPanel contentPanel = new JPanel();
-        contentPanel.setBackground(Color.WHITE);
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
+        contentPanel.add(buildMenuPanel(), "Menu");
+        contentPanel.add(new StudentAttendancePanel(lecturerId, () -> cardLayout.show(contentPanel, "Menu")), "Attendance");
+
+        add(contentPanel, BorderLayout.CENTER);
+        cardLayout.show(contentPanel, "Menu");
+    }
+
+    private JPanel buildMenuPanel() {
+        JPanel menuPanel = new JPanel();
+        menuPanel.setLayout(new BorderLayout());
+        menuPanel.setBackground(Color.WHITE);
+
+        JPanel content = new JPanel();
+        content.setBackground(Color.WHITE);
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
 
         JLabel titleLabel = new JLabel("Student Records");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         titleLabel.setForeground(UITheme.TEXT_PRIMARY);
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(titleLabel);
-        contentPanel.add(Box.createVerticalStrut(12));
+        content.add(titleLabel);
+        content.add(Box.createVerticalStrut(12));
 
         JLabel subtitleLabel = new JLabel("Select the record area you want to manage.");
         subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         subtitleLabel.setForeground(UITheme.TEXT_MUTED);
         subtitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(subtitleLabel);
-        contentPanel.add(Box.createVerticalStrut(28));
+        content.add(subtitleLabel);
+        content.add(Box.createVerticalStrut(28));
 
-        contentPanel.add(createMenuCard("Student Attendance"));
-        contentPanel.add(Box.createVerticalStrut(20));
-        contentPanel.add(createMenuCard("Student Marks"));
-        contentPanel.add(Box.createVerticalStrut(20));
-        contentPanel.add(createMenuCard("Student Eligibility"));
+        content.add(createMenuCard("Student Attendance", () -> cardLayout.show(contentPanel, "Attendance")));
+        content.add(Box.createVerticalStrut(20));
+        content.add(createMenuCard("Student Marks", this::showNextStepMessage));
+        content.add(Box.createVerticalStrut(20));
+        content.add(createMenuCard("Student Eligibility", this::showNextStepMessage));
 
-        add(contentPanel, BorderLayout.CENTER);
+        menuPanel.add(content, BorderLayout.CENTER);
+        return menuPanel;
     }
 
-    private JPanel createMenuCard(String title) {
+    private JPanel createMenuCard(String title, Runnable action) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(CARD_COLOR);
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
@@ -56,15 +72,19 @@ public class StudentDetails extends JPanel {
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JOptionPane.showMessageDialog(
-                        StudentDetails.this,
-                        title + " view will be implemented in the next step.",
-                        "Student Records",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                action.run();
             }
         });
 
         return card;
+    }
+
+    private void showNextStepMessage() {
+        JOptionPane.showMessageDialog(
+                this,
+                "This section will be implemented in the next step.",
+                "Student Records",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 }

@@ -111,4 +111,61 @@ public class AttendanceDAO {
         pst.setString(2, courseCode);
         return pst.executeQuery();
     }
+
+    public ResultSet getCourseAttendanceSummary(String courseCode, String studentId, String sessionFilter) throws SQLException {
+        Connection conn = DBConnection.getConnection();
+        StringBuilder sql = new StringBuilder(
+                "SELECT e.Reg_no, " +
+                        "COALESCE(SUM(CASE WHEN a.Status IN ('Present', 'Medical') THEN a.Session_hours ELSE 0 END), 0) AS attended_hours, " +
+                        "COALESCE(SUM(a.Session_hours), 0) AS total_hours, " +
+                        "COUNT(a.Attendance_id) AS total_sessions, " +
+                        "COALESCE(SUM(CASE WHEN a.Status IN ('Present', 'Medical') THEN 1 ELSE 0 END), 0) AS attended_sessions " +
+                        "FROM enrollment e " +
+                        "LEFT JOIN attendance a ON e.Reg_no = a.Reg_no AND e.Course_code = a.Course_code");
+
+        boolean filterBySession = sessionFilter != null && !sessionFilter.isBlank() && !"Overall".equalsIgnoreCase(sessionFilter);
+        if (filterBySession) {
+            sql.append(" AND a.Session_type = ?");
+        }
+
+        sql.append(" WHERE e.Course_code = ?");
+        boolean filterByStudent = studentId != null && !studentId.isBlank();
+        if (filterByStudent) {
+            sql.append(" AND e.Reg_no = ?");
+        }
+
+        sql.append(" GROUP BY e.Reg_no ORDER BY e.Reg_no");
+
+        PreparedStatement pst = conn.prepareStatement(sql.toString());
+        int parameterIndex = 1;
+        if (filterBySession) {
+            pst.setString(parameterIndex++, sessionFilter);
+        }
+        pst.setString(parameterIndex++, courseCode);
+        if (filterByStudent) {
+            pst.setString(parameterIndex, studentId.trim());
+        }
+        return pst.executeQuery();
+    }
+
+    public ResultSet getStudentAttendanceDetails(String courseCode, String studentId, String sessionFilter) throws SQLException {
+        Connection conn = DBConnection.getConnection();
+        StringBuilder sql = new StringBuilder(
+                "SELECT Session_date, Session_type, Session_hours, Status " +
+                        "FROM attendance WHERE Course_code = ? AND Reg_no = ?");
+
+        boolean filterBySession = sessionFilter != null && !sessionFilter.isBlank() && !"Overall".equalsIgnoreCase(sessionFilter);
+        if (filterBySession) {
+            sql.append(" AND Session_type = ?");
+        }
+        sql.append(" ORDER BY Session_date DESC, Attendance_id DESC");
+
+        PreparedStatement pst = conn.prepareStatement(sql.toString());
+        pst.setString(1, courseCode);
+        pst.setString(2, studentId);
+        if (filterBySession) {
+            pst.setString(3, sessionFilter);
+        }
+        return pst.executeQuery();
+    }
 }
