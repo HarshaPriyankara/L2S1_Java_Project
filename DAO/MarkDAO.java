@@ -61,6 +61,19 @@ public class MarkDAO {
         }
     }
 
+    public List<MarksCalculator.MarkBreakdown> getAllStudentMarkBreakdowns() throws SQLException {
+        String sql = "SELECT e.Reg_no, c.Course_code, c.Course_name, c.Credits, m.Marks_type, m.Marks_value " +
+                "FROM enrollment e " +
+                "JOIN course c ON e.Course_code = c.Course_code " +
+                "LEFT JOIN MARK m ON e.Reg_no = m.Reg_no AND e.Course_code = m.Course_code " +
+                "ORDER BY e.Reg_no, c.Course_code, m.Marks_type";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            return buildBreakdowns(pst.executeQuery());
+        }
+    }
+
     public Map<String, Map<String, Double>> getCourseMarksByStudent(String courseCode) throws SQLException {
         String sql = "SELECT e.Reg_no, m.Marks_type, m.Marks_value " +
                 "FROM enrollment e " +

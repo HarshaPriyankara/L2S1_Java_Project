@@ -20,6 +20,7 @@ public class StudentDetails extends JPanel {
         contentPanel.add(buildMenuPanel(), "Menu");
         contentPanel.add(new StudentAttendancePanel(lecturerId, () -> cardLayout.show(contentPanel, "Menu")), "Attendance");
         contentPanel.add(new StudentMarksPanel(lecturerId, () -> cardLayout.show(contentPanel, "Menu")), "Marks");
+        contentPanel.add(new StudentGpaPanel(() -> cardLayout.show(contentPanel, "Menu")), "Gpa");
 
         add(contentPanel, BorderLayout.CENTER);
         cardLayout.show(contentPanel, "Menu");
@@ -53,7 +54,7 @@ public class StudentDetails extends JPanel {
         content.add(Box.createVerticalStrut(20));
         content.add(createMenuCard("Student Marks", () -> cardLayout.show(contentPanel, "Marks")));
         content.add(Box.createVerticalStrut(20));
-        content.add(createMenuCard("SGPA and CGPA", this::showNextStepMessage));
+        content.add(createMenuCard("SGPA and CGPA", () -> cardLayout.show(contentPanel, "Gpa")));
 
         menuPanel.add(content, BorderLayout.CENTER);
         return menuPanel;
@@ -80,12 +81,4 @@ public class StudentDetails extends JPanel {
         return card;
     }
 
-    private void showNextStepMessage() {
-        JOptionPane.showMessageDialog(
-                this,
-                "This section will be implemented in the next step.",
-                "Student Records",
-                JOptionPane.INFORMATION_MESSAGE
-        );
-    }
 }
