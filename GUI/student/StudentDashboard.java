@@ -22,7 +22,7 @@ public class StudentDashboard extends BaseDashboard {
     @Override
     protected void setupUserPanels() {
         // These classes (UpdateProfilePanel, AttendancePanel, etc.) should exist in your project
-        contentPanel.add(new StudentProfilePanel(loggedInID), "Update Profile");
+        contentPanel.add(new StudentProfilePanel(loggedInID, contentPanel, cardLayout), "Update Profile");
         contentPanel.add(new AttendancePanel(loggedInID), "Attendance Details");
         contentPanel.add(new MedicalPanel(loggedInID), "Medical Details");
         contentPanel.add(new CoursePanel(loggedInID), "Course Details");
