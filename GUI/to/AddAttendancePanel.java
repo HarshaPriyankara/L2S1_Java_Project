@@ -14,6 +14,7 @@ public class AddAttendancePanel extends JPanel {
     private final JComboBox<String> typeBox = new JComboBox<>(new String[]{"Theory", "Practical"});
     private JTable table;
     private DefaultTableModel model;
+    private final JTextField txtDate = new JTextField(10);
 
     public AddAttendancePanel(AttendanceManagement parent) {
         setLayout(new BorderLayout(15, 15));
@@ -22,6 +23,9 @@ public class AddAttendancePanel extends JPanel {
 
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         top.setBackground(UITheme.APP_BACKGROUND);
+
+        txtDate.setText(LocalDate.now().toString());
+        UITheme.styleTextField(txtDate);
 
         JButton btnBack = new JButton("Back");
         UITheme.styleNeutralButton(btnBack);
@@ -43,6 +47,8 @@ public class AddAttendancePanel extends JPanel {
         top.add(courseBox);
         top.add(new JLabel("Type:"));
         top.add(typeBox);
+        top.add(new JLabel("Date:"));
+        top.add(txtDate);
         top.add(btnLoad);
 
         model = new DefaultTableModel(new String[]{"Student ID", "Course", "Status", "Hours"}, 0);
@@ -57,9 +63,14 @@ public class AddAttendancePanel extends JPanel {
         UITheme.styleSuccessButton(btnSave);
         UITheme.setWideButtonSize(btnSave);
         btnSave.addActionListener(e -> {
+            String manualDate = txtDate.getText().trim();
+            if (manualDate.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter the date first!");
+                return;
+            }
             boolean success = controller.saveAttendance(
                     courseBox.getSelectedItem().toString(),
-                    LocalDate.now().toString(),
+                    manualDate,
                     typeBox.getSelectedItem().toString(),
                     model.getDataVector()
             );

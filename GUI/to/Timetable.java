@@ -1,7 +1,6 @@
 package GUI.to;
 
 import Controllers.TimetableControllers.TimetableController;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -10,7 +9,7 @@ import java.util.List;
 public class Timetable extends JPanel {
     private JTable table;
     private DefaultTableModel model;
-    private JComboBox<String> levelCombo, semesterCombo, deptCombo;
+    private JComboBox<String> deptCombo;
     private final TimetableController timetableController = new TimetableController();
 
     public Timetable(TechnicalOfficerDashboard dashboard) {
@@ -32,10 +31,6 @@ public class Timetable extends JPanel {
         JPanel selectPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         selectPanel.setBackground(Color.WHITE);
 
-        levelCombo = new JComboBox<>(new String[]{"Level 1", "Level 2", "Level 3", "Level 4"});
-        semesterCombo = new JComboBox<>(new String[]{"Semester 1", "Semester 2"});
-
-
         deptCombo = new JComboBox<>(new String[]{ "ICT", "ET", "BST", "Multidisciplinary"});
 
         JButton btnView = new JButton("View Timetable");
@@ -44,11 +39,7 @@ public class Timetable extends JPanel {
         btnView.setPreferredSize(new Dimension(130, 30));
         btnView.setFocusPainted(false);
 
-        selectPanel.add(new JLabel("Level: "));
-        selectPanel.add(levelCombo);
-        selectPanel.add(new JLabel("  Sem: "));
-        selectPanel.add(semesterCombo);
-        selectPanel.add(new JLabel("  Dept: "));
+        selectPanel.add(new JLabel("Select Department: "));
         selectPanel.add(deptCombo);
         selectPanel.add(new JLabel("  "));
         selectPanel.add(btnView);
@@ -57,7 +48,9 @@ public class Timetable extends JPanel {
         add(headerContainer, BorderLayout.NORTH);
 
         // --- Table Setup ---
-        String[] columns = {"Level", "Sem", "Department", "Day", "Time Slot", "Course", "Venue", "Type"};
+
+
+        String[] columns = {"Department", "Day", "Time Slot", "Course", "Venue", "Type"};
         model = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
@@ -72,49 +65,46 @@ public class Timetable extends JPanel {
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 30, 30, 30));
         add(scrollPane, BorderLayout.CENTER);
 
+        // Button Action
         btnView.addActionListener(e -> updateTableData());
 
-        // if page load , show data
+        //if page load, show data
         updateTableData();
     }
 
     private void updateTableData() {
         model.setRowCount(0);
 
-        String selectedLevel = levelCombo.getSelectedItem().toString();
-        String selectedSem = semesterCombo.getSelectedItem().toString();
         String selectedDeptName = deptCombo.getSelectedItem().toString();
 
-
-        String deptId = "ALL";
+        // Department ID choose
+        String deptId = "dep001"; // defauli
         if (selectedDeptName.equals("ICT")) {
-            deptId = "D1";
+            deptId = "dep01"; //
         } else if (selectedDeptName.equals("ET")) {
-            deptId = "D2";
+            deptId = "dep02";
         } else if (selectedDeptName.equals("BST")) {
-            deptId = "D3";
+            deptId = "dep03";
         } else if (selectedDeptName.equals("Multidisciplinary")) {
-            deptId = "D4";
+            deptId = "dep04";
         }
 
-        // get filter data using DAO
-        List<Models.Timetable> list = timetableController.loadTimetable(selectedLevel, selectedSem, deptId);
+        // Controller using and get data
+        List<Models.Timetable> list = timetableController.loadTimetable(deptId);
 
         if (list != null && !list.isEmpty()) {
             for (Models.Timetable tt : list) {
                 model.addRow(new Object[]{
-                        selectedLevel,
-                        selectedSem,
-                        tt.getDepartmentId(), // මෙතන දැන් එන්නේ 'Information & Communication Technology' වගේ Full Name එක
+                        selectedDeptName,
                         tt.getDay(),
                         tt.getStartTime() + " - " + tt.getEndTime(),
-                        tt.getCourseCode() + " : " + tt.getCourseName(),
+                        tt.getCourseCode() + " : " + tt.getCourseName(), // කෝස් නම මෙතනට වැටෙනවා
                         tt.getVenue(),
                         tt.getSessionType()
                 });
             }
         } else {
-
+            // if data not, send error message
         }
     }
 }

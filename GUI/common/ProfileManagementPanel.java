@@ -10,17 +10,22 @@ public class ProfileManagementPanel extends JPanel {
     private final JPanel contentPanel = new JPanel();
     private final String loggedInUserId;
     private final boolean allowRoleEdit;
+    private final JPanel dashboardContentPanel;
+    private final CardLayout dashboardCardLayout;
 
     private static final Color BUTTON_COLOR = UITheme.PRIMARY;
     private static final Color CARD_COLOR   = UITheme.ACCENT;
 
-    public ProfileManagementPanel(String loggedInUserId) {
-        this(loggedInUserId, true);
+    public ProfileManagementPanel(String loggedInUserId, boolean allowRoleEdit) {
+        this(loggedInUserId, allowRoleEdit, null, null);
     }
 
-    public ProfileManagementPanel(String loggedInUserId, boolean allowRoleEdit) {
+    public ProfileManagementPanel(String loggedInUserId, boolean allowRoleEdit,
+                                  JPanel dashboardContentPanel, CardLayout dashboardCardLayout) {
         this.loggedInUserId = loggedInUserId;
         this.allowRoleEdit = allowRoleEdit;
+        this.dashboardContentPanel = dashboardContentPanel;
+        this.dashboardCardLayout = dashboardCardLayout;
         setLayout(new BorderLayout());
         setBackground(UITheme.APP_BACKGROUND);
         contentPanel.setBackground(UITheme.APP_BACKGROUND);
@@ -70,7 +75,7 @@ public class ProfileManagementPanel extends JPanel {
         JTextField txtPic = addPhotoPicker("Profile Photo", existing.getProfilePicPath());
 
         JPanel row = buttonRow();
-        //    backButton(row);
+        backButton(row);
         JButton updBtn = actionButton(row, "Save Changes", BUTTON_COLOR);
 
         updBtn.addActionListener(e -> {
@@ -201,12 +206,17 @@ public class ProfileManagementPanel extends JPanel {
     }
 
 
-//    private void backButton(JPanel row) {
-//        JButton btn = new JButton("Back");
-//        btn.setPreferredSize(new Dimension(100, 38));
-//        btn.addActionListener(e -> new LecturerDashboard());
-//        row.add(btn);
-//    }
+    private void backButton(JPanel row) {
+        JButton btn = new JButton("Back");
+        btn.setPreferredSize(new Dimension(100, 38));
+        UITheme.styleNeutralButton(btn);
+        btn.addActionListener(e -> {
+            if (dashboardCardLayout != null && dashboardContentPanel != null) {
+                dashboardCardLayout.show(dashboardContentPanel, "Home");
+            }
+        });
+        row.add(btn);
+    }
 
     private JButton actionButton(JPanel row, String label, Color bg) {
         JButton btn = new JButton(label);

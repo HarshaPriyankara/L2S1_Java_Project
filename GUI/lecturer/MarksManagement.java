@@ -38,6 +38,8 @@ public class MarksManagement extends JPanel {
         loadLecturerCourses();
 
         typeComboBox = new JComboBox<>(MarksCalculator.MARK_TYPES);
+        courseComboBox.addActionListener(e -> refreshAssessmentTypes());
+        refreshAssessmentTypes();
 
         JButton btnLoad = new JButton("Show Students");
         styleButton(btnLoad, new Color(46, 125, 192));
@@ -112,6 +114,17 @@ public class MarksManagement extends JPanel {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error loading courses: " + e.getMessage());
+        }
+    }
+
+    private void refreshAssessmentTypes() {
+        String selectedCourse = (String) courseComboBox.getSelectedItem();
+        typeComboBox.removeAllItems();
+        String[] markTypes = selectedCourse == null
+                ? MarksCalculator.MARK_TYPES
+                : marksController.getAllowedMarkTypes(selectedCourse);
+        for (String markType : markTypes) {
+            typeComboBox.addItem(markType);
         }
     }
 
