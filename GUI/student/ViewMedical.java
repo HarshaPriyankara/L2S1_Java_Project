@@ -1,6 +1,7 @@
 package GUI.student;
 
-import DAO.MedicalRecordDAO;
+import Controllers.MedicalControllers.MedicalViewController;
+import Controllers.MedicalControllers.StudentMedicalController;
 import Models.MedicalRecord;
 
 import javax.swing.*;
@@ -9,6 +10,7 @@ import java.awt.*;
 import java.util.List;
 
 public class ViewMedical extends JFrame {
+    private final MedicalViewController medicalViewController = new MedicalViewController();
 
     public ViewMedical() {
         this("");
@@ -36,11 +38,11 @@ public class ViewMedical extends JFrame {
 
         add(new JScrollPane(table));
 
-        try {
-            List<MedicalRecord> records = studentId == null || studentId.isBlank()
-                    ? new MedicalRecordDAO().getAllMedicalRecords()
-                    : new MedicalRecordDAO().getMedicalRecordsByStudent(studentId);
-
+        StudentMedicalController.MedicalRecordsResult result = medicalViewController.loadMedicalRecords(studentId);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage(), "Medical Records", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            List<MedicalRecord> records = result.getRecords();
             for (MedicalRecord record : records) {
                 model.addRow(new Object[]{
                         record.getMedicalId(),
@@ -52,8 +54,6 @@ public class ViewMedical extends JFrame {
                         record.isApproved() ? "Approved" : "Pending"
                 });
             }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage());
         }
 
         setVisible(true);

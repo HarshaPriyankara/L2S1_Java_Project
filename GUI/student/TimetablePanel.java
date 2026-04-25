@@ -1,8 +1,8 @@
 package GUI.student;
 
+import Controllers.TimetableControllers.TimetableController;
+import GUI.common.UITheme;
 import Models.Timetable;
-import DAO.UndergraduateDAO;
-import DAO.TimetableDAO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -10,38 +10,25 @@ import java.util.List;
 
 public class TimetablePanel extends JPanel {
 
-    private JComboBox<String> cmbYear, cmbSemester;
     private JTable table;
     private DefaultTableModel tableModel;
-    private JButton btnSearch;
     private final String studentId;
-    private final UndergraduateDAO undergraduateDAO = new UndergraduateDAO();
+    private final TimetableController timetableController = new TimetableController();
 
     public TimetablePanel(String studentId) {
         this.studentId = studentId;
-        setBackground(Color.WHITE);
+        setBackground(UITheme.APP_BACKGROUND);
         setLayout(new BorderLayout(15, 15));
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setBorder(UITheme.createContentBorder());
 
-        // --- Top Panel for Filtering ---
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
-        topPanel.setBackground(Color.WHITE);
+        // --- Top Panel (Title Only) ---
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.setBackground(UITheme.APP_BACKGROUND);
 
-        // Academic Year සහ Semester සඳහා Dropdowns
-        cmbYear = new JComboBox<>(new String[]{"Level 1", "Level 2", "Level 3", "Level 4"});
-        cmbSemester = new JComboBox<>(new String[]{"Semester 1", "Semester 2"});
-
-        btnSearch = new JButton("View Timetable");
-        btnSearch.setBackground(new Color(46, 125, 192));
-        btnSearch.setForeground(Color.WHITE);
-        btnSearch.setFont(new Font("SansSerif", Font.BOLD, 12));
-        btnSearch.setFocusPainted(false);
-
-        topPanel.add(new JLabel("Academic Level:"));
-        topPanel.add(cmbYear);
-        topPanel.add(new JLabel("Semester:"));
-        topPanel.add(cmbSemester);
-        topPanel.add(btnSearch);
+        JLabel lblTitle = new JLabel("MY ACADEMIC TIMETABLE");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblTitle.setForeground(new Color(41, 128, 185));
+        topPanel.add(lblTitle);
 
         add(topPanel, BorderLayout.NORTH);
 
@@ -49,49 +36,43 @@ public class TimetablePanel extends JPanel {
         String[] columns = {"Day", "Start Time", "End Time", "Course Code", "Course Name", "Venue", "Type"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
-            public boolean isCellEditable(int r, int c) {
-                return false;
-            }
+            public boolean isCellEditable(int r, int c) { return false; }
         };
 
         table = new JTable(tableModel);
         table.setRowHeight(35);
-        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-        table.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        UITheme.styleTable(table);
 
-        table.getColumnModel().getColumn(0).setPreferredWidth(80); // Day
-        table.getColumnModel().getColumn(4).setPreferredWidth(200); // Course Name (දිග වැඩි නිසා)
+        // Column width
+        table.getColumnModel().getColumn(0).setPreferredWidth(100); // Day
+        table.getColumnModel().getColumn(4).setPreferredWidth(250); // Course Name
 
         JScrollPane scrollPane = new JScrollPane(table);
         add(scrollPane, BorderLayout.CENTER);
 
-        btnSearch.addActionListener(e -> loadData());
+        //data load
+        loadData();
     }
 
     private void loadData() {
+        // Controller using and get student
+        TimetableController.TimetableStudentResult result = timetableController.loadStudentTimetable(studentId);
 
-        String level = cmbYear.getSelectedItem().toString();
-        String sem = cmbSemester.getSelectedItem().toString();
-
-
-        String deptId = undergraduateDAO.getStudentDepartmentId(studentId);
-        if (deptId == null || deptId.isBlank()) {
-            JOptionPane.showMessageDialog(this, "Unable to find your department details.", "Error", JOptionPane.ERROR_MESSAGE);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        TimetableDAO dao = new TimetableDAO();
-
-        // DAO එකෙන් ඩේටාබේස් එකේ නැති Level/Sem දත්ත අරගෙන එනවා (Course Code එක පාවිච්චි කරලා)
-        List<Timetable> list = dao.getStudentTimetable(deptId, level, sem);
-
-        tableModel.setRowCount(0);
+        List<Timetable> list = result.getTimetables();
+        tableModel.setRowCount(0); // old data remove
 
         if (list == null || list.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No lectures found for " + level + " " + sem, "No Data", JOptionPane.INFORMATION_MESSAGE);
+
+            tableModel.addRow(new Object[]{"-", "-", "-", "No records found", "-", "-", "-"});
         } else {
             for (Timetable tt : list) {
-                Object[] row = {
+                tableModel.addRow(new Object[]{
                         tt.getDay(),
                         tt.getStartTime(),
                         tt.getEndTime(),
@@ -99,8 +80,7 @@ public class TimetablePanel extends JPanel {
                         tt.getCourseName(),
                         tt.getVenue(),
                         tt.getSessionType()
-                };
-                tableModel.addRow(row);
+                });
             }
         }
     }

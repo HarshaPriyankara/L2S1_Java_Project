@@ -1,38 +1,50 @@
 package GUI.admin;
 
-import Models.Course;
-import DAO.CourseDAO;
+import Controllers.CourseControllers.CourseController;
+import Controllers.CourseControllers.CourseFormData;
+import Controllers.CourseControllers.CourseOperationResult;
+import GUI.common.UITheme;
 import javax.swing.*;
 import java.awt.*;
 
 class AddNewCoursePanel extends JPanel {
 
-    private JTextField txtCode, txtName, txtType, txtCredits, txtLecturer, txtDep;
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
+    private JTextField txtCode, txtName, txtCredits;
+    private JComboBox<String> cmbType, cmbLecturer, cmbDep;
+    private static final Color BUTTON_COLOR = UITheme.PRIMARY;
+    private final CourseController courseController = new CourseController();
 
     public AddNewCoursePanel(JPanel parentPanel, CardLayout cardLayout) {
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(Color.WHITE);
+        setBackground(UITheme.SURFACE);
         setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
 
         addTitle("Create New Course", BUTTON_COLOR);
 
         txtCode     = addField("*Course Code");
         txtName     = addField("*Course Name");
-        txtType     = addField("Type");
+        cmbType     = addTypeDropdown("Type");
         txtCredits  = addField("*Credits");
-        txtLecturer = addField("Lecturer ID");
-        txtDep      = addField("Department ID");
+        cmbLecturer = addDropdown("Lecturer ID");
+        cmbDep      = addDropdown("Department ID");
+        refreshDropdowns();
+
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                refreshDropdowns();
+            }
+        });
 
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        row.setBackground(Color.WHITE);
+        row.setBackground(UITheme.SURFACE);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
         // Back Button
         JButton btnBack = new JButton("Back");
-        styleButton(btnBack, new Color(0xAAAAAA));
+        styleButton(btnBack, UITheme.SURFACE_MUTED);
         btnBack.addActionListener(e -> cardLayout.show(parentPanel, "CourseMenu"));
 
         // Save Button
@@ -45,9 +57,7 @@ class AddNewCoursePanel extends JPanel {
         add(row);
 
         // Save Button Action
-        btnSave.addActionListener(e -> {
-            saveCourse();
-        });
+        btnSave.addActionListener(e -> saveCourse());
     }
 
     private void addTitle(String text, Color color) {
@@ -62,12 +72,14 @@ class AddNewCoursePanel extends JPanel {
     private JTextField addField(String label) {
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JTextField field = new JTextField();
         field.setFont(new Font("SansSerif", Font.PLAIN, 13));
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
         field.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.styleTextField(field);
 
         add(lbl);
         add(Box.createVerticalStrut(5));
@@ -76,51 +88,95 @@ class AddNewCoursePanel extends JPanel {
         return field;
     }
 
+    private JComboBox<String> addTypeDropdown(String label) {
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JComboBox<String> comboBox = new JComboBox<>(new String[]{"Theory", "Practical"});
+        comboBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        comboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        comboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.styleComboBox(comboBox);
+
+        add(lbl);
+        add(Box.createVerticalStrut(5));
+        add(comboBox);
+        add(Box.createVerticalStrut(12));
+        return comboBox;
+    }
+
+    private JComboBox<String> addDropdown(String label) {
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JComboBox<String> comboBox = new JComboBox<>();
+        comboBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        comboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        comboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.styleComboBox(comboBox);
+
+        add(lbl);
+        add(Box.createVerticalStrut(5));
+        add(comboBox);
+        add(Box.createVerticalStrut(12));
+        return comboBox;
+    }
+
+    private void refreshDropdowns() {
+        loadComboBox(cmbLecturer, courseController.getLecturerIds());
+        loadComboBox(cmbDep, courseController.getDepartmentIds());
+    }
+
+    private void loadComboBox(JComboBox<String> comboBox, java.util.List<String> values) {
+        comboBox.removeAllItems();
+        for (String value : values) {
+            comboBox.addItem(value);
+        }
+    }
+
+    private String selectedValue(JComboBox<String> comboBox) {
+        Object selected = comboBox.getSelectedItem();
+        return selected == null ? "" : selected.toString();
+    }
+
     private void styleButton(JButton btn, Color bg) {
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        if (UITheme.SURFACE_MUTED.equals(bg)) {
+            UITheme.styleNeutralButton(btn);
+        } else {
+            UITheme.stylePrimaryButton(btn);
+        }
         btn.setPreferredSize(new Dimension(130, 38));
     }
 
     private void saveCourse() {
-        try {
-            String code = txtCode.getText().trim();
-            String name = txtName.getText().trim();
-            String creditStr = txtCredits.getText().trim();
-            String type = txtType.getText().trim();
-            String lecturer = txtLecturer.getText().trim();
-            String department = txtDep.getText().trim();
+        CourseFormData formData = new CourseFormData(
+                txtCode.getText(),
+                txtName.getText(),
+                txtCredits.getText(),
+                cmbType.getSelectedItem().toString(),
+                selectedValue(cmbLecturer),
+                selectedValue(cmbDep)
+        );
 
-            if (code.isEmpty() || name.isEmpty() || creditStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill all required fields!", "Warning", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            int credits = Integer.parseInt(creditStr);
-            Course newCourse = new Course(code, name, credits, type, lecturer, department);
-            CourseDAO courseDao = new CourseDAO();
-
-            if (courseDao.addCourse(newCourse)) {
-                JOptionPane.showMessageDialog(this, "Course Added Successfully!");
-                clearFields();
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to add course. Code might already exist.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Credits must be a number!", "Input Error", JOptionPane.ERROR_MESSAGE);
+        CourseOperationResult result = courseController.addCourse(formData);
+        if (result.isSuccess()) {
+            JOptionPane.showMessageDialog(this, result.getMessage());
+            clearFields();
+        } else {
+            JOptionPane.showMessageDialog(this, result.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void clearFields() {
         txtCode.setText("");
         txtName.setText("");
-        txtType.setText("");
+        cmbType.setSelectedIndex(0);
         txtCredits.setText("");
-        txtLecturer.setText("");
-        txtDep.setText("");
+        if (cmbLecturer.getItemCount() > 0) cmbLecturer.setSelectedIndex(0);
+        if (cmbDep.getItemCount() > 0) cmbDep.setSelectedIndex(0);
     }
 }

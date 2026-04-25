@@ -1,27 +1,23 @@
 package GUI.common;
 
-import DAO.UserDAO;
-import GUI.admin.AdminDashboard;
-import GUI.lecturer.LecturerDashboard;
-import GUI.student.StudentDashboard;
-import GUI.to.TechnicalOfficerDashboard;
-import Models.User;
+import Controllers.AuthControllers.LoginController;
+import Controllers.AuthControllers.LoginResult;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.SQLException;
 
 public class LoginForm extends JFrame {
     private JTextField txtUsername;
     private JPasswordField txtPassword;
     private JButton btnLogin;
+    private final LoginController loginController = new LoginController();
 
     public LoginForm() {
         setTitle("Student Management System - Login");
         setSize(1000, 600);
         setLocationRelativeTo(null);// Align middle of screen
-        JPanel panel = new JPanel();
         setLayout(new BorderLayout());
+        getContentPane().setBackground(UITheme.APP_BACKGROUND);
 
         JLabel imageLabel = new JLabel();
         ImageIcon icon = new ImageIcon("Images/login2.jpg"); // your image path
@@ -31,13 +27,25 @@ public class LoginForm extends JFrame {
         add(imageLabel, BorderLayout.WEST);
 
         JPanel formPanel = new JPanel();
-        formPanel.setBackground(Color.white); // set background color
+        formPanel.setBackground(UITheme.SURFACE);
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
 
         formPanel.add(Box.createVerticalGlue());// set middle form
 
+        JLabel titleLabel = UITheme.createSectionTitle("Welcome Back");
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        formPanel.add(titleLabel);
+        formPanel.add(Box.createVerticalStrut(8));
+
+        JLabel subtitleLabel = new JLabel("Sign in to continue to the Faculty System");
+        subtitleLabel.setForeground(UITheme.TEXT_MUTED);
+        subtitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        formPanel.add(subtitleLabel);
+        formPanel.add(Box.createVerticalStrut(24));
+
         JLabel lblEmail = new JLabel("Username:");
+        lblEmail.setForeground(UITheme.TEXT_PRIMARY);
         lblEmail.setAlignmentX(Component.LEFT_ALIGNMENT);
         formPanel.add(lblEmail);
 
@@ -51,11 +59,13 @@ public class LoginForm extends JFrame {
         txtUsername.setMaximumSize(size);
         txtUsername.setMinimumSize(size);
         txtUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.styleTextField(txtUsername);
         formPanel.add(txtUsername);
 
         formPanel.add(Box.createVerticalStrut(20)); // set gap between 2 fields
         // 3. Password Label
         JLabel lblPassword = new JLabel("Password:");
+        lblPassword.setForeground(UITheme.TEXT_PRIMARY);
         lblPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
         formPanel.add(lblPassword);
 
@@ -68,16 +78,22 @@ public class LoginForm extends JFrame {
         txtPassword.setMaximumSize(size);
         txtPassword.setMinimumSize(size);
         txtPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtPassword.setBackground(UITheme.SURFACE);
+        txtPassword.setForeground(UITheme.TEXT_PRIMARY);
+        txtPassword.setCaretColor(UITheme.TEXT_PRIMARY);
+        txtPassword.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(204, 214, 224)),
+                BorderFactory.createEmptyBorder(6, 10, 6, 10)
+        ));
         formPanel.add(txtPassword);
 
         formPanel.add(Box.createVerticalStrut(30)); // gap between pwd field and button
         // 5. Login Button
         btnLogin = new JButton("Login");
         btnLogin.setPreferredSize(new Dimension(150, 45)); // button size
-        btnLogin.setBackground(new Color(52, 152, 219)); // set background color blue
-        btnLogin.setForeground(Color.WHITE); // set font color white
         btnLogin.setMaximumSize(new Dimension(150, 45));
         btnLogin.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.stylePrimaryButton(btnLogin);
         formPanel.add(btnLogin);
 
         add(formPanel, BorderLayout.CENTER);
@@ -85,55 +101,23 @@ public class LoginForm extends JFrame {
 
 
         // Button Click Event
-        btnLogin.addActionListener(e -> {
-            try {
-                loginAction();
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+        btnLogin.addActionListener(e -> loginAction());
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
 
-    private void loginAction() throws SQLException {
+    private void loginAction() {
         String username = txtUsername.getText();
         String password = new String(txtPassword.getPassword());
 
-        UserDAO dao = new UserDAO();
-        User user = dao.validateUser(username, password);
+        LoginResult result = loginController.authenticate(username, password);
+        if (result.isSuccess()) {
 
-        if (user != null) {
-            String role = user.getRole();
-            JOptionPane.showMessageDialog(this, "Login Successful! Role: " + role);
-
-            // go to dashboard
-            openDashboard(role, user);
-            this.dispose(); // close Login window
+            result.getDashboard().setVisible(true);
+            this.dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Invalid Username or Password!", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void openDashboard(String role, User user) {
-        String loggedInID = user.getUserID();
-        switch (role.toLowerCase()) {
-            case "admin":
-                new AdminDashboard(user).setVisible(true);
-                break;
-            case "lecture":
-            case "lecturer":
-                new LecturerDashboard(user).setVisible(true);
-                break;
-            case "student":
-            case "undergraduate":
-                new StudentDashboard(user).setVisible(true);
-                break;
-            case "technical officer":
-            case "techofficer":
-                new TechnicalOfficerDashboard(user).setVisible(true);
-                break;
+            JOptionPane.showMessageDialog(this, result.getMessage(), "Login", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }

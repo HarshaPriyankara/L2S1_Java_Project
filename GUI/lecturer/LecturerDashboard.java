@@ -2,6 +2,7 @@ package GUI.lecturer;
 
 import GUI.common.BaseDashboard;
 import GUI.common.ProfileManagementPanel;
+import GUI.common.UITheme;
 import GUI.common.ViewNotice;
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +27,7 @@ public class LecturerDashboard extends BaseDashboard {
         // These are the panels for tasks a lecturer must perform
         contentPanel.add(new MarksManagement(loggedInID), "MarksManagement");
         contentPanel.add(new AddCourseMaterialPanel(loggedInID), "AddMaterial");
-        contentPanel.add(new ProfileManagementPanel(loggedInID, false), "UpdateProfile");
+        contentPanel.add(new ProfileManagementPanel(loggedInID, false, contentPanel, cardLayout), "UpdateProfile");
 
         // Common panel for viewing notices
         contentPanel.add(new ViewNotice("Lecturer", contentPanel, cardLayout), "ViewNotice");
@@ -77,11 +78,11 @@ public class LecturerDashboard extends BaseDashboard {
     @Override
     protected JPanel buildHomePanel() {
         JPanel p = new JPanel(new GridBagLayout());
-        p.setBackground(Color.WHITE);
+        p.setBackground(UITheme.APP_BACKGROUND);
 
         JLabel lbl = new JLabel("Welcome, Lecturer");
         lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
-        lbl.setForeground(new Color(0x555555));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
 
         p.add(lbl);
         return p;

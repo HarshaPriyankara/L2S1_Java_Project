@@ -1,6 +1,7 @@
 package GUI.to;
 
 import GUI.common.BaseDashboard;
+import GUI.common.UITheme;
 import GUI.common.ViewNotice;
 import javax.swing.*;
 import java.awt.*;
@@ -27,7 +28,7 @@ public class TechnicalOfficerDashboard extends BaseDashboard {
         contentPanel.add(new MedicalManagement(this), "Medical");
         contentPanel.add(new Timetable(this), "Timetable");
 
-        contentPanel.add(new ProfileManagementPanel(currentUser.getUserID(), false), "Profile");
+        contentPanel.add(new ProfileManagementPanel(currentUser.getUserID(), false, contentPanel, cardLayout), "Profile");
 
         // Using the common ViewNotice panel used by other users
         contentPanel.add(new ViewNotice("Technical Officer", contentPanel, cardLayout), "Notices");
@@ -76,11 +77,11 @@ public class TechnicalOfficerDashboard extends BaseDashboard {
     @Override
     protected JPanel buildHomePanel() {
         JPanel p = new JPanel(new GridBagLayout());
-        p.setBackground(Color.WHITE);
+        p.setBackground(UITheme.APP_BACKGROUND);
 
         JLabel lbl = new JLabel("Technical Officer Portal");
         lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
-        lbl.setForeground(new Color(0x444444));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
 
         p.add(lbl);
         return p;

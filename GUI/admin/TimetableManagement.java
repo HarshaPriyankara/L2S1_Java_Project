@@ -1,172 +1,206 @@
 package GUI.admin;
 
+import Controllers.TimetableControllers.TimetableController;
+import Controllers.TimetableControllers.TimetableOperationResult;
+import Controllers.TimetableControllers.TimetableRowInput;
 import Models.Timetable;
-import DAO.TimetableDAO;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class TimetableManagement extends JPanel {
 
     private JTable table;
     private DefaultTableModel tableModel;
-    private JComboBox<String> cmbLevel, cmbSemester, cmbDept;
+    private JComboBox<String> cmbDay, cmbCourse, cmbType;
+    private JTextField txtStart, txtEnd, txtVenue;
     private JButton btnAddRow, btnRemoveRow, btnSaveAll, btnClear;
-    private Map<String, String> deptMap = new HashMap<>();
+
+    // Fixed Department for BICT
+    private final String FIXED_DEPT = "dep01";
+    private final TimetableController timetableController = new TimetableController();
 
     public TimetableManagement() {
-        // Department mapping
-        deptMap.put("Information & Communication Technology", "D1");
-        deptMap.put("Engineering Technology", "D2");
-        deptMap.put("Bio-Systems Technology", "D3");
-        deptMap.put("Multidisciplinary", "D4");
-
         setLayout(new BorderLayout(15, 15));
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // --- Top Panel: Selectors ---
-        JPanel topPanel = new JPanel(new GridBagLayout());
-        topPanel.setBackground(Color.WHITE);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        // --- Header ---
+        JLabel lblTitle = new JLabel("BICT TIMETABLE MANAGEMENT - ADMIN PANEL");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblTitle.setForeground(new Color(41, 128, 185));
+        add(lblTitle, BorderLayout.NORTH);
 
-        cmbDept = new JComboBox<>(deptMap.keySet().toArray(new String[0]));
-        cmbLevel = new JComboBox<>(new String[]{"Level 1", "Level 2", "Level 3", "Level 4"});
-        cmbSemester = new JComboBox<>(new String[]{"Semester 1", "Semester 2"});
+        // --- Table Setup ---
+        String[] columns = {"Day", "Course Code", "Course Name", "Start (HH:mm)", "End (HH:mm)", "Venue", "Type"};
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int r, int c) { return false; } // Table can not edit at once
+        };
 
-        gbc.gridx = 0; gbc.gridy = 0; topPanel.add(new JLabel("Department:"), gbc);
-        gbc.gridx = 1; topPanel.add(cmbDept, gbc);
-        gbc.gridx = 2; topPanel.add(new JLabel("Level:"), gbc);
-        gbc.gridx = 3; topPanel.add(cmbLevel, gbc);
-        gbc.gridx = 4; topPanel.add(new JLabel("Semester:"), gbc);
-        gbc.gridx = 5; topPanel.add(cmbSemester, gbc);
-
-        add(topPanel, BorderLayout.NORTH);
-
-        // --- Middle Panel: Table ---
-        String[] columns = {"Day", "Course Code", "Start (HH:mm)", "End (HH:mm)", "Venue", "Type (Theory/Practical)"};
-        tableModel = new DefaultTableModel(columns, 0);
         table = new JTable(tableModel);
         table.setRowHeight(30);
+        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        table.getColumnModel().getColumn(2).setPreferredWidth(200);
 
-        JScrollPane scrollPane = new JScrollPane(table);
-        add(scrollPane, BorderLayout.CENTER);
+        add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // --- Bottom Panel: Buttons ---
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        bottomPanel.setBackground(Color.WHITE);
+        // --- Input Form Panel ---
+        JPanel formPanel = new JPanel(new GridLayout(2, 4, 10, 5));
+        formPanel.setBackground(Color.WHITE);
+        formPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Add New Schedule Entry", 0, 0, new Font("Segoe UI", Font.BOLD, 14), new Color(41, 128, 185)));
 
-        btnAddRow = new JButton("Add Row (+)");
-        btnRemoveRow = new JButton("Remove Selected (-)");
-        btnSaveAll = new JButton("Save All Timetable");
-        btnClear = new JButton("Clear Table");
+        // Input Components
+        cmbDay = new JComboBox<>(new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"});
 
-        btnSaveAll.setBackground(new Color(46, 125, 192));
-        btnSaveAll.setForeground(Color.WHITE);
-        btnSaveAll.setFont(new Font("SansSerif", Font.BOLD, 13));
-
-        bottomPanel.add(btnAddRow);
-        bottomPanel.add(btnRemoveRow);
-        bottomPanel.add(btnClear);
-        bottomPanel.add(btnSaveAll);
-
-        add(bottomPanel, BorderLayout.SOUTH);
-
-        cmbDept.addActionListener(e -> loadDataToTable());
-        cmbLevel.addActionListener(e -> loadDataToTable());
-        cmbSemester.addActionListener(e -> loadDataToTable());
-
-        btnAddRow.addActionListener(e -> tableModel.addRow(new Object[]{"Monday", "", "08:30", "10:30", "", "Theory"}));
-
-        btnRemoveRow.addActionListener(e -> {
-            int selectedRow = table.getSelectedRow();
-            if (selectedRow != -1) tableModel.removeRow(selectedRow);
+        // Course List
+        cmbCourse = new JComboBox<>(new String[]{
+                "ICT2113 - Data Structures and Algorithms",
+                "ICT2122 - Object Oriented Programming",
+                "ENG2122 - English III",
+                "TCS2122 - Soft Skills",
+                "ICT2132 - OOP Practical",
+                "ICT2142 - OOAD",
+                "ICT2152 - E-Commerce"
         });
 
-        btnClear.addActionListener(e -> tableModel.setRowCount(0));
+        txtStart = new JTextField("08:30");
+        txtEnd = new JTextField("10:30");
+        txtVenue = new JTextField();
+        cmbType = new JComboBox<>(new String[]{"Theory", "Practical"});
+
+        // Adding to Form
+        formPanel.add(new JLabel("  Day:"));
+        formPanel.add(cmbDay);
+        formPanel.add(new JLabel("  Course:"));
+        formPanel.add(cmbCourse);
+        formPanel.add(new JLabel("  Start (HH:mm):"));
+        formPanel.add(txtStart);
+        formPanel.add(new JLabel("  End (HH:mm):"));
+        formPanel.add(txtEnd);
+        formPanel.add(new JLabel("  Venue:"));
+        formPanel.add(txtVenue);
+        formPanel.add(new JLabel("  Type:"));
+        formPanel.add(cmbType);
+
+        // --- Buttons Panel ---
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        actionPanel.setBackground(Color.WHITE);
+
+        btnAddRow = new JButton("Add to List (+)");
+        btnRemoveRow = new JButton("Remove Selected (-)");
+        btnSaveAll = new JButton("Save All to Database");
+        btnClear = new JButton("Clear Table");
+
+        // Styling Buttons
+        styleButton(btnAddRow, new Color(52, 152, 219));   // Blue
+        styleButton(btnSaveAll, new Color(46, 204, 113)); // Green
+        styleButton(btnRemoveRow, new Color(231, 76, 60)); // Red
+
+        actionPanel.add(btnAddRow);
+        actionPanel.add(btnRemoveRow);
+        actionPanel.add(btnClear);
+        actionPanel.add(btnSaveAll);
+
+        // Bottom Container (Form + Buttons)
+        JPanel southPanel = new JPanel(new BorderLayout());
+        southPanel.setBackground(Color.WHITE);
+        southPanel.add(formPanel, BorderLayout.NORTH);
+        southPanel.add(actionPanel, BorderLayout.SOUTH);
+
+        add(southPanel, BorderLayout.SOUTH);
+
+        // --- Listeners ---
+
+        // add data to table using form
+        btnAddRow.addActionListener(e -> {
+            String day = cmbDay.getSelectedItem().toString();
+            String fullCourse = cmbCourse.getSelectedItem().toString();
+
+            //code split and divide course and name
+            String[] parts = fullCourse.split(" - ");
+            String code = parts[0];
+            String name = parts[1];
+
+            tableModel.addRow(new Object[]{
+                    day, code, name, txtStart.getText(), txtEnd.getText(), txtVenue.getText(), cmbType.getSelectedItem()
+            });
+        });
+
+        //selected raw delete
+        btnRemoveRow.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row != -1) {
+                tableModel.removeRow(row);
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select a row to remove.");
+            }
+        });
+
+        btnClear.addActionListener(e -> {
+            if (JOptionPane.showConfirmDialog(this, "Clear all rows?", "Confirm", JOptionPane.YES_NO_OPTION) == 0) {
+                tableModel.setRowCount(0);
+            }
+        });
+
         btnSaveAll.addActionListener(e -> syncData());
 
+        // Initial Load
         loadDataToTable();
     }
 
-    private void loadDataToTable() {
-        String dId = deptMap.get(cmbDept.getSelectedItem().toString());
-        String lvl = cmbLevel.getSelectedItem().toString();
-        String sem = cmbSemester.getSelectedItem().toString();
+    private void styleButton(JButton btn, Color color) {
+        btn.setBackground(color);
+        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setFocusPainted(false);
+    }
 
-        List<Timetable> list = new TimetableDAO().getFiltered(lvl, sem, dId);
+    private void loadDataToTable() {
+        List<Timetable> list = timetableController.loadTimetable(FIXED_DEPT);
         tableModel.setRowCount(0);
 
         for (Timetable tt : list) {
             tableModel.addRow(new Object[]{
                     tt.getDay(),
                     tt.getCourseCode(),
+                    tt.getCourseName(),
                     tt.getStartTime(),
                     tt.getEndTime(),
                     tt.getVenue(),
                     tt.getSessionType()
             });
         }
-
-        if (tableModel.getRowCount() == 0) {
-            for (int i = 0; i < 5; i++) {
-                tableModel.addRow(new Object[]{"Monday", "", "08:30", "10:30", "", "Theory"});
-            }
-        }
     }
 
     private void syncData() {
         if (table.isEditing()) table.getCellEditor().stopCellEditing();
 
-        String dId = deptMap.get(cmbDept.getSelectedItem().toString());
-        String lvl = cmbLevel.getSelectedItem().toString();
-        String sem = cmbSemester.getSelectedItem().toString();
+        List<TimetableRowInput> rowInputs = new ArrayList<>();
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            String code = String.valueOf(tableModel.getValueAt(i, 1)).trim();
+            if (code.isEmpty()) continue;
 
-        List<Timetable> newList = new ArrayList<>();
-        try {
-            for (int i = 0; i < tableModel.getRowCount(); i++) {
-                String code = tableModel.getValueAt(i, 1).toString().trim();
-                if (code.isEmpty()) continue;
+            rowInputs.add(new TimetableRowInput(
+                    String.valueOf(tableModel.getValueAt(i, 0)),
+                    code,
+                    String.valueOf(tableModel.getValueAt(i, 3)), // Start Time
+                    String.valueOf(tableModel.getValueAt(i, 4)), // End Time
+                    String.valueOf(tableModel.getValueAt(i, 5)), // Venue
+                    String.valueOf(tableModel.getValueAt(i, 6))  // Type
+            ));
+        }
 
-                Timetable tt = new Timetable();
+        TimetableOperationResult result = timetableController.syncTimetable(rowInputs, FIXED_DEPT);
 
-                // --- අයින් කළා: ID එක ජාවා වලින් සෙට් කරන පේළිය ---
-                // දැන් ඩේටාබේස් එක මේක AUTO_INCREMENT හරහා බලාගන්නවා.
-
-                tt.setCourseCode(code);
-                tt.setDay(tableModel.getValueAt(i, 0).toString());
-
-                // වෙලාවල තිත (.) තිබුණොත් ඒක තිත් දෙක (:) බවට පත් කරමු
-                String startStr = tableModel.getValueAt(i, 2).toString().replace(".", ":");
-                String endStr = tableModel.getValueAt(i, 3).toString().replace(".", ":");
-
-                tt.setStartTime(LocalTime.parse(startStr));
-                tt.setEndTime(LocalTime.parse(endStr));
-
-                tt.setVenue(tableModel.getValueAt(i, 4).toString());
-                tt.setSessionType(tableModel.getValueAt(i, 5).toString());
-                tt.setDepartmentId(dId);
-                newList.add(tt);
-            }
-
-            // DB එකට යැවීම
-            if (Timetable.syncFullTimetable(newList, lvl, sem, dId)) {
-                JOptionPane.showMessageDialog(this, "Timetable Updated Successfully!");
-                loadDataToTable();
-            } else {
-                JOptionPane.showMessageDialog(this, "Update Failed!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Check Time Formats (HH:mm)!", "Input Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+        if (result.isSuccess()) {
+            JOptionPane.showMessageDialog(this, result.getMessage());
+            loadDataToTable(); // Refresh table from DB
+        } else {
+            JOptionPane.showMessageDialog(this, result.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 }

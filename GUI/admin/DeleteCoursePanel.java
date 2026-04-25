@@ -1,42 +1,54 @@
 package GUI.admin;
 
+import Controllers.CourseControllers.CourseController;
+import Controllers.CourseControllers.CourseOperationResult;
+import GUI.common.UITheme;
+
 import javax.swing.*;
 import java.awt.*;
 
 class DeleteCoursePanel extends JPanel {
-    private JTextField txtCode;
-    private static final Color DELETE_COLOR = new Color(0xCC0000); // Red color for delete
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
+    private JComboBox<String> cmbCode;
+    private static final Color DELETE_COLOR = UITheme.DANGER;
+    private final CourseController courseController = new CourseController();
 
     public DeleteCoursePanel(JPanel parentPanel, CardLayout cardLayout) {
         // Layout and Styling setup
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(Color.WHITE);
+        setBackground(UITheme.SURFACE);
         setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
 
         // 1. Title
         addTitle("Delete Course", DELETE_COLOR);
 
         // 2. Description label
-        JLabel desc = new JLabel("Enter the Course Code of the course you want to delete.");
+        JLabel desc = new JLabel("Select the Course Code of the course you want to delete.");
         desc.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        desc.setForeground(Color.GRAY);
+        desc.setForeground(UITheme.TEXT_MUTED);
         desc.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(desc);
         add(Box.createVerticalStrut(20));
 
-        // 3. Input Field (addField helper method eka use kara)
-        txtCode = addField("Course Code");
+        // 3. Course code dropdown
+        cmbCode = addDropdown("Course Code");
+        refreshCourseCodes();
+
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                refreshCourseCodes();
+            }
+        });
 
         // 4. Button Row setup
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        row.setBackground(Color.WHITE);
+        row.setBackground(UITheme.SURFACE);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
         // Back Button
         JButton btnBack = new JButton("Back");
-        styleButton(btnBack, new Color(0xAAAAAA));
+        styleButton(btnBack, UITheme.SURFACE_MUTED);
         btnBack.addActionListener(e -> cardLayout.show(parentPanel, "CourseMenu"));
 
         // Delete Button
@@ -50,10 +62,10 @@ class DeleteCoursePanel extends JPanel {
 
         // --- Delete Button Action (Oyaage original logic eka) ---
         btnDelete.addActionListener(e -> {
-            String code = txtCode.getText().trim();
+            String code = selectedValue(cmbCode);
 
             if (code.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter a Course Code!", "Warning", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Please select a Course Code!", "Warning", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -62,12 +74,12 @@ class DeleteCoursePanel extends JPanel {
                     JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                DAO.CourseDAO dao = new DAO.CourseDAO();
-                if (dao.deleteCourse(code)) {
-                    JOptionPane.showMessageDialog(this, "Course Deleted Successfully!");
-                    txtCode.setText("");
+                CourseOperationResult result = courseController.deleteCourse(code);
+                if (result.isSuccess()) {
+                    JOptionPane.showMessageDialog(this, result.getMessage());
+                    refreshCourseCodes();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Delete Failed! Course Code not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, result.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -84,30 +96,50 @@ class DeleteCoursePanel extends JPanel {
         add(Box.createVerticalStrut(24));
     }
 
-    private JTextField addField(String label) {
+    private JComboBox<String> addDropdown(String label) {
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JTextField field = new JTextField();
-        field.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        field.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JComboBox<String> comboBox = new JComboBox<>();
+        comboBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        comboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        comboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.styleComboBox(comboBox);
 
         add(lbl);
         add(Box.createVerticalStrut(5));
-        add(field);
+        add(comboBox);
         add(Box.createVerticalStrut(12));
-        return field;
+        return comboBox;
+    }
+
+    private void refreshCourseCodes() {
+        String selectedCode = selectedValue(cmbCode);
+        cmbCode.removeAllItems();
+        for (String code : courseController.getCourseCodes()) {
+            cmbCode.addItem(code);
+        }
+        cmbCode.setSelectedItem(selectedCode);
+        if (cmbCode.getSelectedItem() == null && cmbCode.getItemCount() > 0) {
+            cmbCode.setSelectedIndex(0);
+        }
+    }
+
+    private String selectedValue(JComboBox<String> comboBox) {
+        Object selected = comboBox.getSelectedItem();
+        return selected == null ? "" : selected.toString();
     }
 
     private void styleButton(JButton btn, Color bg) {
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(130, 38));
+        if (UITheme.SURFACE_MUTED.equals(bg)) {
+            UITheme.styleNeutralButton(btn);
+        } else if (UITheme.DANGER.equals(bg)) {
+            UITheme.styleDangerButton(btn);
+        } else {
+            UITheme.stylePrimaryButton(btn);
+        }
+        UITheme.setStandardButtonSize(btn);
     }
 }

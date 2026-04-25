@@ -1,7 +1,8 @@
 package DAO;
 
-import Utils.MarksCalculator;
 import Utils.DBConnection;
+import Utils.CourseMarkScheme;
+import Utils.MarksCalculator;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -134,10 +135,13 @@ public class MarkDAO {
 
     // Marks Add
     public boolean addMarks(String regNo, String course, String type, double marks) {
-        String sql = "INSERT INTO mark (Reg_no, Course_code, Marks_type, Marks_value) VALUES (?, ?, ?, ?)";
-
-        // "Quiz 1" convert "Quiz_1"
         String formattedType = type.replace(" ", "_");
+        if (!isAllowedMarkType(course, formattedType)) {
+            return false;
+        }
+
+        String sql = "INSERT INTO mark (Reg_no, Course_code, Marks_type, Marks_value) VALUES (?, ?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE Marks_value = VALUES(Marks_value), Marks_type = VALUES(Marks_type)";
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -158,8 +162,10 @@ public class MarkDAO {
     public boolean updateMarks(int id, String regNo, String course, String type, double marks) {
         String sql = "UPDATE mark SET Reg_no=?, Course_code=?, Marks_type=?, Marks_value=? WHERE Mark_id=?";
 
-        // convert
         String formattedType = type.replace(" ", "_");
+        if (!isAllowedMarkType(course, formattedType)) {
+            return false;
+        }
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -189,5 +195,14 @@ public class MarkDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private boolean isAllowedMarkType(String course, String type) {
+        for (String allowedType : CourseMarkScheme.forCourse(course).getAllowedMarkTypes()) {
+            if (allowedType.equals(type)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

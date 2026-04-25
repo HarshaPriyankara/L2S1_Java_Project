@@ -1,11 +1,13 @@
 package GUI.admin;
 
-import DAO.NoticeDAO;
+import Controllers.NoticeControllers.NoticeAdminController;
+import Controllers.NoticeControllers.NoticeDetailsResult;
+import Controllers.NoticeControllers.NoticeFormData;
+import Controllers.NoticeControllers.NoticeOperationResult;
 import Models.Notice;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
 
 // INHERITANCE: UpdateNotice is "a kind of" CreateNotice. It inherits all UI layout.
 // This prevents rewriting the whole UI panel logic perfectly showing code reusability.
@@ -16,7 +18,7 @@ public class UpdateNotice extends CreateNotice {
 
     public UpdateNotice(NoticeManagementPanel parent, int id, String title) {
         // Calling super class constructor to prepare the base UI
-        super(parent);
+        super(parent, new NoticeAdminController());
         this.noticeId = id;
         
         // POLYMORPHISM: Adapting the base UI components to fit "Update" instead of "Create"
@@ -38,9 +40,13 @@ public class UpdateNotice extends CreateNotice {
 
     // ABSTRACTION: Delegating complex database retrieval directly to NoticeDAO 
     private void loadNoticeData() {
-        NoticeDAO dao = new NoticeDAO();
-        Notice notice = dao.getNoticeById(this.noticeId);
-        
+        NoticeDetailsResult result = noticeController.getNoticeDetails(this.noticeId);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Notice notice = result.getNotice();
         if (notice != null) {
             titleField.setText(notice.getTitle());
             String roles = notice.getTargetRole();
@@ -49,31 +55,13 @@ public class UpdateNotice extends CreateNotice {
                 if (roles.contains("Technical Officer")) chkTechnical.setSelected(true);
                 if (roles.contains("Undergraduate")) chkUndergrad.setSelected(true);
             }
-            
-            // Reusing file loading abstraction if possible
-            File file = new File(notice.getFilePath());
-            if (file.exists()) {
-                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                    contentArea.read(br, null);
-                } catch (IOException e) {
-                    contentArea.setText("Error reading file content.");
-                }
-            }
+            contentArea.setText(result.getContent());
         }
     }
 
-    // POLYMORPHISM: Overriding the super class Database-Save behavior to do an Update instead 
     @Override
-    protected boolean saveToDatabase(String roles, String title, String path) {
-        NoticeDAO dao = new NoticeDAO();
-        // Uses the newly created updateNotice abstraction
-        return dao.updateNotice(this.noticeId, roles, title, path);
-    }
-
-    // POLYMORPHISM: Customize success response text
-    @Override
-    protected String getSuccessMessage() {
-        return "Notice updated successfully!";
+    protected NoticeOperationResult handleNoticeSave(NoticeFormData formData) {
+        return noticeController.updateNotice(this.noticeId, formData);
     }
 
     // POLYMORPHISM: Change post-action behavior to exit panel

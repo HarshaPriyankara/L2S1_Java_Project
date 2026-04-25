@@ -1,6 +1,7 @@
 package GUI.student;
 
 import DAO.MarkDAO;
+import Utils.GpaCalculator;
 import Utils.MarksCalculator;
 
 import javax.swing.*;
@@ -12,7 +13,7 @@ import java.util.List;
 public class GradePanel extends JPanel {
     private JTable gradeTable;
     private DefaultTableModel tableModel;
-    private JLabel sgpaLabel;
+    private JLabel gpaLabel;
     private String studentID;
 
     public GradePanel(String studentID) {
@@ -25,7 +26,7 @@ public class GradePanel extends JPanel {
         title.setFont(new Font("SansSerif", Font.BOLD, 22));
         add(title, BorderLayout.NORTH);
 
-        String[] columns = {"Course Code", "Course Name", "Grade", "GPA", "SGPA"};
+        String[] columns = {"Course Code", "Course Name", "Total Marks", "Grade", "Grade Value"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -38,10 +39,10 @@ public class GradePanel extends JPanel {
         gradeTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
         add(new JScrollPane(gradeTable), BorderLayout.CENTER);
 
-        sgpaLabel = new JLabel("SGPA: 0.00", SwingConstants.RIGHT);
-        sgpaLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
-        sgpaLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
-        add(sgpaLabel, BorderLayout.SOUTH);
+        gpaLabel = new JLabel("SGPA: Not available | CGPA: Not available", SwingConstants.RIGHT);
+        gpaLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        gpaLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+        add(gpaLabel, BorderLayout.SOUTH);
 
         loadGradeData();
     }
@@ -54,25 +55,30 @@ public class GradePanel extends JPanel {
             List<MarksCalculator.MarkBreakdown> breakdowns = dao.getStudentMarkBreakdowns(studentID);
 
             if (breakdowns.isEmpty()) {
-                sgpaLabel.setText("No grade data available");
+                gpaLabel.setText("No grade data available");
                 return;
             }
 
-            double sgpa = MarksCalculator.calculateSGPA(breakdowns);
+            GpaCalculator.GpaResult gpaResult = GpaCalculator.calculate(breakdowns);
 
             for (MarksCalculator.MarkBreakdown breakdown : breakdowns) {
                 tableModel.addRow(new Object[]{
                         breakdown.getCourseCode(),
                         breakdown.getCourseName(),
+                        breakdown.hasMarks() ? breakdown.getTotalMarks() : "Pending",
                         breakdown.getGrade(),
-                        breakdown.getGpa(),
-                        sgpa
+                        breakdown.hasMarks() ? breakdown.getGradePoint() : "Pending"
                 });
             }
 
-            sgpaLabel.setText(String.format("SGPA: %.2f", sgpa));
+            if (gpaResult.isSgpaAvailable() && gpaResult.isCgpaAvailable()) {
+                gpaLabel.setText(String.format("SGPA: %.2f | CGPA: %.2f",
+                        gpaResult.getSgpa(), gpaResult.getCgpa()));
+            } else {
+                gpaLabel.setText("SGPA: Not available | CGPA: Not available");
+            }
         } catch (SQLException e) {
-            sgpaLabel.setText("Error loading grades");
+            gpaLabel.setText("Error loading grades");
             JOptionPane.showMessageDialog(this, "Error loading grades: " + e.getMessage());
         }
     }

@@ -1,31 +1,27 @@
 package GUI.lecturer;
 
-import DAO.AttendanceDAO;
-import DAO.LecturerStudentDAO;
-import DAO.MarkDAO;
-import DAO.MedicalRecordDAO;
+import Controllers.StudentControllers.StudentDetailsController;
+import Controllers.StudentControllers.StudentDetailsResult;
 import Models.MedicalRecord;
+import Utils.CourseMarkScheme;
+import Utils.GpaCalculator;
 import Utils.MarksCalculator;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 
 public class StudentDetails extends JPanel {
     private final String lecturerId;
-    private final LecturerStudentDAO lecturerStudentDAO = new LecturerStudentDAO();
-    private final MarkDAO markDAO = new MarkDAO();
-    private final AttendanceDAO attendanceDAO = new AttendanceDAO();
-    private final MedicalRecordDAO medicalRecordDAO = new MedicalRecordDAO();
+    private final StudentDetailsController studentDetailsController = new StudentDetailsController();
 
     private final JComboBox<String> courseComboBox = new JComboBox<>();
     private final JComboBox<String> studentComboBox = new JComboBox<>();
     private final JPanel profilePanel = new JPanel();
     private final JLabel lblEligibility = new JLabel("Eligibility: -");
-    private final JLabel lblGpa = new JLabel("Overall GPA: -");
+    private final JLabel lblGpa = new JLabel("SGPA: - | CGPA: -");
     private final DefaultTableModel marksModel;
     private final DefaultTableModel attendanceModel;
     private final DefaultTableModel medicalModel;
@@ -54,13 +50,13 @@ public class StudentDetails extends JPanel {
         profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
         profilePanel.setBackground(Color.WHITE);
 
-        marksModel = createModel(new String[]{"Course", "Course Name", "CA", "END", "Total", "Grade", "GPA"});
+        marksModel = createModel(new String[]{"Course", "Course Name", "CA", "END", "Total", "Grade", "Grade Value"});
         attendanceModel = createModel(new String[]{"Date", "Type", "Hours", "Status"});
         medicalModel = createModel(new String[]{"Medical ID", "Date", "Type", "Reason", "Status"});
 
         JTabbedPane tabs = new JTabbedPane();
         tabs.addTab("Profile", new JScrollPane(profilePanel));
-        tabs.addTab("Marks / Grades / GPA", new JScrollPane(new JTable(marksModel)));
+        tabs.addTab("Marks / Grades", new JScrollPane(new JTable(marksModel)));
         tabs.addTab("Attendance", new JScrollPane(new JTable(attendanceModel)));
         tabs.addTab("Medical", new JScrollPane(new JTable(medicalModel)));
         add(tabs, BorderLayout.CENTER);
@@ -89,7 +85,7 @@ public class StudentDetails extends JPanel {
     private void loadLecturerCourses() {
         try {
             courseComboBox.removeAllItems();
-            for (String course : lecturerStudentDAO.getLecturerCourses(lecturerId)) {
+            for (String course : studentDetailsController.loadLecturerCourses(lecturerId)) {
                 courseComboBox.addItem(course);
             }
             loadStudentsForSelectedCourse();
@@ -106,7 +102,7 @@ public class StudentDetails extends JPanel {
         }
 
         try {
-            for (String student : lecturerStudentDAO.getStudentsByCourse(course)) {
+            for (String student : studentDetailsController.loadStudentsByCourse(course)) {
                 studentComboBox.addItem(student);
             }
         } catch (Exception ex) {
@@ -122,92 +118,78 @@ public class StudentDetails extends JPanel {
             return;
         }
 
-        loadProfile(studentId);
-        loadMarks(studentId, courseCode);
-        loadAttendance(studentId, courseCode);
-        loadMedical(studentId);
+        StudentDetailsResult result = studentDetailsController.loadStudentDetails(studentId, courseCode);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage());
+            return;
+        }
+
+        loadProfile(result.getProfile());
+        loadMarks(result.getMarks(), result.getSelectedCourseBreakdown());
+        loadAttendance(result.getAttendanceRows());
+        loadMedical(result.getMedicalRecords());
     }
 
-    private void loadProfile(String studentId) {
+    private void loadProfile(Map<String, String> details) {
         profilePanel.removeAll();
-        try {
-            Map<String, String> details = lecturerStudentDAO.getStudentProfile(studentId);
-            for (Map.Entry<String, String> entry : details.entrySet()) {
-                JLabel label = new JLabel(entry.getKey() + ": " + entry.getValue());
-                label.setFont(new Font("SansSerif", Font.PLAIN, 14));
-                label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-                profilePanel.add(label);
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to load student profile: " + ex.getMessage());
+        for (Map.Entry<String, String> entry : details.entrySet()) {
+            JLabel label = new JLabel(entry.getKey() + ": " + entry.getValue());
+            label.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+            profilePanel.add(label);
         }
         profilePanel.revalidate();
         profilePanel.repaint();
     }
 
-    private void loadMarks(String studentId, String courseCode) {
+    private void loadMarks(List<MarksCalculator.MarkBreakdown> breakdowns, MarksCalculator.MarkBreakdown selectedCourse) {
         marksModel.setRowCount(0);
-        try {
-            List<MarksCalculator.MarkBreakdown> breakdowns = markDAO.getStudentMarkBreakdowns(studentId);
-            for (MarksCalculator.MarkBreakdown breakdown : breakdowns) {
-                marksModel.addRow(new Object[]{
-                        breakdown.getCourseCode(),
-                        breakdown.getCourseName(),
-                        breakdown.getCaMarks(),
-                        breakdown.getEndMarks(),
-                        breakdown.getTotalMarks(),
-                        breakdown.getGrade(),
-                        breakdown.getGpa()
-                });
-            }
+        for (MarksCalculator.MarkBreakdown breakdown : breakdowns) {
+            marksModel.addRow(new Object[]{
+                    breakdown.getCourseCode(),
+                    breakdown.getCourseName(),
+                    breakdown.getCaMarks(),
+                    breakdown.getEndMarks(),
+                    breakdown.hasMarks() ? breakdown.getTotalMarks() : "Pending",
+                    breakdown.getGrade(),
+                    breakdown.hasMarks() ? breakdown.getGradePoint() : "Pending"
+            });
+        }
 
-            MarksCalculator.MarkBreakdown selectedCourse = markDAO.getStudentCourseBreakdown(studentId, courseCode);
-            if (selectedCourse == null) {
-                lblEligibility.setText("Eligibility: No marks yet for selected course");
-            } else {
-                boolean eligible = selectedCourse.getCaMarks() >= 15.0;
-                lblEligibility.setText("Eligibility: " + (eligible ? "Eligible for end assessment" : "Not eligible for end assessment"));
-            }
+        if (selectedCourse == null) {
+            lblEligibility.setText("Eligibility: No marks yet for selected course");
+        } else {
+            double caPassMark = CourseMarkScheme.forCourse(selectedCourse.getCourseCode()).getCaPassMark();
+            boolean eligible = selectedCourse.hasMarks() && selectedCourse.getCaMarks() >= caPassMark;
+            lblEligibility.setText("Eligibility: " + (eligible ? "Eligible for end assessment" : "Not eligible for end assessment"));
+        }
 
-            double sgpa = MarksCalculator.calculateSGPA(breakdowns);
-            lblGpa.setText(String.format("Overall GPA: %.2f", sgpa));
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to load marks: " + ex.getMessage());
+        GpaCalculator.GpaResult gpaResult = GpaCalculator.calculate(breakdowns);
+        if (gpaResult.isSgpaAvailable() && gpaResult.isCgpaAvailable()) {
+            lblGpa.setText(String.format("SGPA: %.2f | CGPA: %.2f",
+                    gpaResult.getSgpa(), gpaResult.getCgpa()));
+        } else {
+            lblGpa.setText("SGPA: Not available | CGPA: Not available");
         }
     }
 
-    private void loadAttendance(String studentId, String courseCode) {
+    private void loadAttendance(List<Object[]> attendanceRows) {
         attendanceModel.setRowCount(0);
-        try {
-            ResultSet rs = attendanceDAO.getStudentAttendance(studentId, courseCode);
-            while (rs.next()) {
-                attendanceModel.addRow(new Object[]{
-                        rs.getString("Session_date"),
-                        rs.getString("Session_type"),
-                        rs.getString("Session_hours"),
-                        rs.getString("Status")
-                });
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to load attendance: " + ex.getMessage());
+        for (Object[] row : attendanceRows) {
+            attendanceModel.addRow(row);
         }
     }
 
-    private void loadMedical(String studentId) {
+    private void loadMedical(List<MedicalRecord> records) {
         medicalModel.setRowCount(0);
-        try {
-            List<MedicalRecord> records = medicalRecordDAO.getMedicalRecordsByStudent(studentId);
-            for (MedicalRecord record : records) {
-                medicalModel.addRow(new Object[]{
-                        record.getMedicalId(),
-                        record.getSessionDate(),
-                        record.getSessionType(),
-                        record.getReason(),
-                        record.isApproved() ? "Approved" : "Pending"
-                });
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to load medical records: " + ex.getMessage());
+        for (MedicalRecord record : records) {
+            medicalModel.addRow(new Object[]{
+                    record.getMedicalId(),
+                    record.getSessionDate(),
+                    record.getSessionType(),
+                    record.getReason(),
+                    record.isApproved() ? "Approved" : "Pending"
+            });
         }
     }
 }

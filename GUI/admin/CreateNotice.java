@@ -1,13 +1,11 @@
 package GUI.admin;
 
-import DAO.AdminDAO;
+import Controllers.NoticeControllers.NoticeAdminController;
+import Controllers.NoticeControllers.NoticeFormData;
+import Controllers.NoticeControllers.NoticeOperationResult;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 // ENCAPSULATION & INHERITANCE: CreateNotice acts as a base class. 
 // Relevant UI elements are declared as 'protected' so subclasses (UpdateNotice) can inherit and access them.
@@ -18,9 +16,15 @@ public class CreateNotice extends JPanel {
     protected JCheckBox chkLecturer, chkTechnical, chkUndergrad;
     protected NoticeManagementPanel parentPanel;
     protected JButton btnSubmit;
+    protected final NoticeAdminController noticeController;
 
     public CreateNotice(NoticeManagementPanel parentPanel) {
+        this(parentPanel, new NoticeAdminController());
+    }
+
+    protected CreateNotice(NoticeManagementPanel parentPanel, NoticeAdminController noticeController) {
         this.parentPanel = parentPanel;
+        this.noticeController = noticeController;
         setLayout(new BorderLayout());
         add(CreateMainCon(), BorderLayout.CENTER);
     }
@@ -101,70 +105,27 @@ public class CreateNotice extends JPanel {
 
     // POLYMORPHISM: This method is designed to be overridden by subclasses.
     protected void saveNoticeAction() {
-        String title = titleField.getText();
-        String content = contentArea.getText();
-
-        StringBuilder targetRole = new StringBuilder();
-        if (chkLecturer.isSelected()) targetRole.append("Lecturer,");
-        if (chkTechnical.isSelected()) targetRole.append("Technical Officer,");
-        if (chkUndergrad.isSelected()) targetRole.append("Undergraduate,");
-
-        String finalRoles = targetRole.toString();
-        if (finalRoles.endsWith(",")) {
-            finalRoles = finalRoles.substring(0, finalRoles.length() - 1);
-        }
-
-        if (title.isEmpty() || content.isEmpty() || finalRoles.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill all fields!");
-            return;
-        }
-
-        try {
-            String finalPathForDB = saveToFileAndReturnPath(title, content);
-
-            // Using polymorphic database saving method
-            boolean isSaved = saveToDatabase(finalRoles, title, finalPathForDB);
-
-            if (isSaved) {
-                JOptionPane.showMessageDialog(this, getSuccessMessage());
-                clearFields();
-            } else {
-                JOptionPane.showMessageDialog(this, "Database Error!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+        NoticeOperationResult result = handleNoticeSave(buildFormData());
+        if (result.isSuccess()) {
+            JOptionPane.showMessageDialog(this, result.getMessage());
+            clearFields();
+        } else {
+            JOptionPane.showMessageDialog(this, result.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    protected String saveToFileAndReturnPath(String title, String content) throws IOException {
-        String sanitizedTitle = title.replaceAll("[^a-zA-Z0-9\\s]", "_");
-        String folderPath = "notices/" + sanitizedTitle;
-        String fileName = sanitizedTitle + ".txt";
-        String finalPathForDB = folderPath + "/" + fileName;
-
-        File folder = new File(folderPath);
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-
-        File file = new File(folder, fileName);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write(content);
-        }
-        return finalPathForDB;
+    protected NoticeFormData buildFormData() {
+        return new NoticeFormData(
+                titleField.getText(),
+                contentArea.getText(),
+                chkLecturer.isSelected(),
+                chkTechnical.isSelected(),
+                chkUndergrad.isSelected()
+        );
     }
 
-    // POLYMORPHISM (Runtime): Can be overridden later to alter DB behavior
-    protected boolean saveToDatabase(String roles, String title, String path) {
-        DAO.AdminDAO adminDAO = new DAO.AdminDAO();
-        return adminDAO.addNotice(roles, title, path);
-    }
-
-    // POLYMORPHISM
-    protected String getSuccessMessage() {
-        return "Notice saved to file and Database successfully!";
+    protected NoticeOperationResult handleNoticeSave(NoticeFormData formData) {
+        return noticeController.createNotice(formData);
     }
 
     // Reusability

@@ -10,19 +10,25 @@ public class ProfileManagementPanel extends JPanel {
     private final JPanel contentPanel = new JPanel();
     private final String loggedInUserId;
     private final boolean allowRoleEdit;
+    private final JPanel dashboardContentPanel;
+    private final CardLayout dashboardCardLayout;
 
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
-    private static final Color CARD_COLOR   = new Color(85, 179, 232);
-
-    public ProfileManagementPanel(String loggedInUserId) {
-        this(loggedInUserId, true);
-    }
+    private static final Color BUTTON_COLOR = UITheme.PRIMARY;
+    private static final Color CARD_COLOR   = UITheme.ACCENT;
 
     public ProfileManagementPanel(String loggedInUserId, boolean allowRoleEdit) {
+        this(loggedInUserId, allowRoleEdit, null, null);
+    }
+
+    public ProfileManagementPanel(String loggedInUserId, boolean allowRoleEdit,
+                                  JPanel dashboardContentPanel, CardLayout dashboardCardLayout) {
         this.loggedInUserId = loggedInUserId;
         this.allowRoleEdit = allowRoleEdit;
+        this.dashboardContentPanel = dashboardContentPanel;
+        this.dashboardCardLayout = dashboardCardLayout;
         setLayout(new BorderLayout());
-        contentPanel.setBackground(Color.WHITE);
+        setBackground(UITheme.APP_BACKGROUND);
+        contentPanel.setBackground(UITheme.APP_BACKGROUND);
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scroll = new JScrollPane(contentPanel);
@@ -69,7 +75,7 @@ public class ProfileManagementPanel extends JPanel {
         JTextField txtPic = addPhotoPicker("Profile Photo", existing.getProfilePicPath());
 
         JPanel row = buttonRow();
-        //    backButton(row);
+        backButton(row);
         JButton updBtn = actionButton(row, "Save Changes", BUTTON_COLOR);
 
         updBtn.addActionListener(e -> {
@@ -106,6 +112,7 @@ public class ProfileManagementPanel extends JPanel {
         row.add(createLabel(labelText));
         JTextField f = new JTextField(value);
         f.setPreferredSize(new Dimension(350, 30));
+        UITheme.styleTextField(f);
         row.add(f);
         contentPanel.add(row);
         return f;
@@ -117,7 +124,7 @@ public class ProfileManagementPanel extends JPanel {
         JTextField f = new JTextField(value);
         f.setPreferredSize(new Dimension(350, 30));
         f.setEditable(false);
-        f.setBackground(new Color(240, 240, 240));
+        f.setBackground(UITheme.SURFACE_MUTED);
         row.add(f);
         contentPanel.add(row);
     }
@@ -128,6 +135,7 @@ public class ProfileManagementPanel extends JPanel {
         JComboBox<String> combo = new JComboBox<>(new String[]{"lecture", "Technical Officer", "Admin", "Student"});
         combo.setSelectedItem(currentRole);
         combo.setPreferredSize(new Dimension(350, 30));
+        UITheme.styleComboBox(combo);
         row.add(combo);
         contentPanel.add(row);
         return combo;
@@ -138,8 +146,10 @@ public class ProfileManagementPanel extends JPanel {
         row.add(createLabel(labelText));
         JTextField path = new JTextField(currentPath);
         path.setPreferredSize(new Dimension(265, 30));
+        UITheme.styleTextField(path);
         JButton btn = new JButton("Browse");
         btn.setPreferredSize(new Dimension(80, 30));
+        UITheme.styleNeutralButton(btn);
         btn.addActionListener(e -> {
             JFileChooser jfc = new JFileChooser();
             if(jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -153,7 +163,7 @@ public class ProfileManagementPanel extends JPanel {
 
     private JPanel createRow() {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
-        row.setBackground(Color.WHITE);
+        row.setBackground(UITheme.APP_BACKGROUND);
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         return row;
@@ -163,6 +173,7 @@ public class ProfileManagementPanel extends JPanel {
         JLabel lbl = new JLabel(text);
         lbl.setPreferredSize(new Dimension(150, 30));
         lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
         return lbl;
     }
 
@@ -189,24 +200,34 @@ public class ProfileManagementPanel extends JPanel {
 
     private JPanel buttonRow() {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 20));
-        row.setBackground(Color.WHITE);
+        row.setBackground(UITheme.APP_BACKGROUND);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         return row;
     }
 
 
-//    private void backButton(JPanel row) {
-//        JButton btn = new JButton("Back");
-//        btn.setPreferredSize(new Dimension(100, 38));
-//        btn.addActionListener(e -> new LecturerDashboard());
-//        row.add(btn);
-//    }
+    private void backButton(JPanel row) {
+        JButton btn = new JButton("Back");
+        btn.setPreferredSize(new Dimension(100, 38));
+        UITheme.styleNeutralButton(btn);
+        btn.addActionListener(e -> {
+            if (dashboardCardLayout != null && dashboardContentPanel != null) {
+                dashboardCardLayout.show(dashboardContentPanel, "Home");
+            }
+        });
+        row.add(btn);
+    }
 
     private JButton actionButton(JPanel row, String label, Color bg) {
         JButton btn = new JButton(label);
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
         btn.setPreferredSize(new Dimension(140, 38));
+        if (UITheme.DANGER.equals(bg)) {
+            UITheme.styleDangerButton(btn);
+        } else if (UITheme.SURFACE_MUTED.equals(bg)) {
+            UITheme.styleNeutralButton(btn);
+        } else {
+            UITheme.stylePrimaryButton(btn);
+        }
         row.add(btn);
         return btn;
     }
