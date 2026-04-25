@@ -30,7 +30,9 @@ public class MedicalManagementController {
                     LocalDate.parse(formData.getSessionDate()),
                     formData.getSessionType(),
                     formData.getExamCourse(),
-                    formData.getReason()
+                    formData.getReason(),
+                    formData.getMedicalFilePath(),
+                    formData.isApproved()
             );
             return new StudentMedicalController.MedicalActionResult(true, "Medical record added successfully.");
         } catch (Exception ex) {

@@ -6,6 +6,7 @@
 out/
 bin/
 *.class
+notices/
 
 # External libraries (optional)
 *.jar

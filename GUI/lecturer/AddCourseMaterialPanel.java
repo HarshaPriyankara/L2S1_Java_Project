@@ -17,10 +17,11 @@ public class AddCourseMaterialPanel extends JPanel {
     private final String lecturerId;
     private final CourseMaterialDAO courseMaterialDAO = new CourseMaterialDAO();
     private JTextField txtTitle;
-    private JTextField txtCourseCode;
+    private JComboBox<String> cmbCourseCode;
     private JTextField txtUploadedBy;
     private JTextArea txtLink;
-    private JTextField txtMaterialId;
+    private int selectedMaterialId = -1;
+    private final java.util.List<Integer> materialIds = new java.util.ArrayList<>();
     private DefaultTableModel tableModel;
     private JTable materialTable;
     private static final Color BUTTON_COLOR = UITheme.PRIMARY;
@@ -51,15 +52,6 @@ public class AddCourseMaterialPanel extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(new JLabel("Material ID:"), gbc);
-        gbc.gridx = 1;
-        txtMaterialId = new JTextField(12);
-        txtMaterialId.setEditable(false);
-        txtMaterialId.setBackground(UITheme.SURFACE_MUTED);
-        panel.add(txtMaterialId, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
         panel.add(new JLabel("Material Title:"), gbc);
         gbc.gridx = 1;
         txtTitle = new JTextField(22);
@@ -67,15 +59,17 @@ public class AddCourseMaterialPanel extends JPanel {
         panel.add(txtTitle, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 1;
         panel.add(new JLabel("Course Code:"), gbc);
         gbc.gridx = 1;
-        txtCourseCode = new JTextField(22);
-        UITheme.styleTextField(txtCourseCode);
-        panel.add(txtCourseCode, gbc);
+        cmbCourseCode = new JComboBox<>();
+        cmbCourseCode.setPreferredSize(new Dimension(220, 32));
+        UITheme.styleComboBox(cmbCourseCode);
+        panel.add(cmbCourseCode, gbc);
+        loadLecturerCourseCodes();
 
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 2;
         panel.add(new JLabel("Uploaded By:"), gbc);
         gbc.gridx = 1;
         txtUploadedBy = new JTextField(lecturerId, 22);
@@ -84,7 +78,7 @@ public class AddCourseMaterialPanel extends JPanel {
         panel.add(txtUploadedBy, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         panel.add(new JLabel("File Path:"), gbc);
         gbc.gridx = 1;
@@ -115,32 +109,44 @@ public class AddCourseMaterialPanel extends JPanel {
         });
         panel.add(new JScrollPane(txtLink), gbc);
 
+        JButton btnBrowse = new JButton("Browse");
+        styleButton(btnBrowse, UITheme.SURFACE_MUTED);
+        gbc.gridx = 2;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        panel.add(btnBrowse, gbc);
+
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         row.setBackground(UITheme.SURFACE);
         JButton btnSave = new JButton("Upload Material");
         JButton btnUpdate = new JButton("Update Material");
+        JButton btnDelete = new JButton("Delete Material");
         JButton btnClear = new JButton("Clear");
         styleButton(btnSave, BUTTON_COLOR);
         styleButton(btnUpdate, UITheme.SUCCESS);
+        styleButton(btnDelete, UITheme.DANGER);
         styleButton(btnClear, CLEAR_BTN_COLOR);
         row.add(btnSave);
         row.add(btnUpdate);
+        row.add(btnDelete);
         row.add(btnClear);
 
         gbc.gridx = 1;
-        gbc.gridy = 5;
+        gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.EAST;
         panel.add(row, gbc);
 
+        btnBrowse.addActionListener(e -> browseFile());
         btnSave.addActionListener(e -> saveMaterial());
         btnUpdate.addActionListener(e -> updateMaterial());
+        btnDelete.addActionListener(e -> deleteMaterial());
         btnClear.addActionListener(e -> clearFields());
 
         return panel;
     }
 
     private JScrollPane buildTablePanel() {
-        String[] columns = {"Material ID", "Title", "Course Code", "Uploaded At", "File Path"};
+        String[] columns = {"Title", "Course Code", "Uploaded At", "File Path"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -163,7 +169,7 @@ public class AddCourseMaterialPanel extends JPanel {
 
     private void saveMaterial() {
         String title = txtTitle.getText().trim();
-        String cCode = txtCourseCode.getText().trim();
+        String cCode = selectedCourseCode();
         String uploadedBy = txtUploadedBy.getText().trim();
         String sourcePath = txtLink.getText().trim();
 
@@ -183,19 +189,20 @@ public class AddCourseMaterialPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Material uploaded.");
             clearFields();
             loadMaterials();
+            selectFirstMaterial();
         } else {
             JOptionPane.showMessageDialog(this, "Error! Check if Course Code or Lecturer ID is valid.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void updateMaterial() {
-        if (txtMaterialId.getText().trim().isEmpty()) {
+        if (selectedMaterialId < 0) {
             JOptionPane.showMessageDialog(this, "Select a material from the table to update.");
             return;
         }
 
         String title = txtTitle.getText().trim();
-        String cCode = txtCourseCode.getText().trim();
+        String cCode = selectedCourseCode();
         String sourcePath = txtLink.getText().trim();
         if (title.isEmpty() || cCode.isEmpty() || sourcePath.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Title, course code, and file path are required.");
@@ -211,7 +218,7 @@ public class AddCourseMaterialPanel extends JPanel {
         }
 
         boolean updated = courseMaterialDAO.updateMaterial(
-                Integer.parseInt(txtMaterialId.getText().trim()),
+                selectedMaterialId,
                 title,
                 cCode,
                 finalPath
@@ -226,23 +233,65 @@ public class AddCourseMaterialPanel extends JPanel {
         }
     }
 
-    private void loadMaterials() {
-        tableModel.setRowCount(0);
-        for (Object[] row : courseMaterialDAO.getMaterialsByLecturer(lecturerId)) {
-            tableModel.addRow(row);
-        }
-    }
-
-    private void populateSelectedMaterial() {
-        int row = materialTable.getSelectedRow();
-        if (row < 0) {
+    private void deleteMaterial() {
+        if (selectedMaterialId < 0) {
+            JOptionPane.showMessageDialog(this, "Select a material from the table to delete.");
             return;
         }
 
-        txtMaterialId.setText(String.valueOf(tableModel.getValueAt(row, 0)));
-        txtTitle.setText(String.valueOf(tableModel.getValueAt(row, 1)));
-        txtCourseCode.setText(String.valueOf(tableModel.getValueAt(row, 2)));
-        txtLink.setText(String.valueOf(tableModel.getValueAt(row, 4)));
+        String title = txtTitle.getText().trim();
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to delete " + title + "?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        String filePath = txtLink.getText().trim();
+        boolean deleted = courseMaterialDAO.deleteMaterial(selectedMaterialId, lecturerId);
+        if (deleted) {
+            deleteStoredFile(filePath);
+            JOptionPane.showMessageDialog(this, "Material deleted.");
+            clearFields();
+            loadMaterials();
+        } else {
+            JOptionPane.showMessageDialog(this, "Material delete failed.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void loadMaterials() {
+        tableModel.setRowCount(0);
+        materialIds.clear();
+        for (Object[] row : courseMaterialDAO.getMaterialsByLecturer(lecturerId)) {
+            materialIds.add((Integer) row[0]);
+            tableModel.addRow(new Object[]{row[1], row[2], row[3], row[4]});
+        }
+    }
+
+    private void selectFirstMaterial() {
+        if (materialTable.getRowCount() == 0) {
+            return;
+        }
+
+        materialTable.setRowSelectionInterval(0, 0);
+        materialTable.scrollRectToVisible(materialTable.getCellRect(0, 0, true));
+    }
+
+    private void populateSelectedMaterial() {
+        int selectedRow = materialTable.getSelectedRow();
+        if (selectedRow < 0) {
+            return;
+        }
+        int row = materialTable.convertRowIndexToModel(selectedRow);
+
+        selectedMaterialId = materialIds.get(row);
+        txtTitle.setText(String.valueOf(tableModel.getValueAt(row, 0)));
+        cmbCourseCode.setSelectedItem(String.valueOf(tableModel.getValueAt(row, 1)));
+        txtLink.setText(String.valueOf(tableModel.getValueAt(row, 3)));
     }
 
     private void styleButton(JButton btn, Color bg) {
@@ -250,10 +299,31 @@ public class AddCourseMaterialPanel extends JPanel {
             UITheme.styleNeutralButton(btn);
         } else if (UITheme.SUCCESS.equals(bg)) {
             UITheme.styleSuccessButton(btn);
+        } else if (UITheme.DANGER.equals(bg)) {
+            UITheme.styleDangerButton(btn);
         } else {
             UITheme.stylePrimaryButton(btn);
         }
         UITheme.setWideButtonSize(btn);
+    }
+
+    private void browseFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            txtLink.setText(fileChooser.getSelectedFile().getAbsolutePath().replace("\\", "/"));
+        }
+    }
+
+    private void loadLecturerCourseCodes() {
+        cmbCourseCode.removeAllItems();
+        for (String courseCode : courseMaterialDAO.getCourseCodesByLecturer(lecturerId)) {
+            cmbCourseCode.addItem(courseCode);
+        }
+    }
+
+    private String selectedCourseCode() {
+        Object selected = cmbCourseCode.getSelectedItem();
+        return selected == null ? "" : selected.toString();
     }
 
     private String saveFileToFolder(String sourcePath, String title) {
@@ -287,10 +357,23 @@ public class AddCourseMaterialPanel extends JPanel {
         }
     }
 
+    private void deleteStoredFile(String filePath) {
+        if (filePath.isEmpty()) {
+            return;
+        }
+
+        File file = new File(filePath);
+        if (file.exists() && file.isFile()) {
+            file.delete();
+        }
+    }
+
     private void clearFields() {
-        txtMaterialId.setText("");
+        selectedMaterialId = -1;
         txtTitle.setText("");
-        txtCourseCode.setText("");
+        if (cmbCourseCode.getItemCount() > 0) {
+            cmbCourseCode.setSelectedIndex(0);
+        }
         txtUploadedBy.setText(lecturerId);
         txtLink.setText("");
         materialTable.clearSelection();

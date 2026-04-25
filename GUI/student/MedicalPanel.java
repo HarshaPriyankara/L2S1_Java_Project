@@ -3,10 +3,14 @@ package GUI.student;
 import Controllers.MedicalControllers.StudentMedicalController;
 import GUI.common.UITheme;
 import Models.MedicalRecord;
+import Utils.FileStorageSupport;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -15,11 +19,20 @@ import java.util.List;
 public class MedicalPanel extends JPanel {
     private final String studentId;
     private final StudentMedicalController medicalController = new StudentMedicalController();
-    private final DefaultTableModel tableModel;
-    private final JTextArea txtReason;
-    private final JComboBox<String> cmbSessionType;
-    private final JTextField txtExamCourse;
-    private final JSpinner dateSpinner;
+    private final FileStorageSupport fileStorageSupport = new FileStorageSupport() {
+        @Override
+        protected File uploadDirectory() {
+            return new File("uploads/medical_records");
+        }
+    };
+
+    private DefaultTableModel tableModel;
+    private JTextArea txtReason;
+    private JComboBox<String> cmbSessionType;
+    private JTextField txtExamCourse;
+    private JTextField txtMedicalFile;
+    private JSpinner dateSpinner;
+    private File selectedMedicalFile;
 
     public MedicalPanel(String studentId) {
         this.studentId = studentId;
@@ -28,55 +41,66 @@ public class MedicalPanel extends JPanel {
         setBackground(UITheme.APP_BACKGROUND);
         setBorder(UITheme.createContentBorder());
 
+        add(UITheme.createSectionTitle("Submit New Medical"), BorderLayout.NORTH);
+        add(buildContentPanel(), BorderLayout.CENTER);
+
+        updateExamCourseState();
+        loadMedicalRecords();
+    }
+
+    private JPanel buildContentPanel() {
+        JPanel contentPanel = new JPanel(new BorderLayout(15, 15));
+        contentPanel.setBackground(UITheme.APP_BACKGROUND);
+        contentPanel.add(buildFormPanel(), BorderLayout.NORTH);
+        contentPanel.add(buildTablePanel(), BorderLayout.CENTER);
+        return contentPanel;
+    }
+
+    private JPanel buildFormPanel() {
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(UITheme.SURFACE);
-        formPanel.setBorder(UITheme.createSectionBorder("Submit New Medical"));
+        formPanel.setBorder(UITheme.createSectionBorder("Medical Details"));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        formPanel.add(new JLabel("Registration No:"), gbc);
-
-        gbc.gridx = 1;
+        addLabel(formPanel, "Registration No:", gbc, 0);
         JTextField txtStudentId = new JTextField(studentId, 18);
         txtStudentId.setEditable(false);
         txtStudentId.setBackground(UITheme.SURFACE_MUTED);
-        formPanel.add(txtStudentId, gbc);
+        addField(formPanel, txtStudentId, gbc, 0);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        formPanel.add(new JLabel("Medical Date:"), gbc);
-
-        gbc.gridx = 1;
+        addLabel(formPanel, "Medical Date:", gbc, 1);
         dateSpinner = new JSpinner(new SpinnerDateModel());
-        JSpinner.DateEditor editor = new JSpinner.DateEditor(dateSpinner, "yyyy-MM-dd");
-        dateSpinner.setEditor(editor);
-        formPanel.add(dateSpinner, gbc);
+        dateSpinner.setEditor(new JSpinner.DateEditor(dateSpinner, "yyyy-MM-dd"));
+        addField(formPanel, dateSpinner, gbc, 1);
 
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        formPanel.add(new JLabel("Session Type:"), gbc);
-
-        gbc.gridx = 1;
+        addLabel(formPanel, "Session Type:", gbc, 2);
         cmbSessionType = new JComboBox<>(new String[]{"NormalDay", "Exam"});
         UITheme.styleComboBox(cmbSessionType);
-        formPanel.add(cmbSessionType, gbc);
+        addField(formPanel, cmbSessionType, gbc, 2);
 
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        formPanel.add(new JLabel("Exam Course:"), gbc);
-
-        gbc.gridx = 1;
+        addLabel(formPanel, "Exam Course:", gbc, 3);
         txtExamCourse = new JTextField(18);
         UITheme.styleTextField(txtExamCourse);
-        formPanel.add(txtExamCourse, gbc);
+        addField(formPanel, txtExamCourse, gbc, 3);
+
+        addLabel(formPanel, "Medical File:", gbc, 4);
+        JPanel filePanel = new JPanel(new BorderLayout(8, 0));
+        filePanel.setBackground(UITheme.SURFACE);
+        txtMedicalFile = new JTextField(18);
+        txtMedicalFile.setEditable(false);
+        txtMedicalFile.setBackground(UITheme.SURFACE_MUTED);
+        JButton btnBrowse = new JButton("Browse");
+        UITheme.styleNeutralButton(btnBrowse);
+        filePanel.add(txtMedicalFile, BorderLayout.CENTER);
+        filePanel.add(btnBrowse, BorderLayout.EAST);
+        addField(formPanel, filePanel, gbc, 4);
 
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         formPanel.add(new JLabel("Reason:"), gbc);
 
@@ -88,7 +112,7 @@ public class MedicalPanel extends JPanel {
         formPanel.add(new JScrollPane(txtReason), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         gbc.anchor = GridBagConstraints.EAST;
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actionPanel.setBackground(UITheme.SURFACE);
@@ -102,27 +126,46 @@ public class MedicalPanel extends JPanel {
         actionPanel.add(btnSubmit);
         formPanel.add(actionPanel, gbc);
 
-        add(formPanel, BorderLayout.NORTH);
+        cmbSessionType.addActionListener(e -> updateExamCourseState());
+        btnBrowse.addActionListener(e -> browseMedicalFile());
+        btnSubmit.addActionListener(e -> submitMedical());
+        btnRefresh.addActionListener(e -> loadMedicalRecords());
 
-        String[] columns = {"Medical ID", "Date", "Type", "Exam Course", "Reason", "Status"};
+        return formPanel;
+    }
+
+    private JScrollPane buildTablePanel() {
+        String[] columns = {"Date", "Type", "Exam Course", "Reason", "Medical File", "Status", "Open"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false;
+                return column == 6;
             }
         };
 
         JTable table = new JTable(tableModel);
-        table.setRowHeight(28);
+        table.setRowHeight(30);
         UITheme.styleTable(table);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        table.getColumnModel().getColumn(6).setCellRenderer(new OpenButtonRenderer());
+        table.getColumnModel().getColumn(6).setCellEditor(new OpenButtonEditor(table));
 
-        cmbSessionType.addActionListener(e -> updateExamCourseState());
-        btnSubmit.addActionListener(e -> submitMedical());
-        btnRefresh.addActionListener(e -> loadMedicalRecords());
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(UITheme.createSectionBorder("My Medical Records"));
+        return scrollPane;
+    }
 
-        updateExamCourseState();
-        loadMedicalRecords();
+    private void addLabel(JPanel panel, String text, GridBagConstraints gbc, int row) {
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(new JLabel(text), gbc);
+    }
+
+    private void addField(JPanel panel, Component component, GridBagConstraints gbc, int row) {
+        gbc.gridx = 1;
+        gbc.gridy = row;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(component, gbc);
     }
 
     private void updateExamCourseState() {
@@ -130,6 +173,14 @@ public class MedicalPanel extends JPanel {
         txtExamCourse.setEnabled(isExam);
         if (!isExam) {
             txtExamCourse.setText("");
+        }
+    }
+
+    private void browseMedicalFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            selectedMedicalFile = fileChooser.getSelectedFile();
+            txtMedicalFile.setText(selectedMedicalFile.getAbsolutePath().replace("\\", "/"));
         }
     }
 
@@ -141,14 +192,20 @@ public class MedicalPanel extends JPanel {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
+        String uploadedFilePath = null;
+        if (selectedMedicalFile != null) {
+            uploadedFilePath = fileStorageSupport.saveFile(selectedMedicalFile, studentId, sessionDate);
+            if (uploadedFilePath == null) {
+                JOptionPane.showMessageDialog(this, "Medical file upload failed.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
         StudentMedicalController.MedicalActionResult result =
-                medicalController.submitMedical(studentId, sessionDate, sessionType, examCourse, reason);
+                medicalController.submitMedical(studentId, sessionDate, sessionType, examCourse, reason, uploadedFilePath);
 
         if (result.isSuccess()) {
-            txtReason.setText("");
-            if (!"Exam".equals(sessionType)) {
-                txtExamCourse.setText("");
-            }
+            clearForm(sessionType);
             loadMedicalRecords();
         }
 
@@ -158,6 +215,15 @@ public class MedicalPanel extends JPanel {
                 result.isSuccess() ? "Success" : "Error",
                 result.isSuccess() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE
         );
+    }
+
+    private void clearForm(String sessionType) {
+        txtReason.setText("");
+        txtMedicalFile.setText("");
+        selectedMedicalFile = null;
+        if (!"Exam".equals(sessionType)) {
+            txtExamCourse.setText("");
+        }
     }
 
     private void loadMedicalRecords() {
@@ -171,14 +237,79 @@ public class MedicalPanel extends JPanel {
 
         List<MedicalRecord> records = result.getRecords();
         for (MedicalRecord record : records) {
+            String filePath = record.getMedicalFilePath() == null ? "" : record.getMedicalFilePath();
             tableModel.addRow(new Object[]{
-                    record.getMedicalId(),
                     record.getSessionDate(),
                     record.getSessionType(),
                     record.getExamCourse(),
                     record.getReason(),
-                    record.isApproved() ? "Approved" : "Pending"
+                    filePath,
+                    record.isApproved() ? "Approved" : "Pending",
+                    filePath.isBlank() ? "" : "Open"
             });
         }
     }
+
+    private void openMedicalFile(String filePath) {
+        if (filePath == null || filePath.isBlank()) {
+            JOptionPane.showMessageDialog(this, "No medical file uploaded for this record.");
+            return;
+        }
+
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                JOptionPane.showMessageDialog(this, "File not found: " + filePath, "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Desktop.getDesktop().open(file);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Unable to open medical file.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private class OpenButtonRenderer extends JButton implements TableCellRenderer {
+        OpenButtonRenderer() {
+            UITheme.stylePrimaryButton(this);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                                                       boolean hasFocus, int row, int column) {
+            setText(value == null || value.toString().isBlank() ? "No File" : value.toString());
+            setEnabled(value != null && !value.toString().isBlank());
+            return this;
+        }
+    }
+
+    private class OpenButtonEditor extends AbstractCellEditor implements TableCellEditor {
+        private final JButton button = new JButton("Open");
+        private final JTable table;
+        private int row;
+
+        OpenButtonEditor(JTable table) {
+            this.table = table;
+            UITheme.stylePrimaryButton(button);
+            button.addActionListener(e -> {
+                fireEditingStopped();
+                int modelRow = table.convertRowIndexToModel(row);
+                String filePath = String.valueOf(table.getModel().getValueAt(modelRow, 4));
+                openMedicalFile(filePath);
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            this.row = row;
+            button.setText(value == null || value.toString().isBlank() ? "No File" : value.toString());
+            button.setEnabled(value != null && !value.toString().isBlank());
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return button.getText();
+        }
+    }
+
 }

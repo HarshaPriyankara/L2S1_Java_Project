@@ -8,7 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 
 class DeleteCoursePanel extends JPanel {
-    private JTextField txtCode;
+    private JComboBox<String> cmbCode;
     private static final Color DELETE_COLOR = UITheme.DANGER;
     private final CourseController courseController = new CourseController();
 
@@ -22,15 +22,23 @@ class DeleteCoursePanel extends JPanel {
         addTitle("Delete Course", DELETE_COLOR);
 
         // 2. Description label
-        JLabel desc = new JLabel("Enter the Course Code of the course you want to delete.");
+        JLabel desc = new JLabel("Select the Course Code of the course you want to delete.");
         desc.setFont(new Font("SansSerif", Font.PLAIN, 13));
         desc.setForeground(UITheme.TEXT_MUTED);
         desc.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(desc);
         add(Box.createVerticalStrut(20));
 
-        // 3. Input Field (addField helper method eka use kara)
-        txtCode = addField("Course Code");
+        // 3. Course code dropdown
+        cmbCode = addDropdown("Course Code");
+        refreshCourseCodes();
+
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                refreshCourseCodes();
+            }
+        });
 
         // 4. Button Row setup
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -54,10 +62,10 @@ class DeleteCoursePanel extends JPanel {
 
         // --- Delete Button Action (Oyaage original logic eka) ---
         btnDelete.addActionListener(e -> {
-            String code = txtCode.getText().trim();
+            String code = selectedValue(cmbCode);
 
             if (code.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter a Course Code!", "Warning", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Please select a Course Code!", "Warning", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -69,7 +77,7 @@ class DeleteCoursePanel extends JPanel {
                 CourseOperationResult result = courseController.deleteCourse(code);
                 if (result.isSuccess()) {
                     JOptionPane.showMessageDialog(this, result.getMessage());
-                    txtCode.setText("");
+                    refreshCourseCodes();
                 } else {
                     JOptionPane.showMessageDialog(this, result.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -88,23 +96,40 @@ class DeleteCoursePanel extends JPanel {
         add(Box.createVerticalStrut(24));
     }
 
-    private JTextField addField(String label) {
+    private JComboBox<String> addDropdown(String label) {
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
         lbl.setForeground(UITheme.TEXT_PRIMARY);
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JTextField field = new JTextField();
-        field.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        field.setAlignmentX(Component.LEFT_ALIGNMENT);
-        UITheme.styleTextField(field);
+        JComboBox<String> comboBox = new JComboBox<>();
+        comboBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        comboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        comboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.styleComboBox(comboBox);
 
         add(lbl);
         add(Box.createVerticalStrut(5));
-        add(field);
+        add(comboBox);
         add(Box.createVerticalStrut(12));
-        return field;
+        return comboBox;
+    }
+
+    private void refreshCourseCodes() {
+        String selectedCode = selectedValue(cmbCode);
+        cmbCode.removeAllItems();
+        for (String code : courseController.getCourseCodes()) {
+            cmbCode.addItem(code);
+        }
+        cmbCode.setSelectedItem(selectedCode);
+        if (cmbCode.getSelectedItem() == null && cmbCode.getItemCount() > 0) {
+            cmbCode.setSelectedIndex(0);
+        }
+    }
+
+    private String selectedValue(JComboBox<String> comboBox) {
+        Object selected = comboBox.getSelectedItem();
+        return selected == null ? "" : selected.toString();
     }
 
     private void styleButton(JButton btn, Color bg) {

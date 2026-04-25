@@ -17,8 +17,21 @@ public class MedicalRecordDAO {
 
     public void addMedical(String regNo, LocalDate sessionDate, String sessionType, String examCourse, String reason)
             throws SQLException {
-        String sql = "INSERT INTO medical_record (Reg_no, Session_date, Reason, Session_type, Exam_course, Approved) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        addMedical(regNo, sessionDate, sessionType, examCourse, reason, null, false);
+    }
+
+    public void addMedical(String regNo, LocalDate sessionDate, String sessionType, String examCourse, String reason,
+                           String medicalFilePath)
+            throws SQLException {
+        addMedical(regNo, sessionDate, sessionType, examCourse, reason, medicalFilePath, false);
+    }
+
+    public void addMedical(String regNo, LocalDate sessionDate, String sessionType, String examCourse, String reason,
+                           String medicalFilePath, boolean approved)
+            throws SQLException {
+        ensureMedicalFileColumn();
+        String sql = "INSERT INTO medical_record (Reg_no, Session_date, Reason, Session_type, Exam_course, Medical_file, Approved) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -27,12 +40,14 @@ public class MedicalRecordDAO {
             pst.setString(3, reason);
             pst.setString(4, sessionType);
             pst.setString(5, normalizeExamCourse(sessionType, examCourse));
-            pst.setBoolean(6, false);
+            pst.setString(6, normalizeFilePath(medicalFilePath));
+            pst.setBoolean(7, approved);
             pst.executeUpdate();
         }
     }
 
     public List<MedicalRecord> getMedicalRecordsByStudent(String studentId) throws SQLException {
+        ensureMedicalFileColumn();
         List<MedicalRecord> records = new ArrayList<>();
         String sql = "SELECT * FROM medical_record WHERE Reg_no = ? ORDER BY Session_date DESC, Medical_id DESC";
 
@@ -50,6 +65,7 @@ public class MedicalRecordDAO {
     }
 
     public List<MedicalRecord> getAllMedicalRecords() throws SQLException {
+        ensureMedicalFileColumn();
         List<MedicalRecord> records = new ArrayList<>();
         String sql = "SELECT * FROM medical_record ORDER BY Approved ASC, Session_date DESC, Medical_id DESC";
 
@@ -104,6 +120,7 @@ public class MedicalRecordDAO {
         record.setReason(rs.getString("Reason"));
         record.setSessionType(rs.getString("Session_type"));
         record.setExamCourse(rs.getString("Exam_course"));
+        record.setMedicalFilePath(rs.getString("Medical_file"));
         record.setApproved(rs.getBoolean("Approved"));
         return record;
     }
@@ -119,5 +136,30 @@ public class MedicalRecordDAO {
 
         String trimmed = examCourse.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String normalizeFilePath(String medicalFilePath) {
+        if (medicalFilePath == null) {
+            return null;
+        }
+
+        String trimmed = medicalFilePath.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private void ensureMedicalFileColumn() throws SQLException {
+        String sql = "ALTER TABLE medical_record ADD COLUMN Medical_file VARCHAR(1000) DEFAULT NULL";
+        try (Connection con = DBConnection.getConnection();
+             Statement stmt = con.createStatement()) {
+            stmt.executeUpdate(sql);
+        } catch (SQLException ex) {
+            if (!isDuplicateColumnError(ex)) {
+                throw ex;
+            }
+        }
+    }
+
+    private boolean isDuplicateColumnError(SQLException ex) {
+        return "42S21".equals(ex.getSQLState()) || ex.getErrorCode() == 1060;
     }
 }

@@ -3,6 +3,10 @@ package Controllers.CourseControllers;
 import DAO.CourseDAO;
 import Models.Course;
 
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
+
 public class CourseController {
     private final CourseDAO courseDAO = new CourseDAO();
 
@@ -72,6 +76,33 @@ public class CourseController {
         }
 
         return new CourseOperationResult(false, "Delete Failed! Course Code not found.");
+    }
+
+    public List<String> getCourseCodes() {
+        try {
+            return courseDAO.getAllCourseCodes();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+    public List<String> getLecturerIds() {
+        try {
+            return courseDAO.getAllLecturerIds();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+    public List<String> getDepartmentIds() {
+        try {
+            return courseDAO.getAllDepartmentIds();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 
     private boolean isRequiredCourseDataMissing(CourseFormData formData) {

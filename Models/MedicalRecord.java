@@ -10,6 +10,7 @@ public class MedicalRecord {
     private String reason;
     private String sessionType;
     private String examCourse;
+    private String medicalFilePath;
     private boolean approved;
 
     public MedicalRecord() {
@@ -79,5 +80,13 @@ public class MedicalRecord {
 
     public void setApproved(boolean approved) {
         this.approved = approved;
+    }
+
+    public String getMedicalFilePath() {
+        return medicalFilePath;
+    }
+
+    public void setMedicalFilePath(String medicalFilePath) {
+        this.medicalFilePath = medicalFilePath;
     }
 }

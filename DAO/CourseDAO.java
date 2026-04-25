@@ -69,6 +69,31 @@ public class CourseDAO {
         }
     }
 
+    public List<String> getAllCourseCodes() throws SQLException {
+        return getSingleColumnValues("SELECT Course_code FROM course ORDER BY Course_code", "Course_code");
+    }
+
+    public List<String> getAllLecturerIds() throws SQLException {
+        return getSingleColumnValues("SELECT Lecturer_id FROM lecturer ORDER BY Lecturer_id", "Lecturer_id");
+    }
+
+    public List<String> getAllDepartmentIds() throws SQLException {
+        return getSingleColumnValues("SELECT Department_id FROM department ORDER BY Department_id", "Department_id");
+    }
+
+    private List<String> getSingleColumnValues(String sql, String columnName) throws SQLException {
+        List<String> values = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                values.add(rs.getString(columnName));
+            }
+        }
+        return values;
+    }
+
     public List<String[]> getStudentCourses(String regNo) throws SQLException {
         List<String[]> courses = new ArrayList<>();
         String sql = "SELECT c.Course_code, c.Course_name, c.Type, c.Credits, " +
