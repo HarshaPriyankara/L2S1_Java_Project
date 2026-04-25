@@ -28,6 +28,7 @@ public class UserDAO {
 
 
     // user create method
+    /// @author dilusha
     public boolean createUser(User user) {
         String sql = "INSERT INTO user (User_id, F_name, L_name, Email, Password, " +
                 "Role, date_of_birth, Address, contact_no, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

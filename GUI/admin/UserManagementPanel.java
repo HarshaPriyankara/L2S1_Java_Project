@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+/// @author dilusha
 public class UserManagementPanel extends JPanel {
     private final AdminProfileController controller = new AdminProfileController();
     private final JPanel contentPanel = new JPanel();
@@ -13,7 +14,9 @@ public class UserManagementPanel extends JPanel {
     private static final Color CARD_COLOR   = new Color(85, 179, 232);
 
 
+
     // create main base panel through constructor
+    /// @author dilusha
     public UserManagementPanel() {
         setLayout(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
@@ -26,6 +29,7 @@ public class UserManagementPanel extends JPanel {
     }
 
     //creates card for each facility and add action event when clicking
+    /// @author dilusha
     private void showCards() {
         contentPanel.removeAll();
         contentPanel.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
@@ -38,6 +42,7 @@ public class UserManagementPanel extends JPanel {
     }
 
     //for create cards
+    /// @author dilusha
     private JPanel makeCard(String title, ActionListener action) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(CARD_COLOR);
@@ -55,6 +60,7 @@ public class UserManagementPanel extends JPanel {
 
 
     //create new user creating form
+    /// @author dilusha
     private void showCreateForm() {
         prepareForm("Create New User", BUTTON_COLOR);
 
@@ -71,7 +77,6 @@ public class UserManagementPanel extends JPanel {
 
         // back and save buttons
         contentPanel.add(Box.createVerticalStrut(20));
-
         backButton(buttonRow());
         JButton save = actionButton(buttonRow(), "Save User", BUTTON_COLOR);
 
@@ -100,8 +105,8 @@ public class UserManagementPanel extends JPanel {
         refresh();
     }
 
-
-    private void showUpdateForm() {
+    /// @author dilusha
+        private void showUpdateForm() {
         prepareForm("Update User Details", BUTTON_COLOR);
 
         // button for load user by id
@@ -127,6 +132,7 @@ public class UserManagementPanel extends JPanel {
         // disable editing untill user data loaded
         setFieldsEnabled(false, txtNewId, txtFN, txtLN, txtEmail, txtDb, txtContact, txtAddr, txtPic, txtPw, cmbRole);
 
+        backButton(buttonRow());
         JButton updateBtn = actionButton(buttonRow(), "Update User", BUTTON_COLOR);
         updateBtn.setEnabled(false);
 
@@ -185,15 +191,17 @@ public class UserManagementPanel extends JPanel {
         refresh();
     }
 
+    /// @author dilusha
     private void showDeleteForm() {
         prepareForm("Delete User", Color.RED);
         JTextField txtId = addField("Enter ID to Delete");
         JButton del = actionButton(buttonRow(), "Delete Permanent", Color.RED);
         del.addActionListener(e -> handleResponse(controller.deleteUser(txtId.getText())));
+        backButton(buttonRow());
         refresh();
     }
 
-
+    /// @author dilusha
     private void prepareForm(String title, Color c) {
         contentPanel.removeAll();
         contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
@@ -208,6 +216,7 @@ public class UserManagementPanel extends JPanel {
 
 
     //for back button
+    /// @author dilusha
     private JPanel buttonRow() {
         JPanel r = new JPanel(new FlowLayout(FlowLayout.LEFT));
         r.setBackground(Color.WHITE);
@@ -216,13 +225,14 @@ public class UserManagementPanel extends JPanel {
         return r;
     }
 
+    /// @author dilusha
     private void backButton(JPanel r) {
         JButton b = new JButton("Back");
         b.addActionListener(e -> showCards());
         r.add(b);
     }
 
-
+    /// @author dilusha
     private JButton actionButton(JPanel r, String label, Color bg) {
         JButton b = new JButton(label);
         b.setBackground(bg);
@@ -231,7 +241,7 @@ public class UserManagementPanel extends JPanel {
         return b;
     }
 
-
+    /// @author dilusha
     private void handleResponse(String res) {
         JOptionPane.showMessageDialog(this, res.split(":")[1].trim());
         if (res.startsWith("SUCCESS"))
@@ -239,12 +249,14 @@ public class UserManagementPanel extends JPanel {
     }
 
     //for better GUI view
+    /// @author dilusha
     private void refresh() {
         contentPanel.revalidate();
         contentPanel.repaint();
     }
 
     //role selection field
+    /// @author dilusha
     private JComboBox<String> addRoleCombo() {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
         row.setBackground(Color.WHITE);
@@ -261,6 +273,7 @@ public class UserManagementPanel extends JPanel {
         return c;
     }
 
+    /// @author dilusha
     private String toRoleValue(String label) {
         if (label == null) return "";
         switch (label) {
@@ -277,6 +290,7 @@ public class UserManagementPanel extends JPanel {
         }
     }
 
+    /// @author dilusha
     private String toRoleLabel(String role) {
         if (role == null) return "Student";
         String value = role.trim().toLowerCase();
@@ -299,6 +313,7 @@ public class UserManagementPanel extends JPanel {
 
 
     //create photo picker for profile photos
+    /// @author dilusha
     private JTextField addPhotoPicker(String labelText) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
         row.setBackground(Color.WHITE);
@@ -326,12 +341,13 @@ public class UserManagementPanel extends JPanel {
 
 
     //passed fields for disable
+    /// @author dilusha
     private void setFieldsEnabled(boolean en, JComponent... comps) {
         for (JComponent c : comps) c.setEnabled(en);
     }
 
 
-
+    /// @author dilusha
     private JTextField addField(String labelText) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
         row.setBackground(Color.WHITE);
@@ -349,7 +365,7 @@ public class UserManagementPanel extends JPanel {
     }
 
 
-
+    /// @author dilusha
     private JPasswordField addPasswordField(String labelText) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
         row.setBackground(Color.WHITE);
