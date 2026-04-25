@@ -1,11 +1,14 @@
 package GUI.lecturer;
 
+import Controllers.StudentControllers.Eng2122CaMarksController;
+import Controllers.StudentControllers.Eng2122CaMarksResult;
 import Controllers.StudentControllers.LecturerMarksOverviewController;
 import Controllers.StudentControllers.LecturerMarksOverviewResult;
 import GUI.common.UITheme;
 import Utils.CourseMarkScheme;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -13,7 +16,8 @@ import java.awt.event.MouseEvent;
 public class StudentMarksPanel extends JPanel {
     private static final Color CARD_COLOR = new Color(85, 179, 232);
 
-    private final LecturerMarksOverviewController controller = new LecturerMarksOverviewController();
+    private final LecturerMarksOverviewController overviewController = new LecturerMarksOverviewController();
+    private final Eng2122CaMarksController caMarksController = new Eng2122CaMarksController();
     private final JComboBox<String> courseComboBox = new JComboBox<>();
     private final JTextField studentSearchField = new JTextField(12);
     private final JComboBox<String> scopeComboBox = new JComboBox<>(new String[]{"Whole Batch", "Individual Student"});
@@ -23,6 +27,21 @@ public class StudentMarksPanel extends JPanel {
     private final Runnable onBack;
     private final String lecturerId;
 
+    private final CardLayout centerCardLayout = new CardLayout();
+    private final JPanel centerCardPanel = new JPanel(centerCardLayout);
+    private DefaultTableModel caMarksModel;
+    private DefaultTableModel eligibilityModel;
+    private DefaultTableModel finalMarksModel;
+    private JTable caTable;
+    private JTable eligibilityTable;
+    private JTable finalMarksTable;
+    private final JLabel caViewTitleLabel = new JLabel("ENG2122 CA Marks");
+    private final JLabel caNoteLabel = new JLabel();
+    private final JLabel eligibilityTitleLabel = new JLabel("End Exam Eligibility by CA");
+    private final JLabel eligibilityNoteLabel = new JLabel();
+    private final JLabel finalMarksTitleLabel = new JLabel("Final Marks (CA + END)");
+    private final JLabel finalMarksNoteLabel = new JLabel();
+
     public StudentMarksPanel(String lecturerId, Runnable onBack) {
         this.lecturerId = lecturerId;
         this.onBack = onBack;
@@ -31,6 +50,28 @@ public class StudentMarksPanel extends JPanel {
         setBackground(UITheme.APP_BACKGROUND);
         setBorder(UITheme.createContentBorder());
 
+        JPanel topPanel = buildTopPanel();
+        add(topPanel, BorderLayout.NORTH);
+
+        caMarksModel = createCaMarksModel(new String[]{"Reg No"});
+        eligibilityModel = createCaMarksModel(new String[]{"Reg No"});
+        finalMarksModel = createCaMarksModel(new String[]{"Reg No", "CA Marks", "End Marks", "Final Marks", "Grade"});
+
+        centerCardPanel.setBackground(UITheme.APP_BACKGROUND);
+        centerCardPanel.add(buildOverviewPanel(), "Overview");
+        centerCardPanel.add(buildCaMarksPanel(), "CA");
+        centerCardPanel.add(buildEligibilityPanel(), "EligibilityByCa");
+        centerCardPanel.add(buildFinalMarksPanel(), "FinalMarks");
+        add(centerCardPanel, BorderLayout.CENTER);
+
+        scopeComboBox.addActionListener(e -> updateSearchState());
+
+        updateSearchState();
+        loadInitialData();
+        centerCardLayout.show(centerCardPanel, "Overview");
+    }
+
+    private JPanel buildTopPanel() {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         topPanel.setBackground(UITheme.APP_BACKGROUND);
 
@@ -46,6 +87,10 @@ public class StudentMarksPanel extends JPanel {
         JButton loadButton = new JButton("Load Marks Base");
         UITheme.stylePrimaryButton(loadButton);
         UITheme.setWideButtonSize(loadButton);
+        loadButton.addActionListener(e -> {
+            loadOverview();
+            centerCardLayout.show(centerCardPanel, "Overview");
+        });
 
         topPanel.add(backButton);
         topPanel.add(new JLabel("Course:"));
@@ -55,8 +100,10 @@ public class StudentMarksPanel extends JPanel {
         topPanel.add(new JLabel("Reg No:"));
         topPanel.add(studentSearchField);
         topPanel.add(loadButton);
-        add(topPanel, BorderLayout.NORTH);
+        return topPanel;
+    }
 
+    private JPanel buildOverviewPanel() {
         JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
         centerPanel.setBackground(UITheme.APP_BACKGROUND);
 
@@ -99,27 +146,106 @@ public class StudentMarksPanel extends JPanel {
         JPanel actionCardsPanel = new JPanel();
         actionCardsPanel.setBackground(UITheme.APP_BACKGROUND);
         actionCardsPanel.setLayout(new BoxLayout(actionCardsPanel, BoxLayout.Y_AXIS));
-        actionCardsPanel.add(createActionCard("CA Marks"));
+        actionCardsPanel.add(createActionCard("CA Marks", this::showCaMarksView));
         actionCardsPanel.add(Box.createVerticalStrut(18));
-        actionCardsPanel.add(createActionCard("End Exam Eligibility by CA"));
+        actionCardsPanel.add(createActionCard("End Exam Eligibility by CA", this::showEligibilityByCaView));
         actionCardsPanel.add(Box.createVerticalStrut(18));
-        actionCardsPanel.add(createActionCard("End Exam Eligibility by Attendance + CA"));
+        actionCardsPanel.add(createActionCard("End Exam Eligibility by Attendance + CA", this::showNextStepMessage));
         actionCardsPanel.add(Box.createVerticalStrut(18));
-        actionCardsPanel.add(createActionCard("Final Marks (CA + END)"));
+        actionCardsPanel.add(createActionCard("Final Marks (CA + END)", this::showFinalMarksBaseView));
 
         centerPanel.add(infoPanel, BorderLayout.CENTER);
         centerPanel.add(actionCardsPanel, BorderLayout.EAST);
-        add(centerPanel, BorderLayout.CENTER);
+        return centerPanel;
+    }
 
-        loadButton.addActionListener(e -> loadOverview());
-        scopeComboBox.addActionListener(e -> updateSearchState());
+    private JPanel buildCaMarksPanel() {
+        JPanel panel = new JPanel(new BorderLayout(0, 12));
+        panel.setBackground(UITheme.APP_BACKGROUND);
 
-        updateSearchState();
-        loadInitialData();
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(UITheme.APP_BACKGROUND);
+
+        caViewTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        caViewTitleLabel.setForeground(UITheme.TEXT_PRIMARY);
+        headerPanel.add(caViewTitleLabel, BorderLayout.WEST);
+
+        JButton backToOverviewButton = new JButton("Back to Marks Menu");
+        UITheme.styleNeutralButton(backToOverviewButton);
+        backToOverviewButton.addActionListener(e -> centerCardLayout.show(centerCardPanel, "Overview"));
+        headerPanel.add(backToOverviewButton, BorderLayout.EAST);
+
+        caTable = new JTable(caMarksModel);
+        caTable.setRowHeight(28);
+        UITheme.styleTable(caTable);
+
+        caNoteLabel.setForeground(UITheme.TEXT_MUTED);
+
+        panel.add(headerPanel, BorderLayout.NORTH);
+        panel.add(new JScrollPane(caTable), BorderLayout.CENTER);
+        panel.add(caNoteLabel, BorderLayout.SOUTH);
+        return panel;
+    }
+
+    private JPanel buildEligibilityPanel() {
+        JPanel panel = new JPanel(new BorderLayout(0, 12));
+        panel.setBackground(UITheme.APP_BACKGROUND);
+
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(UITheme.APP_BACKGROUND);
+
+        eligibilityTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        eligibilityTitleLabel.setForeground(UITheme.TEXT_PRIMARY);
+        headerPanel.add(eligibilityTitleLabel, BorderLayout.WEST);
+
+        JButton backToOverviewButton = new JButton("Back to Marks Menu");
+        UITheme.styleNeutralButton(backToOverviewButton);
+        backToOverviewButton.addActionListener(e -> centerCardLayout.show(centerCardPanel, "Overview"));
+        headerPanel.add(backToOverviewButton, BorderLayout.EAST);
+
+        eligibilityTable = new JTable(eligibilityModel);
+        eligibilityTable.setRowHeight(28);
+        UITheme.styleTable(eligibilityTable);
+
+        eligibilityNoteLabel.setForeground(UITheme.TEXT_MUTED);
+
+        panel.add(headerPanel, BorderLayout.NORTH);
+        panel.add(new JScrollPane(eligibilityTable), BorderLayout.CENTER);
+        panel.add(eligibilityNoteLabel, BorderLayout.SOUTH);
+        return panel;
+    }
+
+    private JPanel buildFinalMarksPanel() {
+        JPanel panel = new JPanel(new BorderLayout(0, 12));
+        panel.setBackground(UITheme.APP_BACKGROUND);
+
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(UITheme.APP_BACKGROUND);
+
+        finalMarksTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        finalMarksTitleLabel.setForeground(UITheme.TEXT_PRIMARY);
+        headerPanel.add(finalMarksTitleLabel, BorderLayout.WEST);
+
+        JButton backToOverviewButton = new JButton("Back to Marks Menu");
+        UITheme.styleNeutralButton(backToOverviewButton);
+        backToOverviewButton.addActionListener(e -> centerCardLayout.show(centerCardPanel, "Overview"));
+        headerPanel.add(backToOverviewButton, BorderLayout.EAST);
+
+        finalMarksTable = new JTable(finalMarksModel);
+        finalMarksTable.setRowHeight(28);
+        UITheme.styleTable(finalMarksTable);
+
+        finalMarksNoteLabel.setForeground(UITheme.TEXT_MUTED);
+        finalMarksNoteLabel.setText("Final marks logic will be added in the next step based on selected subject and scope.");
+
+        panel.add(headerPanel, BorderLayout.NORTH);
+        panel.add(new JScrollPane(finalMarksTable), BorderLayout.CENTER);
+        panel.add(finalMarksNoteLabel, BorderLayout.SOUTH);
+        return panel;
     }
 
     private void loadInitialData() {
-        LecturerMarksOverviewResult result = controller.loadOverview(lecturerId, null);
+        LecturerMarksOverviewResult result = overviewController.loadOverview(lecturerId, null);
         if (result.hasError()) {
             JOptionPane.showMessageDialog(this, result.getErrorMessage());
             return;
@@ -137,7 +263,7 @@ public class StudentMarksPanel extends JPanel {
 
     private void loadOverview() {
         String courseCode = (String) courseComboBox.getSelectedItem();
-        LecturerMarksOverviewResult result = controller.loadOverview(lecturerId, courseCode);
+        LecturerMarksOverviewResult result = overviewController.loadOverview(lecturerId, courseCode);
         if (result.hasError()) {
             JOptionPane.showMessageDialog(this, result.getErrorMessage());
             return;
@@ -154,8 +280,89 @@ public class StudentMarksPanel extends JPanel {
                 scheme.getCaPassMark(), scheme.getCaWeight()
         ));
         attendanceRuleLabel.setText(
-                "Attendance + CA Rule: base prepared for next step using selected course and view scope"
+                "Attendance + CA Rule: base prepared for the next step using this course and selected scope"
         );
+    }
+
+    private void showCaMarksView() {
+        String courseCode = (String) courseComboBox.getSelectedItem();
+        boolean individualView = "Individual Student".equals(scopeComboBox.getSelectedItem());
+        String studentId = studentSearchField.getText().trim();
+
+        Eng2122CaMarksResult result = caMarksController.loadCaMarks(courseCode, studentId, individualView);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage(), "CA Marks", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        caTable.setModel(createCaMarksModel(result.getColumns()));
+        caMarksModel = (DefaultTableModel) caTable.getModel();
+        UITheme.styleTable(caTable);
+        caMarksModel.setRowCount(0);
+        for (Object[] row : result.getRows()) {
+            caMarksModel.addRow(row);
+        }
+
+        caViewTitleLabel.setText(result.getTitle());
+        caNoteLabel.setText(result.getNote());
+        centerCardLayout.show(centerCardPanel, "CA");
+    }
+
+    private void showEligibilityByCaView() {
+        String courseCode = (String) courseComboBox.getSelectedItem();
+        boolean individualView = "Individual Student".equals(scopeComboBox.getSelectedItem());
+        String studentId = studentSearchField.getText().trim();
+
+        Eng2122CaMarksResult result = caMarksController.loadEndEligibilityByCa(courseCode, studentId, individualView);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage(), "End Exam Eligibility by CA", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        eligibilityTable.setModel(createCaMarksModel(result.getColumns()));
+        eligibilityModel = (DefaultTableModel) eligibilityTable.getModel();
+        UITheme.styleTable(eligibilityTable);
+        eligibilityModel.setRowCount(0);
+        for (Object[] row : result.getRows()) {
+            eligibilityModel.addRow(row);
+        }
+
+        eligibilityTitleLabel.setText(result.getTitle());
+        eligibilityNoteLabel.setText(result.getNote());
+        centerCardLayout.show(centerCardPanel, "EligibilityByCa");
+    }
+
+    private void showFinalMarksBaseView() {
+        String courseCode = (String) courseComboBox.getSelectedItem();
+        boolean individualView = "Individual Student".equals(scopeComboBox.getSelectedItem());
+        String studentId = studentSearchField.getText().trim();
+
+        Eng2122CaMarksResult result = caMarksController.loadFinalMarks(courseCode, studentId, individualView);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage(), "Final Marks", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        finalMarksTable.setModel(createCaMarksModel(result.getColumns()));
+        finalMarksModel = (DefaultTableModel) finalMarksTable.getModel();
+        UITheme.styleTable(finalMarksTable);
+        finalMarksModel.setRowCount(0);
+        for (Object[] row : result.getRows()) {
+            finalMarksModel.addRow(row);
+        }
+
+        finalMarksTitleLabel.setText(result.getTitle());
+        finalMarksNoteLabel.setText(result.getNote());
+        centerCardLayout.show(centerCardPanel, "FinalMarks");
+    }
+
+    private DefaultTableModel createCaMarksModel(String[] columns) {
+        return new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
     }
 
     private void updateSearchState() {
@@ -166,7 +373,7 @@ public class StudentMarksPanel extends JPanel {
         }
     }
 
-    private JPanel createActionCard(String title) {
+    private JPanel createActionCard(String title, Runnable action) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(CARD_COLOR);
         card.setPreferredSize(new Dimension(360, 68));
@@ -181,15 +388,19 @@ public class StudentMarksPanel extends JPanel {
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JOptionPane.showMessageDialog(
-                        StudentMarksPanel.this,
-                        title + " logic will be implemented in the next step.",
-                        "Student Marks",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                action.run();
             }
         });
 
         return card;
+    }
+
+    private void showNextStepMessage() {
+        JOptionPane.showMessageDialog(
+                this,
+                "This logic will be implemented in the next step.",
+                "Student Marks",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 }

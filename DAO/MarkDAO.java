@@ -61,6 +61,37 @@ public class MarkDAO {
         }
     }
 
+    public Map<String, Map<String, Double>> getCourseMarksByStudent(String courseCode) throws SQLException {
+        String sql = "SELECT e.Reg_no, m.Marks_type, m.Marks_value " +
+                "FROM enrollment e " +
+                "LEFT JOIN mark m ON e.Reg_no = m.Reg_no AND e.Course_code = m.Course_code " +
+                "WHERE e.Course_code = ? " +
+                "ORDER BY e.Reg_no, m.Marks_type";
+
+        Map<String, Map<String, Double>> groupedMarks = new LinkedHashMap<>();
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setString(1, courseCode);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    String regNo = rs.getString("Reg_no");
+                    Map<String, Double> marks = groupedMarks.computeIfAbsent(regNo, key -> new HashMap<>());
+                    String markType = rs.getString("Marks_type");
+                    if (markType != null) {
+                        marks.put(normalizeMarkType(markType), rs.getDouble("Marks_value"));
+                    }
+                }
+            }
+        }
+        return groupedMarks;
+    }
+
+    public Map<String, Double> getStudentCourseMarks(String regNo, String courseCode) throws SQLException {
+        Map<String, Map<String, Double>> groupedMarks = getCourseMarksByStudent(courseCode);
+        Map<String, Double> marks = groupedMarks.get(regNo);
+        return marks == null ? new HashMap<>() : new HashMap<>(marks);
+    }
+
     private List<MarksCalculator.MarkBreakdown> buildBreakdowns(ResultSet rs) throws SQLException {
         Map<String, StudentCourseMarks> groupedMarks = new LinkedHashMap<>();
 
