@@ -27,7 +27,7 @@ public class LecturerDashboard extends BaseDashboard {
         // These are the panels for tasks a lecturer must perform
         contentPanel.add(new MarksManagement(loggedInID), "MarksManagement");
         contentPanel.add(new AddCourseMaterialPanel(loggedInID), "AddMaterial");
-        contentPanel.add(new ProfileManagementPanel(loggedInID, false), "UpdateProfile");
+        contentPanel.add(new ProfileManagementPanel(loggedInID, false, contentPanel, cardLayout), "UpdateProfile");
 
         // Common panel for viewing notices
         contentPanel.add(new ViewNotice("Lecturer", contentPanel, cardLayout), "ViewNotice");
