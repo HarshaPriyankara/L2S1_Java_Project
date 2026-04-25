@@ -81,6 +81,10 @@ public abstract class CourseMarkScheme {
         return "End_theory";
     }
 
+    public boolean hasCompleteMarks(Map<String, Double> marks) {
+        return hasAllMarks(marks, getAllowedMarkTypes());
+    }
+
     public final double calculateCA(Map<String, Double> marks) {
         return round(Math.min(caWeight, Math.max(0.0, calculateCaMarks(marks))));
     }
@@ -187,6 +191,31 @@ public abstract class CourseMarkScheme {
         return Arrays.copyOf(types, types.length);
     }
 
+    protected boolean hasMark(Map<String, Double> marks, String type) {
+        return getMark(marks, type) != null;
+    }
+
+    protected boolean hasAllMarks(Map<String, Double> marks, String... types) {
+        if (marks == null) return false;
+        for (String type : types) {
+            if (!hasMark(marks, type)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected int countMarks(Map<String, Double> marks, String... types) {
+        if (marks == null) return 0;
+        int count = 0;
+        for (String type : types) {
+            if (hasMark(marks, type)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private static class Eng2122Scheme extends CourseMarkScheme {
         private Eng2122Scheme() {
             super("ENG2122", 40.0, 60.0);
@@ -209,6 +238,12 @@ public abstract class CourseMarkScheme {
         public String[] getAllowedMarkTypes() {
             return types("Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2",
                     "Mid_theory", "End_theory");
+        }
+
+        public boolean hasCompleteMarks(Map<String, Double> marks) {
+            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") > 0
+                    && countMarks(marks, "Assignment_1", "Assignment_2") > 0
+                    && hasAllMarks(marks, "Mid_theory", "End_theory");
         }
     }
 
@@ -238,6 +273,11 @@ public abstract class CourseMarkScheme {
             return types("Quiz_1", "Quiz_2", "Quiz_3",
                     "Mid_practical", "Mid_theory", "End_theory", "End_practical");
         }
+
+        public boolean hasCompleteMarks(Map<String, Double> marks) {
+            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
+                    && hasAllMarks(marks, "Mid_practical", "Mid_theory", "End_theory", "End_practical");
+        }
     }
 
     private static class Ict2122Scheme extends CourseMarkScheme {
@@ -260,6 +300,11 @@ public abstract class CourseMarkScheme {
 
         public String[] getAllowedMarkTypes() {
             return types("Quiz_1", "Quiz_2", "Quiz_3", "Mid_theory", "End_theory");
+        }
+
+        public boolean hasCompleteMarks(Map<String, Double> marks) {
+            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
+                    && hasAllMarks(marks, "Mid_theory", "End_theory");
         }
     }
 
@@ -287,6 +332,11 @@ public abstract class CourseMarkScheme {
         public String[] getAllowedMarkTypes() {
             return types("Assignment_1", "Assignment_2", "End_practical");
         }
+
+        public boolean hasCompleteMarks(Map<String, Double> marks) {
+            return countMarks(marks, "Assignment_1", "Assignment_2") > 0
+                    && hasAllMarks(marks, "End_practical");
+        }
     }
 
     private static class Ict2142Scheme extends CourseMarkScheme {
@@ -309,6 +359,11 @@ public abstract class CourseMarkScheme {
 
         public String[] getAllowedMarkTypes() {
             return types("Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2", "End_theory");
+        }
+
+        public boolean hasCompleteMarks(Map<String, Double> marks) {
+            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
+                    && hasAllMarks(marks, "Assignment_1", "Assignment_2", "End_theory");
         }
     }
 
@@ -333,6 +388,12 @@ public abstract class CourseMarkScheme {
         public String[] getAllowedMarkTypes() {
             return types("Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2", "End_theory");
         }
+
+        public boolean hasCompleteMarks(Map<String, Double> marks) {
+            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
+                    && countMarks(marks, "Assignment_1", "Assignment_2") > 0
+                    && hasAllMarks(marks, "End_theory");
+        }
     }
 
     private static class Tcs2112Scheme extends CourseMarkScheme {
@@ -356,6 +417,12 @@ public abstract class CourseMarkScheme {
         public String[] getAllowedMarkTypes() {
             return types("Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2", "End_theory");
         }
+
+        public boolean hasCompleteMarks(Map<String, Double> marks) {
+            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
+                    && countMarks(marks, "Assignment_1", "Assignment_2") > 0
+                    && hasAllMarks(marks, "End_theory");
+        }
     }
 
     private static class Tcs2122Scheme extends CourseMarkScheme {
@@ -374,6 +441,10 @@ public abstract class CourseMarkScheme {
 
         public String[] getAllowedMarkTypes() {
             return types("Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2");
+        }
+
+        public boolean hasCompleteMarks(Map<String, Double> marks) {
+            return hasAllMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2");
         }
     }
 

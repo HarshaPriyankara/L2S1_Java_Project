@@ -1,6 +1,5 @@
 package Utils;
 
-import java.util.List;
 import java.util.Map;
 
 public class MarksCalculator {
@@ -19,10 +18,12 @@ public class MarksCalculator {
         double endMarks = scheme.calculateEnd(marks);
         double totalMarks = round(Math.min(100.0, caMarks + endMarks));
         String grade = calculateGrade(caMarks, endMarks, totalMarks, scheme);
-        double gpa = calculateGradePoint(grade);
+        double gradePoint = GpaCalculator.getGradePoint(grade);
+        boolean hasMarks = marks != null && !marks.isEmpty();
+        boolean completeMarks = scheme.hasCompleteMarks(marks);
 
         return new MarkBreakdown(regNo, courseCode, courseName, credits,
-                caMarks, endMarks, totalMarks, grade, gpa);
+                caMarks, endMarks, totalMarks, grade, gradePoint, hasMarks, completeMarks);
     }
 
     public static String calculateGrade(double caMarks, double endMarks, double totalMarks) {
@@ -54,45 +55,6 @@ public class MarksCalculator {
         return "E";
     }
 
-    public static double calculateGradePoint(String grade) {
-        switch (grade) {
-            case "A+":
-            case "A":
-                return 4.0;
-            case "A-":
-                return 3.7;
-            case "B+":
-                return 3.3;
-            case "B":
-                return 3.0;
-            case "B-":
-                return 2.7;
-            case "C+":
-                return 2.3;
-            case "C":
-                return 2.0;
-            case "C-":
-                return 1.7;
-            case "D":
-                return 1.0;
-            default:
-                return 0.0;
-        }
-    }
-
-    public static double calculateSGPA(List<MarkBreakdown> marks) {
-        double weightedPoints = 0.0;
-        int totalCredits = 0;
-
-        for (MarkBreakdown mark : marks) {
-            if (mark.getCredits() <= 0) continue;
-            weightedPoints += mark.getGpa() * mark.getCredits();
-            totalCredits += mark.getCredits();
-        }
-
-        return totalCredits == 0 ? 0.0 : round(weightedPoints / totalCredits);
-    }
-
     private static double round(double value) {
         return Math.round(value * 100.0) / 100.0;
     }
@@ -106,11 +68,13 @@ public class MarksCalculator {
         private final double endMarks;
         private final double totalMarks;
         private final String grade;
-        private final double gpa;
+        private final double gradePoint;
+        private final boolean hasMarks;
+        private final boolean completeMarks;
 
         public MarkBreakdown(String regNo, String courseCode, String courseName, int credits,
                              double caMarks, double endMarks, double totalMarks,
-                             String grade, double gpa) {
+                             String grade, double gradePoint, boolean hasMarks, boolean completeMarks) {
             this.regNo = regNo;
             this.courseCode = courseCode;
             this.courseName = courseName;
@@ -119,7 +83,9 @@ public class MarksCalculator {
             this.endMarks = endMarks;
             this.totalMarks = totalMarks;
             this.grade = grade;
-            this.gpa = gpa;
+            this.gradePoint = gradePoint;
+            this.hasMarks = hasMarks;
+            this.completeMarks = completeMarks;
         }
 
         public String getRegNo() { return regNo; }
@@ -130,6 +96,8 @@ public class MarksCalculator {
         public double getEndMarks() { return endMarks; }
         public double getTotalMarks() { return totalMarks; }
         public String getGrade() { return grade; }
-        public double getGpa() { return gpa; }
+        public double getGradePoint() { return gradePoint; }
+        public boolean hasMarks() { return hasMarks; }
+        public boolean hasCompleteMarks() { return completeMarks; }
     }
 }
