@@ -9,7 +9,8 @@ import java.awt.*;
 
 class UpdateCoursePanel extends JPanel {
 
-    private JTextField txtCode, txtName, txtType, txtCredits, txtLecturer, txtDep;
+    private JTextField txtName, txtCredits;
+    private JComboBox<String> cmbCode, cmbType, cmbLecturer, cmbDep;
     private static final Color BUTTON_COLOR = UITheme.PRIMARY;
     private final CourseController courseController = new CourseController();
 
@@ -23,12 +24,20 @@ class UpdateCoursePanel extends JPanel {
         addTitle("Update Course Details", BUTTON_COLOR);
 
         // 2. UserManagement eke wage fields tika piliwelata add kara
-        txtCode     = addField("Course Code (to Update)");
+        cmbCode     = addDropdown("Course Code (to Update)");
         txtName     = addField("New Course Name");
-        txtType     = addField("New Type");
+        cmbType     = addTypeDropdown("New Type");
         txtCredits  = addField("New Credits");
-        txtLecturer = addField("New Lecturer ID");
-        txtDep      = addField("New Department ID");
+        cmbLecturer = addDropdown("New Lecturer ID");
+        cmbDep      = addDropdown("New Department ID");
+        refreshDropdowns();
+
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                refreshDropdowns();
+            }
+        });
 
         // 3. Button Row setup kara
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -84,6 +93,67 @@ class UpdateCoursePanel extends JPanel {
         return field;
     }
 
+    private JComboBox<String> addTypeDropdown(String label) {
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JComboBox<String> comboBox = new JComboBox<>(new String[]{"Theory", "Practical"});
+        comboBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        comboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        comboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.styleComboBox(comboBox);
+
+        add(lbl);
+        add(Box.createVerticalStrut(5));
+        add(comboBox);
+        add(Box.createVerticalStrut(12));
+        return comboBox;
+    }
+
+    private JComboBox<String> addDropdown(String label) {
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JComboBox<String> comboBox = new JComboBox<>();
+        comboBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        comboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        comboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.styleComboBox(comboBox);
+
+        add(lbl);
+        add(Box.createVerticalStrut(5));
+        add(comboBox);
+        add(Box.createVerticalStrut(12));
+        return comboBox;
+    }
+
+    private void refreshDropdowns() {
+        loadComboBox(cmbCode, courseController.getCourseCodes());
+        loadComboBox(cmbLecturer, courseController.getLecturerIds());
+        loadComboBox(cmbDep, courseController.getDepartmentIds());
+    }
+
+    private void loadComboBox(JComboBox<String> comboBox, java.util.List<String> values) {
+        String selectedValue = selectedValue(comboBox);
+        comboBox.removeAllItems();
+        for (String value : values) {
+            comboBox.addItem(value);
+        }
+        comboBox.setSelectedItem(selectedValue);
+        if (comboBox.getSelectedItem() == null && comboBox.getItemCount() > 0) {
+            comboBox.setSelectedIndex(0);
+        }
+    }
+
+    private String selectedValue(JComboBox<String> comboBox) {
+        Object selected = comboBox.getSelectedItem();
+        return selected == null ? "" : selected.toString();
+    }
+
     private void styleButton(JButton btn, Color bg) {
         if (UITheme.SURFACE_MUTED.equals(bg)) {
             UITheme.styleNeutralButton(btn);
@@ -94,22 +164,22 @@ class UpdateCoursePanel extends JPanel {
     }
 
     private void clearFields() {
-        txtCode.setText("");
+        if (cmbCode.getItemCount() > 0) cmbCode.setSelectedIndex(0);
         txtName.setText("");
-        txtType.setText("");
+        cmbType.setSelectedIndex(0);
         txtCredits.setText("");
-        txtLecturer.setText("");
-        txtDep.setText("");
+        if (cmbLecturer.getItemCount() > 0) cmbLecturer.setSelectedIndex(0);
+        if (cmbDep.getItemCount() > 0) cmbDep.setSelectedIndex(0);
     }
 
     private void updateCourse() {
         CourseFormData formData = new CourseFormData(
-                txtCode.getText(),
+                selectedValue(cmbCode),
                 txtName.getText(),
                 txtCredits.getText(),
-                txtType.getText(),
-                txtLecturer.getText(),
-                txtDep.getText()
+                cmbType.getSelectedItem().toString(),
+                selectedValue(cmbLecturer),
+                selectedValue(cmbDep)
         );
 
         CourseOperationResult result = courseController.updateCourse(formData);
