@@ -1,6 +1,6 @@
 package GUI.admin;
 
-import Controllers.AdminProfileController;
+import Controllers.ProfileControllers.AdminProfileController;
 import Models.User;
 import javax.swing.*;
 import java.awt.*;
@@ -12,6 +12,8 @@ public class UserManagementPanel extends JPanel {
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
     private static final Color CARD_COLOR   = new Color(85, 179, 232);
 
+
+    // create main base panel through constructor
     public UserManagementPanel() {
         setLayout(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
@@ -23,6 +25,7 @@ public class UserManagementPanel extends JPanel {
         showCards();
     }
 
+    //creates card for each facility and add action event when clicking
     private void showCards() {
         contentPanel.removeAll();
         contentPanel.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
@@ -34,8 +37,24 @@ public class UserManagementPanel extends JPanel {
         refresh();
     }
 
-    // --- FORM METHODS ---
+    //for create cards
+    private JPanel makeCard(String title, ActionListener action) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(CARD_COLOR);
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        JLabel lbl = new JLabel(title, SwingConstants.CENTER);
+        lbl.setForeground(Color.WHITE);
+        lbl.setFont(new Font("SansSerif", Font.BOLD, 18));
+        card.add(lbl);
+        card.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) { action.actionPerformed(null); }
+        });
+        return card;
+    }
 
+
+    //create new user creating form
     private void showCreateForm() {
         prepareForm("Create New User", BUTTON_COLOR);
 
@@ -50,7 +69,13 @@ public class UserManagementPanel extends JPanel {
         JComboBox<String> cmbRole = addRoleCombo();
         JPasswordField txtPw = addPasswordField("Password");
 
+        // back and save buttons
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        backButton(buttonRow());
         JButton save = actionButton(buttonRow(), "Save User", BUTTON_COLOR);
+
+        //set user details into user object
         save.addActionListener(e -> {
             User u = new User();
             u.setUserID(txtId.getText().trim());
@@ -59,12 +84,12 @@ public class UserManagementPanel extends JPanel {
             u.setEmail(txtEm.getText().trim());
             u.setContactNo(txtPh.getText().trim());
             u.setAddress(txtAd.getText().trim());
-            u.setRole((String) cmbRole.getSelectedItem());
+            u.setRole(toRoleValue((String) cmbRole.getSelectedItem()));
             u.setPassword(new String(txtPw.getPassword()).trim());
             u.setProfilePicPath(txtPic.getText().trim());
 
             try {
-                u.setDob(java.time.LocalDate.parse(txtDb.getText().trim()));
+                u.setDob(java.time.LocalDate.parse(txtDb.getText().trim()));  //convert string to date
             } catch (java.time.format.DateTimeParseException ex) {
                 JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.");
                 return;
@@ -79,27 +104,27 @@ public class UserManagementPanel extends JPanel {
     private void showUpdateForm() {
         prepareForm("Update User Details", BUTTON_COLOR);
 
-        // --- SEARCH SECTION ---
+        // button for load user by id
         JTextField txtSearch = addField("Search User ID");
         JButton fetchBtn = actionButton(buttonRow(), "Load Data", BUTTON_COLOR);
 
         contentPanel.add(Box.createVerticalStrut(15));
-        contentPanel.add(new JSeparator());
+        contentPanel.add(new JSeparator()); //vertical line
         contentPanel.add(Box.createVerticalStrut(15));
 
-        // --- EDITABLE FIELDS (The missing ones are added here) ---
+        //fields
         JTextField txtNewId   = addField("New User ID");
         JTextField txtFN      = addField("First Name");
         JTextField txtLN      = addField("Last Name");
-        JTextField txtEmail   = addField("Email Address");    // Added
+        JTextField txtEmail   = addField("Email Address");
         JTextField txtDb      = addField("DOB (YYYY-MM-DD)");
-        JTextField txtContact = addField("Contact No");       // Added
-        JTextField txtAddr    = addField("Address");          // Added
-        JComboBox<String> cmbRole = addRoleCombo();           // Added
+        JTextField txtContact = addField("Contact No");
+        JTextField txtAddr    = addField("Address");
+        JComboBox<String> cmbRole = addRoleCombo();
         JTextField txtPic     = addPhotoPicker("Update Photo");
         JPasswordField txtPw  = addPasswordField("New Password(optional)");
 
-        // Initially disable editing until data is loaded
+        // disable editing untill user data loaded
         setFieldsEnabled(false, txtNewId, txtFN, txtLN, txtEmail, txtDb, txtContact, txtAddr, txtPic, txtPw, cmbRole);
 
         JButton updateBtn = actionButton(buttonRow(), "Update User", BUTTON_COLOR);
@@ -117,7 +142,7 @@ public class UserManagementPanel extends JPanel {
                 txtContact.setText(u.getContactNo());
                 txtAddr.setText(u.getAddress());
                 txtPic.setText(u.getProfilePicPath());
-                cmbRole.setSelectedItem(u.getRole());
+                cmbRole.setSelectedItem(toRoleLabel(u.getRole()));
 
                 setFieldsEnabled(true, txtNewId, txtFN, txtLN, txtEmail, txtDb, txtContact, txtAddr, txtPic, txtPw, cmbRole);
                 updateBtn.setEnabled(true);
@@ -136,7 +161,7 @@ public class UserManagementPanel extends JPanel {
             u.setEmail(txtEmail.getText().trim());
             u.setContactNo(txtContact.getText().trim());
             u.setAddress(txtAddr.getText().trim());
-            u.setRole((String) cmbRole.getSelectedItem());
+            u.setRole(toRoleValue((String) cmbRole.getSelectedItem()));
             u.setProfilePicPath(txtPic.getText().trim());
 
             try {
@@ -148,6 +173,7 @@ public class UserManagementPanel extends JPanel {
 
             String newPw = new String(txtPw.getPassword()).trim();
             if (newPw.isEmpty()) {
+                //if empty set old password as new
                 u.setPassword(controller.fetchUser(txtSearch.getText().trim()).getPassword());
             } else {
                 u.setPassword(newPw);
@@ -167,7 +193,6 @@ public class UserManagementPanel extends JPanel {
         refresh();
     }
 
-    // --- ALIGNED UI HELPERS ---
 
     private void prepareForm(String title, Color c) {
         contentPanel.removeAll();
@@ -178,41 +203,48 @@ public class UserManagementPanel extends JPanel {
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         contentPanel.add(lbl);
         contentPanel.add(Box.createVerticalStrut(20));
-        backButton(buttonRow());
+
     }
 
-    private JTextField addField(String labelText) {
-        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
-        row.setBackground(Color.WHITE);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel lbl = new JLabel(labelText);
-        lbl.setPreferredSize(new Dimension(150, 30));
-        JTextField f = new JTextField();
-        f.setPreferredSize(new Dimension(350, 30));
-
-        row.add(lbl); row.add(f);
-        contentPanel.add(row);
-        return f;
+    //for back button
+    private JPanel buttonRow() {
+        JPanel r = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        r.setBackground(Color.WHITE);
+        r.setAlignmentX(Component.LEFT_ALIGNMENT);
+        contentPanel.add(r);
+        return r;
     }
 
-    private JPasswordField addPasswordField(String labelText) {
-        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
-        row.setBackground(Color.WHITE);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel lbl = new JLabel(labelText);
-        lbl.setPreferredSize(new Dimension(150, 30));
-        JPasswordField f = new JPasswordField();
-        f.setPreferredSize(new Dimension(350, 30));
-
-        row.add(lbl); row.add(f);
-        contentPanel.add(row);
-        return f;
+    private void backButton(JPanel r) {
+        JButton b = new JButton("Back");
+        b.addActionListener(e -> showCards());
+        r.add(b);
     }
 
+
+    private JButton actionButton(JPanel r, String label, Color bg) {
+        JButton b = new JButton(label);
+        b.setBackground(bg);
+        b.setForeground(Color.WHITE);
+        r.add(b);
+        return b;
+    }
+
+
+    private void handleResponse(String res) {
+        JOptionPane.showMessageDialog(this, res.split(":")[1].trim());
+        if (res.startsWith("SUCCESS"))
+            showCards(); //if success call again cardInterface
+    }
+
+    //for better GUI view
+    private void refresh() {
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    //role selection field
     private JComboBox<String> addRoleCombo() {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
         row.setBackground(Color.WHITE);
@@ -221,7 +253,7 @@ public class UserManagementPanel extends JPanel {
 
         JLabel lbl = new JLabel("Role");
         lbl.setPreferredSize(new Dimension(150, 30));
-        JComboBox<String> c = new JComboBox<>(new String[]{"Admin", "Student", "Lecturer", "techofficer"});
+        JComboBox<String> c = new JComboBox<>(new String[]{"Admin", "Student", "Lecturer", "Technical Officer"});
         c.setPreferredSize(new Dimension(350, 30));
 
         row.add(lbl); row.add(c);
@@ -229,6 +261,44 @@ public class UserManagementPanel extends JPanel {
         return c;
     }
 
+    private String toRoleValue(String label) {
+        if (label == null) return "";
+        switch (label) {
+            case "Admin":
+                return "admin";
+            case "Student":
+                return "student";
+            case "Lecturer":
+                return "lecturer";
+            case "Technical Officer":
+                return "techofficer";
+            default:
+                return label.trim().toLowerCase();
+        }
+    }
+
+    private String toRoleLabel(String role) {
+        if (role == null) return "Student";
+        String value = role.trim().toLowerCase();
+        switch (value) {
+            case "admin":
+                return "Admin";
+            case "student":
+            case "undergraduate":
+                return "Student";
+            case "lecture":
+            case "lecturer":
+                return "Lecturer";
+            case "technical officer":
+            case "techofficer":
+                return "Technical Officer";
+            default:
+                return "Student";
+        }
+    }
+
+
+    //create photo picker for profile photos
     private JTextField addPhotoPicker(String labelText) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
         row.setBackground(Color.WHITE);
@@ -254,54 +324,49 @@ public class UserManagementPanel extends JPanel {
         return path;
     }
 
-    private void handleResponse(String res) {
-        JOptionPane.showMessageDialog(this, res.split(":")[1].trim());
-        if (res.startsWith("SUCCESS")) showCards();
-    }
 
-    private JPanel makeCard(String title, ActionListener action) {
-        JPanel card = new JPanel(new BorderLayout());
-        card.setBackground(CARD_COLOR);
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
-        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        JLabel lbl = new JLabel(title, SwingConstants.CENTER);
-        lbl.setForeground(Color.WHITE);
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 18));
-        card.add(lbl);
-        card.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) { action.actionPerformed(null); }
-        });
-        return card;
-    }
-
-    private JPanel buttonRow() {
-        JPanel r = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        r.setBackground(Color.WHITE);
-        r.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(r);
-        return r;
-    }
-
-    private void backButton(JPanel r) {
-        JButton b = new JButton("Back");
-        b.addActionListener(e -> showCards());
-        r.add(b);
-    }
-
-    private JButton actionButton(JPanel r, String label, Color bg) {
-        JButton b = new JButton(label);
-        b.setBackground(bg);
-        b.setForeground(Color.WHITE);
-        r.add(b);
-        return b;
-    }
-
+    //passed fields for disable
     private void setFieldsEnabled(boolean en, JComponent... comps) {
         for (JComponent c : comps) c.setEnabled(en);
     }
 
-    private void refresh() {
-        contentPanel.revalidate();
-        contentPanel.repaint();
+
+
+    private JTextField addField(String labelText) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        row.setBackground(Color.WHITE);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lbl = new JLabel(labelText);
+        lbl.setPreferredSize(new Dimension(150, 30));
+        JTextField f = new JTextField();
+        f.setPreferredSize(new Dimension(350, 30));
+
+        row.add(lbl); row.add(f);
+        contentPanel.add(row);
+        return f;
     }
+
+
+
+    private JPasswordField addPasswordField(String labelText) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        row.setBackground(Color.WHITE);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lbl = new JLabel(labelText);
+        lbl.setPreferredSize(new Dimension(150, 30));
+        JPasswordField f = new JPasswordField();
+        f.setPreferredSize(new Dimension(350, 30));
+
+        row.add(lbl); row.add(f);
+        contentPanel.add(row);
+        return f;
+    }
+
+
+
+
 }

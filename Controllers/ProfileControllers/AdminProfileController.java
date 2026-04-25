@@ -1,4 +1,4 @@
-package Controllers;
+package Controllers.ProfileControllers;
 
 import Models.User;
 
@@ -26,7 +26,20 @@ public class AdminProfileController extends BaseUserController {
         if (isNullOrEmpty(user.getFname()) || isNullOrEmpty(user.getEmail()) || user.getDateOfBirth() == null) {
             return "VALIDATION_ERROR: Basic information is missing.";
         }
-        
+
+        User existing = dao.getUserById(user.getOriginalUserID());
+        if (existing == null) {
+            return "DATABASE_ERROR: User not found.";
+        }
+
+        if (!existing.getUserID().equals(user.getUserID())) {
+            return "VALIDATION_ERROR: Changing User ID is not supported here.";
+        }
+
+        if (!normalizeRole(existing.getRole()).equals(normalizeRole(user.getRole()))) {
+            return "VALIDATION_ERROR: Changing user role is not supported here.";
+        }
+
         return dao.updateUser(user) ? "SUCCESS: All details updated!" : "DATABASE_ERROR: Failed to save.";
     }
 
@@ -35,5 +48,13 @@ public class AdminProfileController extends BaseUserController {
         if (!dao.userExists(id)) return "NOT_FOUND: User does not exist.";
 
         return dao.deleteUser(id) ? "SUCCESS: User deleted." : "DATABASE_ERROR: Delete failed.";
+    }
+
+    private String normalizeRole(String role) {
+        if (role == null) return "";
+        String value = role.trim().toLowerCase();
+        if (value.equals("lecture")) return "lecturer";
+        if (value.equals("technical officer")) return "techofficer";
+        return value;
     }
 }

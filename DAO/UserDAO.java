@@ -34,53 +34,38 @@ public class UserDAO {
         return null;
     }
 
-    // ── Update profile ───────────────────────────────────────────────────────
 
-    public boolean updateProfile(User user) {
-        String sql = "UPDATE user SET F_name=?, L_name=?, date_of_birth=?, Address=?, " +
-                "Email=?, contact_no=? WHERE User_id=?";
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, user.getFname());
-            pst.setString(2, user.getLname());
-            pst.setDate  (3, user.getDateOfBirth() != null
-                    ? Date.valueOf(user.getDateOfBirth()) : null);
-            pst.setString(4, user.getAddress());
-            pst.setString(5, user.getEmail());
-            pst.setString(6, user.getContactNo());
-            pst.setString(7, user.getUserID());
-
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // Inside UserDAO.java
-
-    // Update CREATE USER
+    // user create method
     public boolean createUser(User user) {
         String sql = "INSERT INTO user (User_id, F_name, L_name, Email, Password, " +
                 "Role, date_of_birth, Address, contact_no, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(false);
 
             pst.setString(1, user.getUserID());
             pst.setString(2, user.getFname());
             pst.setString(3, user.getLname());
             pst.setString(4, user.getEmail());
             pst.setString(5, user.getPassword());
-            pst.setString(6, user.getRole());
+            pst.setString(6, normalizeRole(user.getRole()));
             pst.setDate(7, user.getDateOfBirth() != null ? Date.valueOf(user.getDateOfBirth()) : null);
             pst.setString(8, user.getAddress());
             pst.setString(9, user.getContactNo());
-            pst.setString(10, user.getProfilePicPath()); // Added this line
+            pst.setString(10, user.getProfilePicPath());
 
-            return pst.executeUpdate() > 0;
+            boolean inserted = pst.executeUpdate() > 0;
+            if (!inserted) {
+                conn.rollback();
+                return false;
+            }
+
+            ensureRoleProfileExists(conn, user.getUserID(), normalizeRole(user.getRole()));
+            conn.commit();
+            return true;
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             return false;
         }
     }
@@ -97,14 +82,18 @@ public class UserDAO {
             pst.setString(3, user.getLname());
             pst.setString(4, user.getEmail());
             pst.setString(5, user.getPassword());
-            pst.setString(6, user.getRole());
+            pst.setString(6, normalizeRole(user.getRole()));
             pst.setDate(7, user.getDateOfBirth() != null ? Date.valueOf(user.getDateOfBirth()) : null);
             pst.setString(8, user.getAddress());
             pst.setString(9, user.getContactNo());
             pst.setString(10, user.getProfilePicPath()); // Added this line
             pst.setString(11, user.getOriginalUserID());
 
-            return pst.executeUpdate() > 0;
+            boolean updated = pst.executeUpdate() > 0;
+            if (updated) {
+                ensureRoleProfileExists(conn, user.getUserID(), normalizeRole(user.getRole()));
+            }
+            return updated;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -162,18 +151,19 @@ public class UserDAO {
                 user.setContactNo(rs.getString("contact_no"));
                 user.setAddress(rs.getString("Address"));
                 user.setPassword(rs.getString("Password"));
+                user.setProfilePicPath(rs.getString("profile_pic"));
                 Date dob = rs.getDate("date_of_birth");
                 if (dob != null) user.setDob(dob.toLocalDate());
                 return user;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error: " + e.getMessage());
         }
         return null;
     }
 
     public boolean emailExists(String email) {
-        String query = "SELECT COUNT(*) FROM users WHERE email = ?";
+        String query = "SELECT COUNT(*) FROM user WHERE Email = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -187,5 +177,70 @@ public class UserDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void ensureRoleProfileExists(Connection conn, String userId, String role) throws SQLException {
+        if (role == null || role.isBlank()) {
+            return;
+        }
+
+        String tableName;
+        String idColumn;
+        switch (role) {
+            case "admin":
+                tableName = "admin";
+                idColumn = "Admin_id";
+                break;
+            case "student":
+                tableName = "student";
+                idColumn = "Reg_no";
+                break;
+            case "lecturer":
+                tableName = "lecturer";
+                idColumn = "Lecturer_id";
+                break;
+            case "techofficer":
+                tableName = "technical_officer";
+                idColumn = "To_id";
+                break;
+            default:
+                return;
+        }
+
+        String checkSql = "SELECT 1 FROM " + tableName + " WHERE " + idColumn + " = ?";
+        try (PreparedStatement check = conn.prepareStatement(checkSql)) {
+            check.setString(1, userId);
+            ResultSet rs = check.executeQuery();
+            if (rs.next()) {
+                return;
+            }
+        }
+
+        String insertSql = "INSERT INTO " + tableName + " (" + idColumn + ") VALUES (?)";
+        try (PreparedStatement insert = conn.prepareStatement(insertSql)) {
+            insert.setString(1, userId);
+            insert.executeUpdate();
+        }
+    }
+
+    private String normalizeRole(String role) {
+        if (role == null) return null;
+
+        String value = role.trim().toLowerCase();
+        switch (value) {
+            case "lecture":
+            case "lecturer":
+                return "lecturer";
+            case "student":
+            case "undergraduate":
+                return "student";
+            case "technical officer":
+            case "techofficer":
+                return "techofficer";
+            case "admin":
+                return "admin";
+            default:
+                return value;
+        }
     }
 }

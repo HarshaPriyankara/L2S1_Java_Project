@@ -1,6 +1,6 @@
 package GUI.student;
 
-import Controllers.StudentProfileController;
+import Controllers.ProfileControllers.StudentProfileController;
 import Models.User;
 import javax.swing.*;
 import java.awt.*;

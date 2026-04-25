@@ -1,4 +1,4 @@
-package Controllers;
+package Controllers.AttendanceControllers;
 
 import DAO.AttendanceDAO;
 import java.sql.*;

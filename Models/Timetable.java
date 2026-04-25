@@ -57,43 +57,29 @@ public class Timetable {
     public String getSemester() { return semester; }
     public void setSemester(String semester) { this.semester = semester; }
 
-    // --- Database Operations ---
+    // --- Database Operations (New Table Sync Logic) ---
 
-    // කාලසටහනක් අලුතින් ඇතුළත් කිරීම
-    public boolean createTimeTable() {
+    /**
+     * මුළු ටේබල් එකම එකවර Sync කිරීම (Update/Delete/Add සියල්ලම මෙතනින් සිදුවේ)
+     */
+    public static boolean syncFullTimetable(List<Timetable> list, String level, String semester, String deptId) {
         TimetableDAO dao = new TimetableDAO();
-        return dao.saveTimetable(this);
-    }
-
-    // කාලසටහනක් යාවත්කාලීන කිරීම
-    public boolean updateTimeTable() {
-        TimetableDAO dao = new TimetableDAO();
-        return dao.updateTimetable(this);
-    }
-
-    // කාලසටහනක් මකා දැමීම
-    public static boolean deleteTimeTable(String id) {
-        TimetableDAO dao = new TimetableDAO();
-        // DAO එකේ deleteTimetable මෙතඩ් එක නිවැරදිව කෝල් කරනවා
-        return dao.deleteTimetable(id);
+        return dao.syncTimetable(list, level, semester, deptId);
     }
 
     /**
-     * ශිෂ්‍යයාට තමන්ගේ අංශයේ සහ පොදු (D4) කාලසටහන පෙන්වීමට
+     * ශිෂ්‍යයාට තමන්ගේ අංශයේ කාලසටහන පෙන්වීමට
      */
     public static List<Timetable> getTimeTableByDept(String deptId, String level, String semester) {
         TimetableDAO dao = new TimetableDAO();
-        // DAO එකේ getStudentTimetable මෙතඩ් එකට පරාමිතීන් යවනවා
         return dao.getStudentTimetable(deptId, level, semester);
     }
 
     /**
-     * Technical Officer (TO) හට Level, Semester සහ Department අනුව
-     * කාලසටහන පෙන්වීමට
+     * TO හට සියලු දත්ත පෙන්වීමට/ලෝඩ් කිරීමට
      */
     public static List<Timetable> getAllTimetables(String level, String semester, String deptId) {
         TimetableDAO dao = new TimetableDAO();
-        // DAO එකේ getTOTimetableFiltered මෙතඩ් එකට පරාමිතීන් 3ම පාස් කරනවා
         return dao.getTOTimetableFiltered(level, semester, deptId);
     }
 }

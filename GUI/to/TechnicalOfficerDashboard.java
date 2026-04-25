@@ -27,7 +27,7 @@ public class TechnicalOfficerDashboard extends BaseDashboard {
         contentPanel.add(new MedicalManagement(this), "Medical");
         contentPanel.add(new Timetable(this), "Timetable");
 
-        contentPanel.add(new ProfileManagementPanel(currentUser.getUserID()), "Profile");
+        contentPanel.add(new ProfileManagementPanel(currentUser.getUserID(), false), "Profile");
 
         // Using the common ViewNotice panel used by other users
         contentPanel.add(new ViewNotice("Technical Officer", contentPanel, cardLayout), "Notices");

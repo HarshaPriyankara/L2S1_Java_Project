@@ -1,6 +1,6 @@
 package GUI.common;
 
-import Controllers.LecTOProfileController;
+import Controllers.ProfileControllers.LecTOProfileController;
 import Models.User;
 import javax.swing.*;
 import java.awt.*;
@@ -9,12 +9,18 @@ public class ProfileManagementPanel extends JPanel {
     private final LecTOProfileController controller = new LecTOProfileController();
     private final JPanel contentPanel = new JPanel();
     private final String loggedInUserId;
+    private final boolean allowRoleEdit;
 
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
     private static final Color CARD_COLOR   = new Color(85, 179, 232);
 
     public ProfileManagementPanel(String loggedInUserId) {
+        this(loggedInUserId, true);
+    }
+
+    public ProfileManagementPanel(String loggedInUserId, boolean allowRoleEdit) {
         this.loggedInUserId = loggedInUserId;
+        this.allowRoleEdit = allowRoleEdit;
         setLayout(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
@@ -46,12 +52,18 @@ public class ProfileManagementPanel extends JPanel {
         JTextField txtFN      = addAlignedField("First Name", existing.getFname());
         JTextField txtLN      = addAlignedField("Last Name", existing.getLname());
         JTextField txtEmail   = addAlignedField("Email", existing.getEmail());
-        JTextField txtDob     = addAlignedField("DOB (YYYY-MM-DD)", existing.getDateOfBirth().toString());
+        String dobValue = existing.getDateOfBirth() == null ? "" : existing.getDateOfBirth().toString();
+        JTextField txtDob     = addAlignedField("DOB (YYYY-MM-DD)", dobValue);
         JTextField txtContact = addAlignedField("Contact No", existing.getContactNo());
         JTextField txtAddr    = addAlignedField("Address", existing.getAddress());
 
-        // Added Role Dropdown
-        JComboBox<String> cmbRole = addRoleDropdown(existing.getRole());
+        final JComboBox<String> cmbRole;
+        if (allowRoleEdit) {
+            cmbRole = addRoleDropdown(existing.getRole());
+        } else {
+            cmbRole = null;
+            addReadOnlyField("Role", existing.getRole());
+        }
 
         // Added Profile Picture Picker
         JTextField txtPic = addPhotoPicker("Profile Photo", existing.getProfilePicPath());
@@ -68,7 +80,7 @@ public class ProfileManagementPanel extends JPanel {
             user.setEmail(txtEmail.getText().trim());
             user.setContactNo(txtContact.getText().trim());
             user.setAddress(txtAddr.getText().trim());
-            user.setRole((String) cmbRole.getSelectedItem());
+            user.setRole(allowRoleEdit ? (String) cmbRole.getSelectedItem() : existing.getRole());
             user.setProfilePicPath(txtPic.getText().trim());
 
             try {
@@ -181,6 +193,7 @@ public class ProfileManagementPanel extends JPanel {
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         return row;
     }
+
 
 //    private void backButton(JPanel row) {
 //        JButton btn = new JButton("Back");

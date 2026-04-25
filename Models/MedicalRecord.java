@@ -4,26 +4,80 @@ import java.time.LocalDate;
 
 public class MedicalRecord {
 
-    private String    medicalId;
-    private String    regNo;
-    private LocalDate date;
-    private String    reason;
-    private String    document;
-    private boolean   approved;
-    private String    approvedBy;
+    private int medicalId;
+    private String regNo;
+    private LocalDate sessionDate;
+    private String reason;
+    private String sessionType;
+    private String examCourse;
+    private boolean approved;
 
-
-    public MedicalRecord(String medicalId, String regNo, LocalDate date, String reason, String document) {
-        this.medicalId = medicalId;
-        this.regNo = regNo;
-        this.date = date;
-        this.reason = reason;
-        this.document = document;
+    public MedicalRecord() {
     }
 
-    public  void submitMedical(){
-        this.approved =false;
-        this.approvedBy =null;
-        System.out.println("Medical submitted for :"+regNo);
+    public MedicalRecord(int medicalId, String regNo, LocalDate sessionDate, String reason, String sessionType, String examCourse, boolean approved) {
+        this.medicalId = medicalId;
+        this.regNo = regNo;
+        this.sessionDate = sessionDate;
+        this.reason = reason;
+        this.sessionType = sessionType;
+        this.examCourse = examCourse;
+        this.approved = approved;
+    }
+
+    public int getMedicalId() {
+        return medicalId;
+    }
+
+    public void setMedicalId(int medicalId) {
+        this.medicalId = medicalId;
+    }
+
+    public String getRegNo() {
+        return regNo;
+    }
+
+    public void setRegNo(String regNo) {
+        this.regNo = regNo;
+    }
+
+    public LocalDate getSessionDate() {
+        return sessionDate;
+    }
+
+    public void setSessionDate(LocalDate sessionDate) {
+        this.sessionDate = sessionDate;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getSessionType() {
+        return sessionType;
+    }
+
+    public void setSessionType(String sessionType) {
+        this.sessionType = sessionType;
+    }
+
+    public String getExamCourse() {
+        return examCourse;
+    }
+
+    public void setExamCourse(String examCourse) {
+        this.examCourse = examCourse;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
     }
 }
