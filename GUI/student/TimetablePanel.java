@@ -1,8 +1,8 @@
 package GUI.student;
 
+import Controllers.TimetableControllers.TimetableController;
+import GUI.common.UITheme;
 import Models.Timetable;
-import DAO.UndergraduateDAO;
-import DAO.TimetableDAO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -15,27 +15,26 @@ public class TimetablePanel extends JPanel {
     private DefaultTableModel tableModel;
     private JButton btnSearch;
     private final String studentId;
-    private final UndergraduateDAO undergraduateDAO = new UndergraduateDAO();
+    private final TimetableController timetableController = new TimetableController();
 
     public TimetablePanel(String studentId) {
         this.studentId = studentId;
-        setBackground(Color.WHITE);
+        setBackground(UITheme.APP_BACKGROUND);
         setLayout(new BorderLayout(15, 15));
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setBorder(UITheme.createContentBorder());
 
         // --- Top Panel for Filtering ---
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
-        topPanel.setBackground(Color.WHITE);
+        topPanel.setBackground(UITheme.APP_BACKGROUND);
 
         // Academic Year සහ Semester සඳහා Dropdowns
         cmbYear = new JComboBox<>(new String[]{"Level 1", "Level 2", "Level 3", "Level 4"});
         cmbSemester = new JComboBox<>(new String[]{"Semester 1", "Semester 2"});
+        UITheme.styleComboBox(cmbYear);
+        UITheme.styleComboBox(cmbSemester);
 
         btnSearch = new JButton("View Timetable");
-        btnSearch.setBackground(new Color(46, 125, 192));
-        btnSearch.setForeground(Color.WHITE);
-        btnSearch.setFont(new Font("SansSerif", Font.BOLD, 12));
-        btnSearch.setFocusPainted(false);
+        UITheme.stylePrimaryButton(btnSearch);
 
         topPanel.add(new JLabel("Academic Level:"));
         topPanel.add(cmbYear);
@@ -56,8 +55,8 @@ public class TimetablePanel extends JPanel {
 
         table = new JTable(tableModel);
         table.setRowHeight(35);
-        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
         table.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        UITheme.styleTable(table);
 
         table.getColumnModel().getColumn(0).setPreferredWidth(80); // Day
         table.getColumnModel().getColumn(4).setPreferredWidth(200); // Course Name (දිග වැඩි නිසා)
@@ -74,16 +73,13 @@ public class TimetablePanel extends JPanel {
         String sem = cmbSemester.getSelectedItem().toString();
 
 
-        String deptId = undergraduateDAO.getStudentDepartmentId(studentId);
-        if (deptId == null || deptId.isBlank()) {
-            JOptionPane.showMessageDialog(this, "Unable to find your department details.", "Error", JOptionPane.ERROR_MESSAGE);
+        TimetableController.TimetableStudentResult result = timetableController.loadStudentTimetable(studentId, level, sem);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        TimetableDAO dao = new TimetableDAO();
-
-        // DAO එකෙන් ඩේටාබේස් එකේ නැති Level/Sem දත්ත අරගෙන එනවා (Course Code එක පාවිච්චි කරලා)
-        List<Timetable> list = dao.getStudentTimetable(deptId, level, sem);
+        List<Timetable> list = result.getTimetables();
 
         tableModel.setRowCount(0);
 

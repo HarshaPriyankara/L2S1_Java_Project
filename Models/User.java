@@ -108,4 +108,46 @@ public class User {
 
     public String getOriginalUserID() { return originalUserID; }
     public void setOriginalUserID(String id) { this.originalUserID = id; }
+
+    public String getDisplayRoleName() {
+        if (role == null || role.isBlank()) {
+            return "User";
+        }
+
+        switch (getRoleKey()) {
+            case "admin":
+                return "Admin";
+            case "lecturer":
+                return "Lecturer";
+            case "student":
+                return "Undergraduate";
+            case "techofficer":
+                return "Technical Officer";
+            default:
+                return role;
+        }
+    }
+
+    public String getRoleKey() {
+        if (role == null) {
+            return "";
+        }
+
+        String value = role.trim().toLowerCase();
+        switch (value) {
+            case "lecture":
+            case "lecturer":
+                return "lecturer";
+            case "student":
+            case "undergraduate":
+                return "student";
+            case "technical officer":
+            case "techofficer":
+                return "techofficer";
+            case "admin":
+                return "admin";
+            default:
+                return value;
+        }
+    }
 }

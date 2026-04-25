@@ -1,6 +1,7 @@
 package GUI.student;
 
-import DAO.MedicalRecordDAO;
+import Controllers.MedicalControllers.StudentMedicalController;
+import GUI.common.UITheme;
 import Models.MedicalRecord;
 
 import javax.swing.*;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class MedicalPanel extends JPanel {
     private final String studentId;
-    private final MedicalRecordDAO medicalRecordDAO = new MedicalRecordDAO();
+    private final StudentMedicalController medicalController = new StudentMedicalController();
     private final DefaultTableModel tableModel;
     private final JTextArea txtReason;
     private final JComboBox<String> cmbSessionType;
@@ -24,12 +25,12 @@ public class MedicalPanel extends JPanel {
         this.studentId = studentId;
 
         setLayout(new BorderLayout(15, 15));
-        setBackground(Color.WHITE);
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setBackground(UITheme.APP_BACKGROUND);
+        setBorder(UITheme.createContentBorder());
 
         JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBackground(Color.WHITE);
-        formPanel.setBorder(BorderFactory.createTitledBorder("Submit New Medical"));
+        formPanel.setBackground(UITheme.SURFACE);
+        formPanel.setBorder(UITheme.createSectionBorder("Submit New Medical"));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
@@ -43,6 +44,7 @@ public class MedicalPanel extends JPanel {
         gbc.gridx = 1;
         JTextField txtStudentId = new JTextField(studentId, 18);
         txtStudentId.setEditable(false);
+        txtStudentId.setBackground(UITheme.SURFACE_MUTED);
         formPanel.add(txtStudentId, gbc);
 
         gbc.gridx = 0;
@@ -61,6 +63,7 @@ public class MedicalPanel extends JPanel {
 
         gbc.gridx = 1;
         cmbSessionType = new JComboBox<>(new String[]{"NormalDay", "Exam"});
+        UITheme.styleComboBox(cmbSessionType);
         formPanel.add(cmbSessionType, gbc);
 
         gbc.gridx = 0;
@@ -69,6 +72,7 @@ public class MedicalPanel extends JPanel {
 
         gbc.gridx = 1;
         txtExamCourse = new JTextField(18);
+        UITheme.styleTextField(txtExamCourse);
         formPanel.add(txtExamCourse, gbc);
 
         gbc.gridx = 0;
@@ -80,19 +84,20 @@ public class MedicalPanel extends JPanel {
         txtReason = new JTextArea(4, 18);
         txtReason.setLineWrap(true);
         txtReason.setWrapStyleWord(true);
+        UITheme.styleTextArea(txtReason);
         formPanel.add(new JScrollPane(txtReason), gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.EAST;
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        actionPanel.setBackground(Color.WHITE);
+        actionPanel.setBackground(UITheme.SURFACE);
 
         JButton btnSubmit = new JButton("Submit Medical");
-        btnSubmit.setBackground(new Color(46, 125, 192));
-        btnSubmit.setForeground(Color.WHITE);
+        UITheme.stylePrimaryButton(btnSubmit);
 
         JButton btnRefresh = new JButton("Refresh My Records");
+        UITheme.styleNeutralButton(btnRefresh);
         actionPanel.add(btnRefresh);
         actionPanel.add(btnSubmit);
         formPanel.add(actionPanel, gbc);
@@ -109,8 +114,7 @@ public class MedicalPanel extends JPanel {
 
         JTable table = new JTable(tableModel);
         table.setRowHeight(28);
-        table.getTableHeader().setBackground(new Color(46, 125, 192));
-        table.getTableHeader().setForeground(Color.WHITE);
+        UITheme.styleTable(table);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         cmbSessionType.addActionListener(e -> updateExamCourseState());
@@ -137,46 +141,44 @@ public class MedicalPanel extends JPanel {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        if (reason.isBlank()) {
-            JOptionPane.showMessageDialog(this, "Please enter the medical reason.");
-            return;
-        }
+        StudentMedicalController.MedicalActionResult result =
+                medicalController.submitMedical(studentId, sessionDate, sessionType, examCourse, reason);
 
-        if ("Exam".equals(sessionType) && examCourse.isBlank()) {
-            JOptionPane.showMessageDialog(this, "Please enter the exam course code for exam medicals.");
-            return;
-        }
-
-        try {
-            medicalRecordDAO.addMedical(studentId, sessionDate, sessionType, examCourse, reason);
+        if (result.isSuccess()) {
             txtReason.setText("");
             if (!"Exam".equals(sessionType)) {
                 txtExamCourse.setText("");
             }
             loadMedicalRecords();
-            JOptionPane.showMessageDialog(this, "Medical submitted successfully.");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to submit medical: " + ex.getMessage());
         }
+
+        JOptionPane.showMessageDialog(
+                this,
+                result.getMessage(),
+                result.isSuccess() ? "Success" : "Error",
+                result.isSuccess() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE
+        );
     }
 
     private void loadMedicalRecords() {
         tableModel.setRowCount(0);
 
-        try {
-            List<MedicalRecord> records = medicalRecordDAO.getMedicalRecordsByStudent(studentId);
-            for (MedicalRecord record : records) {
-                tableModel.addRow(new Object[]{
-                        record.getMedicalId(),
-                        record.getSessionDate(),
-                        record.getSessionType(),
-                        record.getExamCourse(),
-                        record.getReason(),
-                        record.isApproved() ? "Approved" : "Pending"
-                });
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to load medical records: " + ex.getMessage());
+        StudentMedicalController.MedicalRecordsResult result = medicalController.loadMedicalRecords(studentId);
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage());
+            return;
+        }
+
+        List<MedicalRecord> records = result.getRecords();
+        for (MedicalRecord record : records) {
+            tableModel.addRow(new Object[]{
+                    record.getMedicalId(),
+                    record.getSessionDate(),
+                    record.getSessionType(),
+                    record.getExamCourse(),
+                    record.getReason(),
+                    record.isApproved() ? "Approved" : "Pending"
+            });
         }
     }
 }

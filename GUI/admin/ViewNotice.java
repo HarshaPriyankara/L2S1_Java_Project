@@ -1,6 +1,10 @@
 package GUI.admin;
 
-import DAO.AdminDAO;
+import Controllers.NoticeControllers.NoticeAdminController;
+import Controllers.NoticeControllers.NoticeAdminRow;
+import Controllers.NoticeControllers.NoticeContentResult;
+import Controllers.NoticeControllers.NoticeOperationResult;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -9,8 +13,9 @@ import java.util.List;
 
 public class ViewNotice extends JPanel {
 
-    private NoticeManagementPanel parentPanel;
-    private JTable noticeTable;
+    private final NoticeManagementPanel parentPanel;
+    private final JTable noticeTable;
+    private final NoticeAdminController noticeController = new NoticeAdminController();
 
     public ViewNotice(NoticeManagementPanel parentPanel) {
         this.parentPanel = parentPanel;
@@ -53,11 +58,10 @@ public class ViewNotice extends JPanel {
     }
 
     private void loadTableData(DefaultTableModel model) {
-        AdminDAO dao = new AdminDAO();
-        List<Object[]> data = dao.getAllNotices();
+        List<NoticeAdminRow> data = noticeController.getAllNotices();
         model.setRowCount(0);
-        for (Object[] row : data) {
-            Object[] rowWithButton = {row[0], row[1], row[2], row[3], "View", "Update", "Delete"};
+        for (NoticeAdminRow row : data) {
+            Object[] rowWithButton = {row.getId(), row.getTitle(), row.getTargetRoles(), row.getAddedDate(), "View", "Update", "Delete"};
             model.addRow(rowWithButton);
         }
     }
@@ -92,11 +96,12 @@ public class ViewNotice extends JPanel {
                 if (row != -1) {
                     int id = (int) table.getValueAt(row, 0);
                     String title = (String) table.getValueAt(row, 1);
-                    AdminDAO dao = new AdminDAO();
-                    String path = dao.getNoticeContentPath(id);
-                    if (path != null) {
+                    NoticeContentResult result = noticeController.loadNoticeContent(id);
+                    if (result.isSuccess()) {
                         Frame frame = (Frame) SwingUtilities.getWindowAncestor(table);
-                        new NoticeViewer(frame, title, path).setVisible(true);
+                        new NoticeViewer(frame, title, result.getContent()).setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(button, result.getMessage(), "Notice", JOptionPane.INFORMATION_MESSAGE);
                     }
                 }
                 fireEditingStopped();
@@ -150,11 +155,12 @@ public class ViewNotice extends JPanel {
                     String title = (String) table.getValueAt(row, 1);
                     int confirm = JOptionPane.showConfirmDialog(button, "Delete " + title + "?", "Confirm", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
-                        AdminDAO dao = new AdminDAO();
-                        String path = dao.getNoticeContentPath(id);
-                        if (dao.deleteNotice(id, path)) {
+                        NoticeOperationResult result = noticeController.deleteNotice(id, title);
+                        if (result.isSuccess()) {
                             model.removeRow(row);
-                            JOptionPane.showMessageDialog(button, "Deleted successfully!");
+                            JOptionPane.showMessageDialog(button, result.getMessage());
+                        } else {
+                            JOptionPane.showMessageDialog(button, result.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 }

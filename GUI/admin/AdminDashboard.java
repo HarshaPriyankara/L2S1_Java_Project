@@ -1,6 +1,7 @@
 package GUI.admin;
 
 import GUI.common.BaseDashboard;
+import GUI.common.UITheme;
 import Models.User;
 import javax.swing.*;
 import java.awt.*;
@@ -61,11 +62,11 @@ public class AdminDashboard extends BaseDashboard {
     @Override
     protected JPanel buildHomePanel() {
         JPanel p = new JPanel(new GridBagLayout());
-        p.setBackground(Color.WHITE);
+        p.setBackground(UITheme.APP_BACKGROUND);
 
         JLabel lbl = new JLabel("Admin Control Center");
         lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
-        lbl.setForeground(new Color(0x333333));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
 
         p.add(lbl);
         return p;

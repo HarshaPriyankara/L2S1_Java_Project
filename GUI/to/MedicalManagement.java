@@ -1,6 +1,8 @@
 package GUI.to;
 
-import DAO.MedicalRecordDAO;
+import Controllers.MedicalControllers.MedicalManagementController;
+import Controllers.MedicalControllers.MedicalManagementFormData;
+import Controllers.MedicalControllers.StudentMedicalController;
 import Models.MedicalRecord;
 
 import javax.swing.*;
@@ -10,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class MedicalManagement extends JPanel {
-    private final MedicalRecordDAO medicalRecordDAO = new MedicalRecordDAO();
+    private final MedicalManagementController medicalController = new MedicalManagementController();
     private final DefaultTableModel tableModel;
     private final JTable medicalTable;
     private final JTextField txtMedicalId;
@@ -156,21 +158,23 @@ public class MedicalManagement extends JPanel {
 
     private void loadRecords() {
         tableModel.setRowCount(0);
-        try {
-            List<MedicalRecord> records = medicalRecordDAO.getAllMedicalRecords();
-            for (MedicalRecord record : records) {
-                tableModel.addRow(new Object[]{
-                        record.getMedicalId(),
-                        record.getRegNo(),
-                        record.getSessionDate(),
-                        record.getSessionType(),
-                        record.getExamCourse(),
-                        record.getReason(),
-                        record.isApproved() ? "Yes" : "No"
-                });
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to load medical records: " + ex.getMessage());
+        StudentMedicalController.MedicalRecordsResult result = medicalController.loadAllMedicalRecords();
+        if (result.hasError()) {
+            JOptionPane.showMessageDialog(this, result.getErrorMessage());
+            return;
+        }
+
+        List<MedicalRecord> records = result.getRecords();
+        for (MedicalRecord record : records) {
+            tableModel.addRow(new Object[]{
+                    record.getMedicalId(),
+                    record.getRegNo(),
+                    record.getSessionDate(),
+                    record.getSessionType(),
+                    record.getExamCourse(),
+                    record.getReason(),
+                    record.isApproved() ? "Yes" : "No"
+            });
         }
     }
 
@@ -202,61 +206,28 @@ public class MedicalManagement extends JPanel {
     }
 
     private void addMedical() {
-        if (!validateFields(false)) {
-            return;
-        }
-
-        try {
-            medicalRecordDAO.addMedical(
-                    txtRegNo.getText().trim(),
-                    LocalDate.parse(txtSessionDate.getText().trim()),
-                    (String) cmbSessionType.getSelectedItem(),
-                    txtExamCourse.getText().trim(),
-                    txtReason.getText().trim()
-            );
+        StudentMedicalController.MedicalActionResult result = medicalController.addMedical(buildFormData());
+        if (result.isSuccess()) {
             loadRecords();
             clearForm();
-            JOptionPane.showMessageDialog(this, "Medical record added successfully.");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to add medical record: " + ex.getMessage());
         }
+        showMedicalActionResult(result);
     }
 
     private void updateMedical() {
-        if (txtMedicalId.getText().isBlank()) {
-            JOptionPane.showMessageDialog(this, "Please select a medical record to update.");
-            return;
-        }
-
-        if (!validateFields(true)) {
-            return;
-        }
-
-        try {
-            medicalRecordDAO.updateMedical(
-                    Integer.parseInt(txtMedicalId.getText().trim()),
-                    txtRegNo.getText().trim(),
-                    LocalDate.parse(txtSessionDate.getText().trim()),
-                    (String) cmbSessionType.getSelectedItem(),
-                    txtExamCourse.getText().trim(),
-                    txtReason.getText().trim(),
-                    chkApproved.isSelected()
-            );
+        StudentMedicalController.MedicalActionResult result = medicalController.updateMedical(buildFormData());
+        if (result.isSuccess()) {
             loadRecords();
-            JOptionPane.showMessageDialog(this, "Medical record updated successfully.");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to update medical record: " + ex.getMessage());
         }
+        showMedicalActionResult(result);
     }
 
     private void approveMedical() {
-        if (txtMedicalId.getText().isBlank()) {
-            JOptionPane.showMessageDialog(this, "Please select a medical record to approve.");
-            return;
+        StudentMedicalController.MedicalActionResult result = medicalController.approveMedical(buildApprovedFormData());
+        if (result.isSuccess()) {
+            loadRecords();
         }
-
-        chkApproved.setSelected(true);
-        updateMedical();
+        showMedicalActionResult(result);
     }
 
     private void deleteMedical() {
@@ -270,40 +241,12 @@ public class MedicalManagement extends JPanel {
             return;
         }
 
-        try {
-            medicalRecordDAO.deleteMedical(Integer.parseInt(txtMedicalId.getText().trim()));
+        StudentMedicalController.MedicalActionResult result = medicalController.deleteMedical(txtMedicalId.getText());
+        if (result.isSuccess()) {
             loadRecords();
             clearForm();
-            JOptionPane.showMessageDialog(this, "Medical record deleted successfully.");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unable to delete medical record: " + ex.getMessage());
         }
-    }
-
-    private boolean validateFields(boolean updating) {
-        if (txtRegNo.getText().trim().isBlank()) {
-            JOptionPane.showMessageDialog(this, "Registration number is required.");
-            return false;
-        }
-
-        if (txtReason.getText().trim().isBlank()) {
-            JOptionPane.showMessageDialog(this, "Reason is required.");
-            return false;
-        }
-
-        try {
-            LocalDate.parse(txtSessionDate.getText().trim());
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Session date must be in yyyy-mm-dd format.");
-            return false;
-        }
-
-        if ("Exam".equals(cmbSessionType.getSelectedItem()) && txtExamCourse.getText().trim().isBlank()) {
-            JOptionPane.showMessageDialog(this, "Exam course is required for exam medicals.");
-            return false;
-        }
-
-        return !updating || !txtMedicalId.getText().trim().isBlank();
+        showMedicalActionResult(result);
     }
 
     private void clearForm() {
@@ -320,5 +263,38 @@ public class MedicalManagement extends JPanel {
 
     private String valueOrEmpty(Object value) {
         return value == null ? "" : String.valueOf(value);
+    }
+
+    private MedicalManagementFormData buildFormData() {
+        return new MedicalManagementFormData(
+                txtMedicalId.getText(),
+                txtRegNo.getText(),
+                txtSessionDate.getText(),
+                String.valueOf(cmbSessionType.getSelectedItem()),
+                txtExamCourse.getText(),
+                txtReason.getText(),
+                chkApproved.isSelected()
+        );
+    }
+
+    private MedicalManagementFormData buildApprovedFormData() {
+        return new MedicalManagementFormData(
+                txtMedicalId.getText(),
+                txtRegNo.getText(),
+                txtSessionDate.getText(),
+                String.valueOf(cmbSessionType.getSelectedItem()),
+                txtExamCourse.getText(),
+                txtReason.getText(),
+                true
+        );
+    }
+
+    private void showMedicalActionResult(StudentMedicalController.MedicalActionResult result) {
+        JOptionPane.showMessageDialog(
+                this,
+                result.getMessage(),
+                result.isSuccess() ? "Success" : "Error",
+                result.isSuccess() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE
+        );
     }
 }

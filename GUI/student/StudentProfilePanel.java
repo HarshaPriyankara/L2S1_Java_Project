@@ -10,12 +10,16 @@ public class StudentProfilePanel extends JPanel {
     private final StudentProfileController controller = new StudentProfileController();
     private final JPanel contentPanel = new JPanel();
     private final String loggedInStudentId;
+    private final JPanel dashboardContentPanel;
+    private final CardLayout dashboardCardLayout;
 
     private static final Color BUTTON_COLOR = new Color(46, 125, 192);
     private static final Color CARD_COLOR   = new Color(85, 179, 232);
 
-    public StudentProfilePanel(String loggedInStudentId) {
+    public StudentProfilePanel(String loggedInStudentId, JPanel dashboardContentPanel, CardLayout dashboardCardLayout) {
         this.loggedInStudentId = loggedInStudentId;
+        this.dashboardContentPanel = dashboardContentPanel;
+        this.dashboardCardLayout = dashboardCardLayout;
         setLayout(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
@@ -24,21 +28,11 @@ public class StudentProfilePanel extends JPanel {
         scroll.setBorder(null);
         add(scroll, BorderLayout.CENTER);
 
-        showCards();
+
+        showUpdateForm();
     }
 
-    private void showCards() {
-        contentPanel.removeAll();
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
 
-        JPanel card = makeCard("My Profile Settings");
-        card.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) { showUpdateForm(); }
-        });
-
-        contentPanel.add(card);
-        refresh();
-    }
 
     private void showUpdateForm() {
         contentPanel.removeAll();
@@ -80,7 +74,8 @@ public class StudentProfilePanel extends JPanel {
             String response = controller.updateProfile(user);
 
             JOptionPane.showMessageDialog(this, response.split(":")[1].trim());
-            if (response.startsWith("SUCCESS")) showCards();
+
+
         });
 
         contentPanel.add(row);
@@ -175,7 +170,11 @@ public class StudentProfilePanel extends JPanel {
     private void backButton(JPanel row) {
         JButton btn = new JButton("Back");
         btn.setPreferredSize(new Dimension(100, 38));
-        btn.addActionListener(e -> showCards());
+        btn.addActionListener(e -> {
+            if (dashboardCardLayout != null && dashboardContentPanel != null) {
+                dashboardCardLayout.show(dashboardContentPanel, "Home");
+            }
+        });
         row.add(btn);
     }
 

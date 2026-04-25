@@ -1,17 +1,21 @@
 package GUI.admin;
 
+import Controllers.CourseControllers.CourseController;
+import Controllers.CourseControllers.CourseOperationResult;
+import GUI.common.UITheme;
+
 import javax.swing.*;
 import java.awt.*;
 
 class DeleteCoursePanel extends JPanel {
     private JTextField txtCode;
-    private static final Color DELETE_COLOR = new Color(0xCC0000); // Red color for delete
-    private static final Color BUTTON_COLOR = new Color(46, 125, 192);
+    private static final Color DELETE_COLOR = UITheme.DANGER;
+    private final CourseController courseController = new CourseController();
 
     public DeleteCoursePanel(JPanel parentPanel, CardLayout cardLayout) {
         // Layout and Styling setup
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(Color.WHITE);
+        setBackground(UITheme.SURFACE);
         setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
 
         // 1. Title
@@ -20,7 +24,7 @@ class DeleteCoursePanel extends JPanel {
         // 2. Description label
         JLabel desc = new JLabel("Enter the Course Code of the course you want to delete.");
         desc.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        desc.setForeground(Color.GRAY);
+        desc.setForeground(UITheme.TEXT_MUTED);
         desc.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(desc);
         add(Box.createVerticalStrut(20));
@@ -30,13 +34,13 @@ class DeleteCoursePanel extends JPanel {
 
         // 4. Button Row setup
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        row.setBackground(Color.WHITE);
+        row.setBackground(UITheme.SURFACE);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
         // Back Button
         JButton btnBack = new JButton("Back");
-        styleButton(btnBack, new Color(0xAAAAAA));
+        styleButton(btnBack, UITheme.SURFACE_MUTED);
         btnBack.addActionListener(e -> cardLayout.show(parentPanel, "CourseMenu"));
 
         // Delete Button
@@ -62,12 +66,12 @@ class DeleteCoursePanel extends JPanel {
                     JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                DAO.CourseDAO dao = new DAO.CourseDAO();
-                if (dao.deleteCourse(code)) {
-                    JOptionPane.showMessageDialog(this, "Course Deleted Successfully!");
+                CourseOperationResult result = courseController.deleteCourse(code);
+                if (result.isSuccess()) {
+                    JOptionPane.showMessageDialog(this, result.getMessage());
                     txtCode.setText("");
                 } else {
-                    JOptionPane.showMessageDialog(this, "Delete Failed! Course Code not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, result.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -87,12 +91,14 @@ class DeleteCoursePanel extends JPanel {
     private JTextField addField(String label) {
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("SansSerif", Font.BOLD, 13));
+        lbl.setForeground(UITheme.TEXT_PRIMARY);
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JTextField field = new JTextField();
         field.setFont(new Font("SansSerif", Font.PLAIN, 13));
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
         field.setAlignmentX(Component.LEFT_ALIGNMENT);
+        UITheme.styleTextField(field);
 
         add(lbl);
         add(Box.createVerticalStrut(5));
@@ -102,12 +108,13 @@ class DeleteCoursePanel extends JPanel {
     }
 
     private void styleButton(JButton btn, Color bg) {
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(130, 38));
+        if (UITheme.SURFACE_MUTED.equals(bg)) {
+            UITheme.styleNeutralButton(btn);
+        } else if (UITheme.DANGER.equals(bg)) {
+            UITheme.styleDangerButton(btn);
+        } else {
+            UITheme.stylePrimaryButton(btn);
+        }
+        UITheme.setStandardButtonSize(btn);
     }
 }
