@@ -6,23 +6,24 @@ import Controllers.MarksControllers.MarksSaveResult;
 import Utils.MarksCalculator;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.regex.Pattern;
 
 public class MarksManagement extends JPanel {
     private JComboBox<String> courseComboBox;
     private JComboBox<String> typeComboBox;
-    private JComboBox<String> studentComboBox;
-    private JTextField quickMarkField;
+    private JTextField regNoFilterField;
     private JLabel statusLabel;
     private JTable marksTable;
     private DefaultTableModel tableModel;
+    private TableRowSorter<DefaultTableModel> tableSorter;
     private String lecturerID;
-    private final Map<String, Double> loadedEndMarks = new HashMap<>();
     private final MarksManagementController marksController = new MarksManagementController();
 
     public MarksManagement(String lecturerID) {
@@ -44,68 +45,71 @@ public class MarksManagement extends JPanel {
         JButton btnLoad = new JButton("Show Students");
         styleButton(btnLoad, new Color(46, 125, 192));
 
+        regNoFilterField = new JTextField(12);
+        JButton btnClearFilter = new JButton("Clear");
+        styleButton(btnClearFilter, new Color(108, 117, 125));
+
         topPanel.add(new JLabel("Course:"));
         topPanel.add(courseComboBox);
         topPanel.add(new JLabel("Assessment:"));
         topPanel.add(typeComboBox);
         topPanel.add(btnLoad);
+        topPanel.add(new JLabel("Reg No:"));
+        topPanel.add(regNoFilterField);
+        topPanel.add(btnClearFilter);
         add(topPanel, BorderLayout.NORTH);
 
-        String[] columns = {"Student ID", "Course Code", "Assessment Type", "Mark Value", "CA", "END", "Total Marks", "Grade", "Grade Value"};
+        String[] columns = {"Student ID", "Course Code", "Assessment Type", "Mark Value"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                if (column == 3) {
-                    return true;
-                }
-                if (column != 5) {
-                    return false;
-                }
-
-                Object course = getValueAt(row, 1);
-                return course != null && marksController.hasEndAssessment(String.valueOf(course));
+                return column == 3;
             }
         };
         marksTable = new JTable(tableModel);
         marksTable.setRowHeight(28);
         marksTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 13));
         marksTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
+        tableSorter = new TableRowSorter<>(tableModel);
+        marksTable.setRowSorter(tableSorter);
         add(new JScrollPane(marksTable), BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new BorderLayout(10, 0));
         bottomPanel.setBackground(Color.WHITE);
 
-        JPanel quickAddPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        quickAddPanel.setBackground(Color.WHITE);
-        studentComboBox = new JComboBox<>();
-        studentComboBox.setPreferredSize(new Dimension(120, 28));
-        quickMarkField = new JTextField(8);
-        JButton btnQuickSave = new JButton("Add / Update Mark");
-        styleButton(btnQuickSave, new Color(46, 125, 192));
         statusLabel = new JLabel(" ");
         statusLabel.setForeground(new Color(80, 80, 80));
 
-        quickAddPanel.add(new JLabel("Student:"));
-        quickAddPanel.add(studentComboBox);
-        quickAddPanel.add(new JLabel("Mark:"));
-        quickAddPanel.add(quickMarkField);
-        quickAddPanel.add(btnQuickSave);
-        quickAddPanel.add(statusLabel);
-
-        JButton btnSave = new JButton("Save / Update Marks");
+        JButton btnSave = new JButton("Upload / Update Marks");
         styleButton(btnSave, new Color(40, 167, 69));
 
         JPanel savePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         savePanel.setBackground(Color.WHITE);
         savePanel.add(btnSave);
 
-        bottomPanel.add(quickAddPanel, BorderLayout.CENTER);
+        bottomPanel.add(statusLabel, BorderLayout.CENTER);
         bottomPanel.add(savePanel, BorderLayout.EAST);
         add(bottomPanel, BorderLayout.SOUTH);
 
         btnLoad.addActionListener(e -> loadEnrolledStudents());
-        btnQuickSave.addActionListener(e -> saveQuickMark());
+        btnClearFilter.addActionListener(e -> regNoFilterField.setText(""));
         btnSave.addActionListener(e -> saveOrUpdateMarks());
+        regNoFilterField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                applyRegNoFilter();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                applyRegNoFilter();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                applyRegNoFilter();
+            }
+        });
     }
 
     private void styleButton(JButton btn, Color color) {
@@ -144,8 +148,6 @@ public class MarksManagement extends JPanel {
         }
 
         tableModel.setRowCount(0);
-        studentComboBox.removeAllItems();
-        loadedEndMarks.clear();
 
         MarksLoadResult result = marksController.loadEnrolledStudents(selectedCourse, selectedType);
         if (result.hasError()) {
@@ -153,14 +155,25 @@ public class MarksManagement extends JPanel {
             return;
         }
 
-        loadedEndMarks.putAll(result.getLoadedEndMarks());
-        for (String studentId : result.getStudentIds()) {
-            studentComboBox.addItem(studentId);
-        }
         for (Object[] row : result.getTableRows()) {
             tableModel.addRow(row);
         }
+        applyRegNoFilter();
         statusLabel.setText(result.getStatusMessage());
+    }
+
+    private void applyRegNoFilter() {
+        if (tableSorter == null) {
+            return;
+        }
+
+        String filterText = regNoFilterField.getText().trim();
+        if (filterText.isEmpty()) {
+            tableSorter.setRowFilter(null);
+            return;
+        }
+
+        tableSorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(filterText), 0));
     }
 
     private void saveOrUpdateMarks() {
@@ -169,7 +182,7 @@ public class MarksManagement extends JPanel {
             return;
         }
 
-        MarksSaveResult result = marksController.saveAllMarks(extractTableRows(), loadedEndMarks);
+        MarksSaveResult result = marksController.saveAllMarks(extractTableRows());
         JOptionPane.showMessageDialog(
                 this,
                 result.getMessage(),
@@ -182,36 +195,9 @@ public class MarksManagement extends JPanel {
         }
     }
 
-    private void saveQuickMark() {
-        String regNo = (String) studentComboBox.getSelectedItem();
-        String course = (String) courseComboBox.getSelectedItem();
-        String type = (String) typeComboBox.getSelectedItem();
-        String markText = quickMarkField.getText().trim();
-
-        MarksSaveResult result = marksController.saveQuickMark(regNo, course, type, markText);
-        if (result.isSuccess()) {
-            quickMarkField.setText("");
-            statusLabel.setText(result.getMessage());
-            loadEnrolledStudents();
-            selectStudentRow(regNo);
-        } else {
-            JOptionPane.showMessageDialog(this, result.getMessage());
-        }
-    }
-
     private void stopTableEditing() {
         if (marksTable.isEditing()) {
             marksTable.getCellEditor().stopCellEditing();
-        }
-    }
-
-    private void selectStudentRow(String regNo) {
-        for (int i = 0; i < tableModel.getRowCount(); i++) {
-            if (regNo.equals(String.valueOf(tableModel.getValueAt(i, 0)))) {
-                marksTable.setRowSelectionInterval(i, i);
-                marksTable.scrollRectToVisible(marksTable.getCellRect(i, 0, true));
-                return;
-            }
         }
     }
 
@@ -222,12 +208,7 @@ public class MarksManagement extends JPanel {
                     tableModel.getValueAt(i, 0),
                     tableModel.getValueAt(i, 1),
                     tableModel.getValueAt(i, 2),
-                    tableModel.getValueAt(i, 3),
-                    tableModel.getValueAt(i, 4),
-                    tableModel.getValueAt(i, 5),
-                    tableModel.getValueAt(i, 6),
-                    tableModel.getValueAt(i, 7),
-                    tableModel.getValueAt(i, 8)
+                    tableModel.getValueAt(i, 3)
             });
         }
         return rows;
