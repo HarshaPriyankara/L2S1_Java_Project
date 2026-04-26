@@ -57,11 +57,13 @@ public class StudentMarksPanel extends JPanel {
         JPanel topPanel = buildTopPanel();
         add(topPanel, BorderLayout.NORTH);
 
+        //create table structures
         caMarksModel = createCaMarksModel(new String[]{"Reg No"});
         eligibilityModel = createCaMarksModel(new String[]{"Reg No"});
         attendanceEligibilityModel = createCaMarksModel(new String[]{"Reg No"});
         finalMarksModel = createCaMarksModel(new String[]{"Reg No", "CA Marks", "End Marks", "Final Marks", "Grade"});
 
+        //cards of main 4
         centerCardPanel.setBackground(UITheme.APP_BACKGROUND);
         centerCardPanel.add(buildOverviewPanel(), "Overview");
         centerCardPanel.add(buildCaMarksPanel(), "CA");
@@ -176,6 +178,7 @@ public class StudentMarksPanel extends JPanel {
         caViewTitleLabel.setForeground(UITheme.TEXT_PRIMARY);
         headerPanel.add(caViewTitleLabel, BorderLayout.WEST);
 
+        //back to marks base menu
         JButton backToOverviewButton = new JButton("Back to Marks Menu");
         UITheme.styleNeutralButton(backToOverviewButton);
         backToOverviewButton.addActionListener(e -> centerCardLayout.show(centerCardPanel, "Overview"));
