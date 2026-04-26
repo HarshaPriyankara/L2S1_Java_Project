@@ -1,6 +1,9 @@
 package GUI.lecturer;
 
-import DAO.CourseMaterialDAO;
+import Controllers.CourseMaterialControllers.CourseMaterialController;
+import Controllers.CourseMaterialControllers.CourseMaterialFormData;
+import Controllers.CourseMaterialControllers.CourseMaterialOperationResult;
+import Controllers.CourseMaterialControllers.CourseMaterialRow;
 import GUI.common.UITheme;
 
 import javax.swing.*;
@@ -8,14 +11,15 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AddCourseMaterialPanel extends JPanel {
+    private static final Logger LOGGER = Logger.getLogger(AddCourseMaterialPanel.class.getName());
 
     private final String lecturerId;
-    private final CourseMaterialDAO courseMaterialDAO = new CourseMaterialDAO();
+    private final CourseMaterialController courseMaterialController = new CourseMaterialController();
     private JTextField txtTitle;
     private JComboBox<String> cmbCourseCode;
     private JTextField txtUploadedBy;
@@ -96,12 +100,12 @@ public class AddCourseMaterialPanel extends JPanel {
             public boolean importData(TransferSupport support) {
                 try {
                     Object transferredData = support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-                    if (transferredData instanceof List<?> files && !files.isEmpty() && files.get(0) instanceof File file) {
+                    if (transferredData instanceof List<?> files && !files.isEmpty() && files.getFirst() instanceof File file) {
                         txtLink.setText(file.getAbsolutePath());
                         return true;
                     }
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    LOGGER.log(Level.WARNING, "Unable to import dropped course material file.", ex);
                 }
                 return false;
             }
@@ -135,11 +139,11 @@ public class AddCourseMaterialPanel extends JPanel {
         gbc.anchor = GridBagConstraints.EAST;
         panel.add(row, gbc);
 
-        btnBrowse.addActionListener(e -> browseFile());
-        btnSave.addActionListener(e -> saveMaterial());
-        btnUpdate.addActionListener(e -> updateMaterial());
-        btnDelete.addActionListener(e -> deleteMaterial());
-        btnClear.addActionListener(e -> clearFields());
+        btnBrowse.addActionListener(ignored -> browseFile());
+        btnSave.addActionListener(ignored -> saveMaterial());
+        btnUpdate.addActionListener(ignored -> updateMaterial());
+        btnDelete.addActionListener(ignored -> deleteMaterial());
+        btnClear.addActionListener(ignored -> clearFields());
 
         return panel;
     }
@@ -157,8 +161,8 @@ public class AddCourseMaterialPanel extends JPanel {
         materialTable.setRowHeight(28);
         UITheme.styleTable(materialTable);
         materialTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        materialTable.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
+        materialTable.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
                 populateSelectedMaterial();
             }
         });
@@ -167,68 +171,21 @@ public class AddCourseMaterialPanel extends JPanel {
     }
 
     private void saveMaterial() {
-        String title = txtTitle.getText().trim();
-        String cCode = selectedCourseCode();
-        String uploadedBy = txtUploadedBy.getText().trim();
-        String sourcePath = txtLink.getText().trim();
-
-        if (title.isEmpty() || cCode.isEmpty() || uploadedBy.isEmpty() || sourcePath.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "All fields are required!");
-            return;
-        }
-
-        String newPath = saveFileToFolder(sourcePath, title);
-        if (newPath == null) {
-            JOptionPane.showMessageDialog(this, "File upload failed!", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        boolean isSavedInDB = CourseMaterialDAO.addMaterial(title, cCode, uploadedBy, newPath);
-        if (isSavedInDB) {
-            JOptionPane.showMessageDialog(this, "Material uploaded.");
+        CourseMaterialOperationResult result = courseMaterialController.addMaterial(buildFormData());
+        showActionResult(result);
+        if (result.isSuccess()) {
             clearFields();
             loadMaterials();
             selectFirstMaterial();
-        } else {
-            JOptionPane.showMessageDialog(this, "Error! Check if Course Code or Lecturer ID is valid.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void updateMaterial() {
-        if (selectedMaterialId < 0) {
-            JOptionPane.showMessageDialog(this, "Select a material from the table to update.");
-            return;
-        }
-
-        String title = txtTitle.getText().trim();
-        String cCode = selectedCourseCode();
-        String sourcePath = txtLink.getText().trim();
-        if (title.isEmpty() || cCode.isEmpty() || sourcePath.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Title, course code, and file path are required.");
-            return;
-        }
-
-        String finalPath = sourcePath.contains(":") || sourcePath.startsWith(".")
-                ? saveFileToFolder(sourcePath, title)
-                : sourcePath;
-        if (finalPath == null) {
-            JOptionPane.showMessageDialog(this, "Unable to save updated file.");
-            return;
-        }
-
-        boolean updated = courseMaterialDAO.updateMaterial(
-                selectedMaterialId,
-                title,
-                cCode,
-                finalPath
-        );
-
-        if (updated) {
-            JOptionPane.showMessageDialog(this, "Material updated.");
+        CourseMaterialOperationResult result = courseMaterialController.updateMaterial(buildFormData());
+        showActionResult(result);
+        if (result.isSuccess()) {
             clearFields();
             loadMaterials();
-        } else {
-            JOptionPane.showMessageDialog(this, "Material update failed.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -250,24 +207,29 @@ public class AddCourseMaterialPanel extends JPanel {
             return;
         }
 
-        String filePath = txtLink.getText().trim();
-        boolean deleted = courseMaterialDAO.deleteMaterial(selectedMaterialId, lecturerId);
-        if (deleted) {
-            deleteStoredFile(filePath);
-            JOptionPane.showMessageDialog(this, "Material deleted.");
+        CourseMaterialOperationResult result = courseMaterialController.deleteMaterial(
+                selectedMaterialId,
+                lecturerId,
+                txtLink.getText().trim()
+        );
+        showActionResult(result);
+        if (result.isSuccess()) {
             clearFields();
             loadMaterials();
-        } else {
-            JOptionPane.showMessageDialog(this, "Material delete failed.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void loadMaterials() {
         tableModel.setRowCount(0);
         materialIds.clear();
-        for (Object[] row : courseMaterialDAO.getMaterialsByLecturer(lecturerId)) {
-            materialIds.add((Integer) row[0]);
-            tableModel.addRow(new Object[]{row[1], row[2], row[3], row[4]});
+        for (CourseMaterialRow row : courseMaterialController.loadMaterialsByLecturer(lecturerId)) {
+            materialIds.add(row.getMaterialId());
+            tableModel.addRow(new Object[]{
+                    row.getTitle(),
+                    row.getCourseCode(),
+                    row.getUploadedAt(),
+                    row.getFilePath()
+            });
         }
     }
 
@@ -315,7 +277,7 @@ public class AddCourseMaterialPanel extends JPanel {
 
     private void loadLecturerCourseCodes() {
         cmbCourseCode.removeAllItems();
-        for (String courseCode : courseMaterialDAO.getCourseCodesByLecturer(lecturerId)) {
+        for (String courseCode : courseMaterialController.getCourseCodesByLecturer(lecturerId)) {
             cmbCourseCode.addItem(courseCode);
         }
     }
@@ -325,46 +287,23 @@ public class AddCourseMaterialPanel extends JPanel {
         return selected == null ? "" : selected.toString();
     }
 
-    private String saveFileToFolder(String sourcePath, String title) {
-        try {
-            File sourceFile = new File(sourcePath);
-            if (!sourceFile.exists()) {
-                return null;
-            }
-
-            String fileName = sourceFile.getName();
-            String extension = "";
-            int i = fileName.lastIndexOf('.');
-            if (i > 0) {
-                extension = fileName.substring(i);
-            }
-
-            String sanitizedTitle = title.replaceAll("[^a-zA-Z0-9]", "_");
-            String newFileName = sanitizedTitle + extension;
-
-            File directory = new File("uploads/course_materials");
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-
-            File destinationFile = new File(directory, newFileName);
-            Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            return destinationFile.getPath().replace("\\", "/");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    private CourseMaterialFormData buildFormData() {
+        return new CourseMaterialFormData(
+                selectedMaterialId,
+                txtTitle.getText(),
+                selectedCourseCode(),
+                txtUploadedBy.getText(),
+                txtLink.getText()
+        );
     }
 
-    private void deleteStoredFile(String filePath) {
-        if (filePath.isEmpty()) {
-            return;
-        }
-
-        File file = new File(filePath);
-        if (file.exists() && file.isFile()) {
-            file.delete();
-        }
+    private void showActionResult(CourseMaterialOperationResult result) {
+        JOptionPane.showMessageDialog(
+                this,
+                result.getMessage(),
+                result.isSuccess() ? "Success" : "Error",
+                result.isSuccess() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE
+        );
     }
 
     private void clearFields() {
