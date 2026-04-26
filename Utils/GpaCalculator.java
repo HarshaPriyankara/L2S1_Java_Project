@@ -45,28 +45,38 @@ public class GpaCalculator {
             }
         }
 
-        double semesterTotal = 0.0;
+        double semesterWeightedPoints = 0.0;
+        double semesterCredits = 0.0;
         for (String courseCode : SEMESTER_COURSES) {
             MarksCalculator.MarkBreakdown breakdown = marksByCourse.get(courseCode);
             if (!hasValidSubjectResult(breakdown)) {
                 return new GpaResult(false, false, 0.0, 0.0);
             }
-            semesterTotal += breakdown.getGradePoint();
+            semesterWeightedPoints += breakdown.getCredits() * breakdown.getGradePoint();
+            semesterCredits += breakdown.getCredits();
         }
 
-        double cgpaTotal = 0.0;
+        double cgpaWeightedPoints = 0.0;
+        double cgpaCredits = 0.0;
         for (String courseCode : SEMESTER_COURSES) {
             if (ENGLISH_COURSE_CODE.equals(courseCode)) {
                 continue;
             }
-            cgpaTotal += marksByCourse.get(courseCode).getGradePoint();
+            MarksCalculator.MarkBreakdown breakdown = marksByCourse.get(courseCode);
+            cgpaWeightedPoints += breakdown.getCredits() * breakdown.getGradePoint();
+            cgpaCredits += breakdown.getCredits();
         }
 
-        return new GpaResult(true, true, round(semesterTotal / 8.0), round(cgpaTotal / 7.0));
+        return new GpaResult(
+                semesterCredits > 0.0,
+                cgpaCredits > 0.0,
+                semesterCredits > 0.0 ? round(semesterWeightedPoints / semesterCredits) : 0.0,
+                cgpaCredits > 0.0 ? round(cgpaWeightedPoints / cgpaCredits) : 0.0
+        );
     }
 
     private static boolean hasValidSubjectResult(MarksCalculator.MarkBreakdown breakdown) {
-        return breakdown != null && breakdown.hasMarks();
+        return breakdown != null && breakdown.hasCompleteMarks();
     }
 
     private static String normalizeGrade(String grade) {
