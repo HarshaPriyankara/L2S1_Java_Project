@@ -22,7 +22,11 @@ public abstract class CourseMarkScheme {
     }
 
     public static CourseMarkScheme forCourse(String courseCode) {
-        String code = courseCode == null ? "" : courseCode.trim().toUpperCase(Locale.ROOT);
+        String code = "";
+        if (courseCode != null) {
+            code = courseCode.trim().toUpperCase(Locale.ROOT);
+        }
+
         switch (code) {
             case "ENG2122":
                 return new Eng2122MarkScheme();
@@ -86,11 +90,31 @@ public abstract class CourseMarkScheme {
     }
 
     public final double calculateCA(Map<String, Double> marks) {
-        return round(Math.min(caWeight, Math.max(0.0, calculateCaMarks(marks))));
+        double calculatedMarks = calculateCaMarks(marks);
+
+        if (calculatedMarks < 0.0) {
+            calculatedMarks = 0.0;
+        }
+
+        if (calculatedMarks > caWeight) {
+            calculatedMarks = caWeight;
+        }
+
+        return round(calculatedMarks);
     }
 
     public final double calculateEnd(Map<String, Double> marks) {
-        return round(Math.min(endWeight, Math.max(0.0, calculateEndMarks(marks))));
+        double calculatedMarks = calculateEndMarks(marks);
+
+        if (calculatedMarks < 0.0) {
+            calculatedMarks = 0.0;
+        }
+
+        if (calculatedMarks > endWeight) {
+            calculatedMarks = endWeight;
+        }
+
+        return round(calculatedMarks);
     }
 
     protected abstract double calculateCaMarks(Map<String, Double> marks);
@@ -100,18 +124,26 @@ public abstract class CourseMarkScheme {
     protected double topQuizAverage(Map<String, Double> marks, int count, double weight) {
         List<Double> values = valuesFor(marks, QUIZZES);
         values.sort(Collections.reverseOrder());
-        if (values.isEmpty()) return 0.0;
+
+        if (values.isEmpty()) {
+            return 0.0;
+        }
 
         int selectedCount = Math.min(count, values.size());
         double total = 0.0;
+
         for (int i = 0; i < selectedCount; i++) {
             total += values.get(i);
         }
-        return weighted(total / count, weight);
+
+        double average = total / count;
+        return weighted(average, weight);
     }
 
     protected double fixedAverage(Map<String, Double> marks, double weight, String... types) {
-        if (types.length == 0) return 0.0;
+        if (types.length == 0) {
+            return 0.0;
+        }
 
         double total = 0.0;
         for (String type : types) {
@@ -120,7 +152,9 @@ public abstract class CourseMarkScheme {
                 total += mark;
             }
         }
-        return weighted(total / types.length, weight);
+
+        double average = total / types.length;
+        return weighted(average, weight);
     }
 
     protected double assignmentAverage(Map<String, Double> marks, double weight) {
@@ -128,7 +162,8 @@ public abstract class CourseMarkScheme {
     }
 
     protected double weightedMark(Map<String, Double> marks, String type, double weight) {
-        return weighted(getMark(marks, type), weight);
+        Double mark = getMark(marks, type);
+        return weighted(mark, weight);
     }
 
     protected double theoryOrPracticalMid(Map<String, Double> marks, double weight) {
@@ -145,18 +180,26 @@ public abstract class CourseMarkScheme {
 
     private double averageWeighted(Map<String, Double> marks, String[] types, double weight) {
         List<Double> values = valuesFor(marks, types);
-        if (values.isEmpty()) return 0.0;
+
+        if (values.isEmpty()) {
+            return 0.0;
+        }
 
         double total = 0.0;
         for (Double value : values) {
             total += value;
         }
-        return weighted(total / values.size(), weight);
+
+        double average = total / values.size();
+        return weighted(average, weight);
     }
 
     private List<Double> valuesFor(Map<String, Double> marks, String[] types) {
         List<Double> values = new ArrayList<>();
-        if (marks == null) return values;
+
+        if (marks == null) {
+            return values;
+        }
 
         for (String type : types) {
             Double value = getMark(marks, type);
@@ -168,11 +211,19 @@ public abstract class CourseMarkScheme {
     }
 
     private Double getMark(Map<String, Double> marks, String type) {
-        return marks == null ? null : marks.get(type);
+        if (marks == null) {
+            return null;
+        }
+
+        return marks.get(type);
     }
 
     private double weighted(Double mark, double weight) {
-        return mark == null ? 0.0 : mark * weight / 100.0;
+        if (mark == null) {
+            return 0.0;
+        }
+
+        return mark * weight / 100.0;
     }
 
     protected static double round(double value) {
@@ -184,11 +235,15 @@ public abstract class CourseMarkScheme {
     }
 
     protected boolean hasMark(Map<String, Double> marks, String type) {
-        return getMark(marks, type) != null;
+        Double mark = getMark(marks, type);
+        return mark != null;
     }
 
     protected boolean hasAllMarks(Map<String, Double> marks, String... types) {
-        if (marks == null) return false;
+        if (marks == null) {
+            return false;
+        }
+
         for (String type : types) {
             if (!hasMark(marks, type)) {
                 return false;
@@ -198,7 +253,10 @@ public abstract class CourseMarkScheme {
     }
 
     protected int countMarks(Map<String, Double> marks, String... types) {
-        if (marks == null) return 0;
+        if (marks == null) {
+            return 0;
+        }
+
         int count = 0;
         for (String type : types) {
             if (hasMark(marks, type)) {
@@ -214,26 +272,44 @@ public abstract class CourseMarkScheme {
         }
 
         protected double calculateCaMarks(Map<String, Double> marks) {
-            return topQuizAverage(marks, 2, 10.0)
-                    + assignmentAverage(marks, 10.0)
-                    + theoryOrPracticalMid(marks, 10.0);
+            double quizMarks = topQuizAverage(marks, 2, 10.0);
+            double assignmentMarks = assignmentAverage(marks, 10.0);
+            double midMarks = theoryOrPracticalMid(marks, 10.0);
+
+            return quizMarks + assignmentMarks + midMarks;
         }
 
         protected double calculateEndMarks(Map<String, Double> marks) {
-            Double theory = marks == null ? null : marks.get("End_theory");
-            Double practical = marks == null ? null : marks.get("End_practical");
-            if (theory != null && practical != null) {
-                return endTheory(marks, 35.0) + endPractical(marks, 35.0);
+            Double theory = null;
+            Double practical = null;
+
+            if (marks != null) {
+                theory = marks.get("End_theory");
+                practical = marks.get("End_practical");
             }
+
+            if (theory != null && practical != null) {
+                double theoryMarks = endTheory(marks, 35.0);
+                double practicalMarks = endPractical(marks, 35.0);
+                return theoryMarks + practicalMarks;
+            }
+
             if (practical != null) {
                 return endPractical(marks, 70.0);
             }
+
             return endTheory(marks, 70.0);
         }
 
         public double getAssessmentWeight(String type) {
-            if ("End_theory".equals(type)) return 70.0;
-            if ("End_practical".equals(type)) return 70.0;
+            if ("End_theory".equals(type)) {
+                return 70.0;
+            }
+
+            if ("End_practical".equals(type)) {
+                return 70.0;
+            }
+
             return 0.0;
         }
     }

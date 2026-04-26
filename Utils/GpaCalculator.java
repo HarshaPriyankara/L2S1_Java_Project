@@ -12,7 +12,9 @@ public class GpaCalculator {
     };
 
     public static double getGradePoint(String grade) {
-        switch (normalizeGrade(grade)) {
+        String normalizedGrade = normalizeGrade(grade);
+
+        switch (normalizedGrade) {
             case "A+":
             case "A":
                 return 4.0;
@@ -52,7 +54,9 @@ public class GpaCalculator {
             if (!hasValidSubjectResult(breakdown)) {
                 return new GpaResult(false, false, 0.0, 0.0);
             }
-            semesterWeightedPoints += breakdown.getCredits() * breakdown.getGradePoint();
+
+            double subjectWeightedPoints = breakdown.getCredits() * breakdown.getGradePoint();
+            semesterWeightedPoints += subjectWeightedPoints;
             semesterCredits += breakdown.getCredits();
         }
 
@@ -63,26 +67,48 @@ public class GpaCalculator {
                 continue;
             }
             MarksCalculator.MarkBreakdown breakdown = marksByCourse.get(courseCode);
-            cgpaWeightedPoints += breakdown.getCredits() * breakdown.getGradePoint();
+
+            double subjectWeightedPoints = breakdown.getCredits() * breakdown.getGradePoint();
+            cgpaWeightedPoints += subjectWeightedPoints;
             cgpaCredits += breakdown.getCredits();
         }
 
-        return new GpaResult(
-                semesterCredits > 0.0,
-                cgpaCredits > 0.0,
-                semesterCredits > 0.0 ? round(semesterWeightedPoints / semesterCredits) : 0.0,
-                cgpaCredits > 0.0 ? round(cgpaWeightedPoints / cgpaCredits) : 0.0
-        );
+        boolean sgpaAvailable = semesterCredits > 0.0;
+        boolean cgpaAvailable = cgpaCredits > 0.0;
+        double sgpa = 0.0;
+        double cgpa = 0.0;
+
+        if (sgpaAvailable) {
+            sgpa = round(semesterWeightedPoints / semesterCredits);
+        }
+
+        if (cgpaAvailable) {
+            cgpa = round(cgpaWeightedPoints / cgpaCredits);
+        }
+
+        return new GpaResult(sgpaAvailable, cgpaAvailable, sgpa, cgpa);
     }
 
     private static boolean hasValidSubjectResult(MarksCalculator.MarkBreakdown breakdown) {
-        return breakdown != null && breakdown.hasCompleteMarks();
+        if (breakdown == null) {
+            return false;
+        }
+
+        return breakdown.hasCompleteMarks();
     }
 
     private static String normalizeGrade(String grade) {
-        if (grade == null) return "";
+        if (grade == null) {
+            return "";
+        }
+
         int detailStart = grade.indexOf('(');
-        return detailStart >= 0 ? grade.substring(0, detailStart) : grade;
+
+        if (detailStart >= 0) {
+            return grade.substring(0, detailStart);
+        }
+
+        return grade;
     }
 
     private static double round(double value) {

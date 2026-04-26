@@ -1,7 +1,7 @@
 package GUI.lecturer;
 
-import Controllers.StudentControllers.Eng2122CaMarksController;
-import Controllers.StudentControllers.Eng2122CaMarksResult;
+import Controllers.StudentControllers.CaMarksController;
+import Controllers.StudentControllers.CaMarksResult;
 import Controllers.StudentControllers.LecturerMarksOverviewController;
 import Controllers.StudentControllers.LecturerMarksOverviewResult;
 import GUI.common.UITheme;
@@ -17,7 +17,7 @@ public class StudentMarksPanel extends JPanel {
     private static final Color CARD_COLOR = new Color(85, 179, 232);
 
     private final LecturerMarksOverviewController overviewController = new LecturerMarksOverviewController();
-    private final Eng2122CaMarksController caMarksController = new Eng2122CaMarksController();
+    private final CaMarksController caMarksController = new CaMarksController();
     private final JComboBox<String> courseComboBox = new JComboBox<>();
     private final JTextField studentSearchField = new JTextField(12);
     private final JComboBox<String> scopeComboBox = new JComboBox<>(new String[]{"Whole Batch", "Individual Student"});
@@ -312,21 +312,26 @@ public class StudentMarksPanel extends JPanel {
         }
 
         CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
-        caRuleLabel.setText(String.format(
+        double caPassMark = scheme.getCaPassMark();
+        double caTotalMark = scheme.getCaWeight();
+        String caRuleText = String.format(
                 "CA Eligibility Rule: CA marks should be at least %.2f out of %.2f",
-                scheme.getCaPassMark(), scheme.getCaWeight()
-        ));
-        attendanceRuleLabel.setText(
-                "Attendance + CA Rule: attendance should be at least 80.00% and CA should reach the course CA pass mark"
+                caPassMark,
+                caTotalMark
         );
+        String attendanceRuleText = "Attendance + CA Rule: attendance should be at least 80.00% and CA should reach the course CA pass mark";
+
+        caRuleLabel.setText(caRuleText);
+        attendanceRuleLabel.setText(attendanceRuleText);
     }
 
     private void showCaMarksView() {
         String courseCode = (String) courseComboBox.getSelectedItem();
-        boolean individualView = "Individual Student".equals(scopeComboBox.getSelectedItem());
+        String selectedScope = (String) scopeComboBox.getSelectedItem();
+        boolean individualView = "Individual Student".equals(selectedScope);
         String studentId = studentSearchField.getText().trim();
 
-        Eng2122CaMarksResult result = caMarksController.loadCaMarks(courseCode, studentId, individualView);
+        CaMarksResult result = caMarksController.loadCaMarks(courseCode, studentId, individualView);
         if (result.hasError()) {
             JOptionPane.showMessageDialog(this, result.getErrorMessage(), "CA Marks", JOptionPane.INFORMATION_MESSAGE);
             return;
@@ -347,10 +352,11 @@ public class StudentMarksPanel extends JPanel {
 
     private void showEligibilityByCaView() {
         String courseCode = (String) courseComboBox.getSelectedItem();
-        boolean individualView = "Individual Student".equals(scopeComboBox.getSelectedItem());
+        String selectedScope = (String) scopeComboBox.getSelectedItem();
+        boolean individualView = "Individual Student".equals(selectedScope);
         String studentId = studentSearchField.getText().trim();
 
-        Eng2122CaMarksResult result = caMarksController.loadEndEligibilityByCa(courseCode, studentId, individualView);
+        CaMarksResult result = caMarksController.loadEndEligibilityByCa(courseCode, studentId, individualView);
         if (result.hasError()) {
             JOptionPane.showMessageDialog(this, result.getErrorMessage(), "End Exam Eligibility by CA", JOptionPane.INFORMATION_MESSAGE);
             return;
@@ -371,10 +377,11 @@ public class StudentMarksPanel extends JPanel {
 
     private void showEligibilityByAttendanceAndCaView() {
         String courseCode = (String) courseComboBox.getSelectedItem();
-        boolean individualView = "Individual Student".equals(scopeComboBox.getSelectedItem());
+        String selectedScope = (String) scopeComboBox.getSelectedItem();
+        boolean individualView = "Individual Student".equals(selectedScope);
         String studentId = studentSearchField.getText().trim();
 
-        Eng2122CaMarksResult result = caMarksController.loadEndEligibilityByAttendanceAndCa(courseCode, studentId, individualView);
+        CaMarksResult result = caMarksController.loadEndEligibilityByAttendanceAndCa(courseCode, studentId, individualView);
         if (result.hasError()) {
             JOptionPane.showMessageDialog(this, result.getErrorMessage(), "End Exam Eligibility by Attendance + CA", JOptionPane.INFORMATION_MESSAGE);
             return;
@@ -395,10 +402,11 @@ public class StudentMarksPanel extends JPanel {
 
     private void showFinalMarksBaseView() {
         String courseCode = (String) courseComboBox.getSelectedItem();
-        boolean individualView = "Individual Student".equals(scopeComboBox.getSelectedItem());
+        String selectedScope = (String) scopeComboBox.getSelectedItem();
+        boolean individualView = "Individual Student".equals(selectedScope);
         String studentId = studentSearchField.getText().trim();
 
-        Eng2122CaMarksResult result = caMarksController.loadFinalMarks(courseCode, studentId, individualView);
+        CaMarksResult result = caMarksController.loadFinalMarks(courseCode, studentId, individualView);
         if (result.hasError()) {
             JOptionPane.showMessageDialog(this, result.getErrorMessage(), "Final Marks", JOptionPane.INFORMATION_MESSAGE);
             return;
@@ -427,7 +435,9 @@ public class StudentMarksPanel extends JPanel {
     }
 
     private void updateSearchState() {
-        boolean individual = "Individual Student".equals(scopeComboBox.getSelectedItem());
+        String selectedScope = (String) scopeComboBox.getSelectedItem();
+        boolean individual = "Individual Student".equals(selectedScope);
+
         studentSearchField.setEnabled(individual);
         if (!individual) {
             studentSearchField.setText("");
@@ -436,14 +446,18 @@ public class StudentMarksPanel extends JPanel {
 
     private JPanel createActionCard(String title, Runnable action) {
         JPanel card = new JPanel(new BorderLayout());
+        Dimension cardSize = new Dimension(360, 68);
+
         card.setBackground(CARD_COLOR);
-        card.setPreferredSize(new Dimension(360, 68));
-        card.setMaximumSize(new Dimension(360, 68));
+        card.setPreferredSize(cardSize);
+        card.setMaximumSize(cardSize);
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JLabel label = new JLabel(title, SwingConstants.CENTER);
+        Font labelFont = new Font("SansSerif", Font.BOLD, 16);
+
         label.setForeground(Color.WHITE);
-        label.setFont(new Font("SansSerif", Font.BOLD, 16));
+        label.setFont(labelFont);
         card.add(label, BorderLayout.CENTER);
 
         card.addMouseListener(new MouseAdapter() {

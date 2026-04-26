@@ -50,14 +50,14 @@ public class MarksManagementController {
 
             while (rs.next()) {
                 String regNo = rs.getString("Reg_no");
+                Object mark = rs.getObject("Marks_value");
+                Object formattedMark = formatMarkForEntry(mark);
 
                 List<Object> row = new ArrayList<>();
                 row.add(regNo);
                 row.add(selectedCourse);
                 row.add(selectedType);
-
-                Object mark = rs.getObject("Marks_value");
-                row.add(formatMarkForEntry(mark));
+                row.add(formattedMark);
                 rows.add(row.toArray());
             }
 
@@ -103,7 +103,10 @@ public class MarksManagementController {
     }
 
     private boolean isInvalidMarkType(String course, String type) {
-        if (course == null || type == null) return true;
+        if (course == null || type == null) {
+            return true;
+        }
+
         for (String allowedType : CourseMarkScheme.forCourse(course).getAllowedMarkTypes()) {
             if (allowedType.equals(type)) {
                 return false;
@@ -117,12 +120,26 @@ public class MarksManagementController {
             return "";
         }
 
-        if (mark instanceof Number number && Math.abs(number.doubleValue()) < 0.001) {
-            return "";
+        if (mark instanceof Number) {
+            Number number = (Number) mark;
+            double markValue = number.doubleValue();
+            double absoluteValue = Math.abs(markValue);
+
+            if (absoluteValue < 0.001) {
+                return "";
+            }
         }
 
         String markText = String.valueOf(mark).trim();
-        return "0".equals(markText) || "0.0".equals(markText) || "0.00".equals(markText) ? "" : mark;
+        boolean zeroMark = "0".equals(markText)
+                || "0.0".equals(markText)
+                || "0.00".equals(markText);
+
+        if (zeroMark) {
+            return "";
+        }
+
+        return mark;
     }
 
     private void saveSingleAssessmentMark(Connection conn, String regNo, String course,

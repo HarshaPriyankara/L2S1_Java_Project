@@ -132,9 +132,14 @@ public class MarksManagement extends JPanel {
     private void refreshAssessmentTypes() {
         String selectedCourse = (String) courseComboBox.getSelectedItem();
         typeComboBox.removeAllItems();
-        String[] markTypes = selectedCourse == null
-                ? MarksCalculator.MARK_TYPES
-                : marksController.getAllowedMarkTypes(selectedCourse);
+
+        String[] markTypes;
+        if (selectedCourse == null) {
+            markTypes = MarksCalculator.MARK_TYPES;
+        } else {
+            markTypes = marksController.getAllowedMarkTypes(selectedCourse);
+        }
+
         for (String markType : markTypes) {
             typeComboBox.addItem(markType);
         }
@@ -183,11 +188,22 @@ public class MarksManagement extends JPanel {
         }
 
         MarksSaveResult result = marksController.saveAllMarks(extractTableRows());
+        String dialogTitle;
+        int messageType;
+
+        if (result.isSuccess()) {
+            dialogTitle = "Success";
+            messageType = JOptionPane.INFORMATION_MESSAGE;
+        } else {
+            dialogTitle = "Error";
+            messageType = JOptionPane.ERROR_MESSAGE;
+        }
+
         JOptionPane.showMessageDialog(
                 this,
                 result.getMessage(),
-                result.isSuccess() ? "Success" : "Error",
-                result.isSuccess() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE
+                dialogTitle,
+                messageType
         );
 
         if (result.isSuccess()) {
@@ -204,12 +220,13 @@ public class MarksManagement extends JPanel {
     private List<Object[]> extractTableRows() {
         List<Object[]> rows = new java.util.ArrayList<>();
         for (int i = 0; i < tableModel.getRowCount(); i++) {
-            rows.add(new Object[]{
-                    tableModel.getValueAt(i, 0),
-                    tableModel.getValueAt(i, 1),
-                    tableModel.getValueAt(i, 2),
-                    tableModel.getValueAt(i, 3)
-            });
+            Object studentId = tableModel.getValueAt(i, 0);
+            Object courseCode = tableModel.getValueAt(i, 1);
+            Object assessmentType = tableModel.getValueAt(i, 2);
+            Object markValue = tableModel.getValueAt(i, 3);
+
+            Object[] row = {studentId, courseCode, assessmentType, markValue};
+            rows.add(row);
         }
         return rows;
     }

@@ -8,9 +8,11 @@ class Ict2152MarkScheme extends CourseMarkScheme {
     }
 
     protected double calculateCaMarks(Map<String, Double> marks) {
-        return topQuizAverage(marks, 2, 10.0)
-                + weightedMark(marks, "Mini_project", 20.0)
-                + fixedAverage(marks, 10.0, "Assignment_1", "Assignment_2");
+        double quizMarks = topQuizAverage(marks, 2, 10.0);
+        double miniProjectMarks = weightedMark(marks, "Mini_project", 20.0);
+        double assignmentMarks = fixedAverage(marks, 10.0, "Assignment_1", "Assignment_2");
+
+        return quizMarks + miniProjectMarks + assignmentMarks;
     }
 
     protected double calculateEndMarks(Map<String, Double> marks) {
@@ -18,7 +20,11 @@ class Ict2152MarkScheme extends CourseMarkScheme {
     }
 
     public double getAssessmentWeight(String type) {
-        return "End_theory".equals(type) ? 60.0 : 0.0;
+        if ("End_theory".equals(type)) {
+            return 60.0;
+        }
+
+        return 0.0;
     }
 
     public String[] getAllowedMarkTypes() {
@@ -26,8 +32,10 @@ class Ict2152MarkScheme extends CourseMarkScheme {
     }
 
     public boolean hasCompleteMarks(Map<String, Double> marks) {
-        return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
-                && hasAllMarks(marks, "Mini_project", "Assignment_1", "Assignment_2")
-                && hasAllMarks(marks, "End_theory");
+        boolean hasEnoughQuizMarks = countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2;
+        boolean hasCaMarks = hasAllMarks(marks, "Mini_project", "Assignment_1", "Assignment_2");
+        boolean hasEndMarks = hasAllMarks(marks, "End_theory");
+
+        return hasEnoughQuizMarks && hasCaMarks && hasEndMarks;
     }
 }
