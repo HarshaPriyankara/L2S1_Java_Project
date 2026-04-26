@@ -15,23 +15,6 @@ import java.util.List;
 
 public class MedicalRecordDAO {
 
-    public void addMedical(String regNo, LocalDate sessionDate, String sessionType, String examCourse, String reason)
-            throws SQLException {
-        addMedical(regNo, sessionDate, sessionDate, sessionDate, sessionType, examCourse, reason, null, false);
-    }
-
-    public void addMedical(String regNo, LocalDate sessionDate, String sessionType, String examCourse, String reason,
-                           String medicalFilePath)
-            throws SQLException {
-        addMedical(regNo, sessionDate, sessionDate, sessionDate, sessionType, examCourse, reason, medicalFilePath, false);
-    }
-
-    public void addMedical(String regNo, LocalDate sessionDate, String sessionType, String examCourse, String reason,
-                           String medicalFilePath, boolean approved)
-            throws SQLException {
-        addMedical(regNo, sessionDate, sessionDate, sessionDate, sessionType, examCourse, reason, medicalFilePath, approved);
-    }
-
     public int addMedical(String regNo, LocalDate sessionDate, LocalDate startDate, LocalDate endDate,
                           String sessionType, String examCourse, String reason, String medicalFilePath,
                           boolean approved)
