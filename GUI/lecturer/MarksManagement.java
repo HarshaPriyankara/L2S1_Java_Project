@@ -6,17 +6,23 @@ import Controllers.MarksControllers.MarksSaveResult;
 import Utils.MarksCalculator;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class MarksManagement extends JPanel {
     private JComboBox<String> courseComboBox;
     private JComboBox<String> typeComboBox;
+    private JTextField regNoFilterField;
     private JLabel statusLabel;
     private JTable marksTable;
     private DefaultTableModel tableModel;
+    private TableRowSorter<DefaultTableModel> tableSorter;
     private String lecturerID;
     private final MarksManagementController marksController = new MarksManagementController();
 
@@ -39,11 +45,18 @@ public class MarksManagement extends JPanel {
         JButton btnLoad = new JButton("Show Students");
         styleButton(btnLoad, new Color(46, 125, 192));
 
+        regNoFilterField = new JTextField(12);
+        JButton btnClearFilter = new JButton("Clear");
+        styleButton(btnClearFilter, new Color(108, 117, 125));
+
         topPanel.add(new JLabel("Course:"));
         topPanel.add(courseComboBox);
         topPanel.add(new JLabel("Assessment:"));
         topPanel.add(typeComboBox);
         topPanel.add(btnLoad);
+        topPanel.add(new JLabel("Reg No:"));
+        topPanel.add(regNoFilterField);
+        topPanel.add(btnClearFilter);
         add(topPanel, BorderLayout.NORTH);
 
         String[] columns = {"Student ID", "Course Code", "Assessment Type", "Mark Value"};
@@ -57,6 +70,8 @@ public class MarksManagement extends JPanel {
         marksTable.setRowHeight(28);
         marksTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 13));
         marksTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
+        tableSorter = new TableRowSorter<>(tableModel);
+        marksTable.setRowSorter(tableSorter);
         add(new JScrollPane(marksTable), BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new BorderLayout(10, 0));
@@ -77,7 +92,24 @@ public class MarksManagement extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
 
         btnLoad.addActionListener(e -> loadEnrolledStudents());
+        btnClearFilter.addActionListener(e -> regNoFilterField.setText(""));
         btnSave.addActionListener(e -> saveOrUpdateMarks());
+        regNoFilterField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                applyRegNoFilter();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                applyRegNoFilter();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                applyRegNoFilter();
+            }
+        });
     }
 
     private void styleButton(JButton btn, Color color) {
@@ -126,7 +158,22 @@ public class MarksManagement extends JPanel {
         for (Object[] row : result.getTableRows()) {
             tableModel.addRow(row);
         }
+        applyRegNoFilter();
         statusLabel.setText(result.getStatusMessage());
+    }
+
+    private void applyRegNoFilter() {
+        if (tableSorter == null) {
+            return;
+        }
+
+        String filterText = regNoFilterField.getText().trim();
+        if (filterText.isEmpty()) {
+            tableSorter.setRowFilter(null);
+            return;
+        }
+
+        tableSorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(filterText), 0));
     }
 
     private void saveOrUpdateMarks() {
