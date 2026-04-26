@@ -1,5 +1,6 @@
 package DAO;
 
+import Controllers.CourseMaterialControllers.CourseMaterialRow;
 import Utils.DBConnection;
 import java.sql.ResultSet;
 import java.sql.Connection;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class CourseMaterialDAO {
 
-    public static boolean addMaterial(String title, String courseCode, String uploadedBy, String fileUrl) {
+    public boolean addMaterial(String title, String courseCode, String uploadedBy, String fileUrl) {
         String sql = "INSERT INTO course_material (Title, Course_code, Uploaded_by, File_URL) VALUES (?, ?, ?, ?)";
 
         try {
@@ -30,8 +31,8 @@ public class CourseMaterialDAO {
         }
     }
 
-    public List<Object[]> getMaterialsByLecturer(String lecturerId) {
-        List<Object[]> materials = new ArrayList<>();
+    public List<CourseMaterialRow> getMaterialsByLecturer(String lecturerId) {
+        List<CourseMaterialRow> materials = new ArrayList<>();
         String sql = "SELECT Material_id, Title, Course_code, Uploaded_at, File_URL FROM course_material " +
                 "WHERE Uploaded_by = ? ORDER BY Material_id DESC";
 
@@ -41,13 +42,13 @@ public class CourseMaterialDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                materials.add(new Object[]{
+                materials.add(new CourseMaterialRow(
                         rs.getInt("Material_id"),
                         rs.getString("Title"),
                         rs.getString("Course_code"),
                         rs.getString("Uploaded_at"),
                         rs.getString("File_URL")
-                });
+                ));
             }
         } catch (SQLException e) {
             e.printStackTrace();
