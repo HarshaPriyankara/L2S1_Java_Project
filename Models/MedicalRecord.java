@@ -7,6 +7,8 @@ public class MedicalRecord {
     private int medicalId;
     private String regNo;
     private LocalDate sessionDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String reason;
     private String sessionType;
     private String examCourse;
@@ -48,6 +50,22 @@ public class MedicalRecord {
 
     public void setSessionDate(LocalDate sessionDate) {
         this.sessionDate = sessionDate;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 
     public String getReason() {

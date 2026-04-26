@@ -14,6 +14,7 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.io.File;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MedicalManagement extends JPanel {
@@ -22,11 +23,15 @@ public class MedicalManagement extends JPanel {
     private final JTable medicalTable;
     private final JTextField txtRegNo;
     private final JTextField txtSessionDate;
+    private final JTextField txtStartDate;
+    private final JTextField txtEndDate;
     private final JComboBox<String> cmbSessionType;
     private final JTextField txtExamCourse;
     private final JTextField txtMedicalFile;
     private final JTextArea txtReason;
     private final JCheckBox chkApproved;
+    private final DefaultTableModel absentTableModel;
+    private final List<Integer> loadedAbsentAttendanceIds = new ArrayList<>();
     private final FileStorageSupport fileStorageSupport = new FileStorageSupport() {
         @Override
         protected File uploadDirectory() {
@@ -44,11 +49,11 @@ public class MedicalManagement extends JPanel {
         JLabel title = UITheme.createSectionTitle("Medical Management");
         add(title, BorderLayout.NORTH);
 
-        String[] columns = {"Medical ID", "Reg No", "Session Date", "Type", "Exam Course", "Reason", "Medical File", "Approved", "Open"};
+        String[] columns = {"Medical ID", "Reg No", "Upload Date", "Start Date", "End Date", "Type", "Exam Course", "Reason", "Medical File", "Approved", "Open"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 8;
+                return column == 10;
             }
         };
 
@@ -56,12 +61,12 @@ public class MedicalManagement extends JPanel {
         medicalTable.setRowHeight(28);
         medicalTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         UITheme.styleTable(medicalTable);
-        medicalTable.getColumnModel().getColumn(8).setCellRenderer(new OpenButtonRenderer());
-        medicalTable.getColumnModel().getColumn(8).setCellEditor(new OpenButtonEditor(medicalTable));
+        medicalTable.getColumnModel().getColumn(10).setCellRenderer(new OpenButtonRenderer());
+        medicalTable.getColumnModel().getColumn(10).setCellEditor(new OpenButtonEditor(medicalTable));
 
         JScrollPane tableScrollPane = new JScrollPane(medicalTable);
         tableScrollPane.setBorder(UITheme.createSectionBorder("Medical Records"));
-        add(tableScrollPane, BorderLayout.CENTER);
+        tableScrollPane.setMinimumSize(new Dimension(700, 220));
 
         JPanel editorPanel = new JPanel(new GridBagLayout());
         editorPanel.setBackground(UITheme.SURFACE);
@@ -82,7 +87,7 @@ public class MedicalManagement extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        editorPanel.add(new JLabel("Session Date (yyyy-mm-dd):"), gbc);
+        editorPanel.add(new JLabel("Upload Date (yyyy-mm-dd):"), gbc);
         gbc.gridx = 1;
         txtSessionDate = new JTextField(LocalDate.now().toString(), 12);
         UITheme.styleTextField(txtSessionDate);
@@ -90,6 +95,29 @@ public class MedicalManagement extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy = 2;
+        editorPanel.add(new JLabel("Start Date (yyyy-mm-dd):"), gbc);
+        gbc.gridx = 1;
+        txtStartDate = new JTextField(LocalDate.now().toString(), 12);
+        UITheme.styleTextField(txtStartDate);
+        editorPanel.add(txtStartDate, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        editorPanel.add(new JLabel("End Date (yyyy-mm-dd):"), gbc);
+        gbc.gridx = 1;
+        txtEndDate = new JTextField(LocalDate.now().toString(), 12);
+        UITheme.styleTextField(txtEndDate);
+        editorPanel.add(txtEndDate, gbc);
+
+        JButton btnLoadAbsent = new JButton("Load Absent Attendance");
+        UITheme.styleNeutralButton(btnLoadAbsent);
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.EAST;
+        editorPanel.add(btnLoadAbsent, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 5;
         editorPanel.add(new JLabel("Session Type:"), gbc);
         gbc.gridx = 1;
         cmbSessionType = new JComboBox<>(new String[]{"NormalDay", "Exam"});
@@ -97,7 +125,7 @@ public class MedicalManagement extends JPanel {
         editorPanel.add(cmbSessionType, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 6;
         editorPanel.add(new JLabel("Exam Course:"), gbc);
         gbc.gridx = 1;
         txtExamCourse = new JTextField(12);
@@ -105,7 +133,7 @@ public class MedicalManagement extends JPanel {
         editorPanel.add(txtExamCourse, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 7;
         editorPanel.add(new JLabel("Medical File:"), gbc);
         gbc.gridx = 1;
         JPanel filePanel = new JPanel(new BorderLayout(8, 0));
@@ -120,7 +148,7 @@ public class MedicalManagement extends JPanel {
         editorPanel.add(filePanel, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 5;
+        gbc.gridy = 8;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         editorPanel.add(new JLabel("Reason:"), gbc);
         gbc.gridx = 1;
@@ -131,13 +159,33 @@ public class MedicalManagement extends JPanel {
         editorPanel.add(new JScrollPane(txtReason), gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 6;
+        gbc.gridy = 9;
         gbc.anchor = GridBagConstraints.WEST;
         editorPanel.add(new JLabel("Approved:"), gbc);
         gbc.gridx = 1;
         chkApproved = new JCheckBox("Approve this medical");
         chkApproved.setBackground(UITheme.SURFACE);
         editorPanel.add(chkApproved, gbc);
+
+        absentTableModel = new DefaultTableModel(new String[]{"Course Code", "Date", "Type", "Hours", "Status"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        JTable absentTable = new JTable(absentTableModel);
+        absentTable.setRowHeight(24);
+        UITheme.styleTable(absentTable);
+        JScrollPane absentScrollPane = new JScrollPane(absentTable);
+        absentScrollPane.setPreferredSize(new Dimension(520, 105));
+        absentScrollPane.setBorder(UITheme.createSectionBorder("Absent Attendance In Selected Range"));
+
+        gbc.gridx = 0;
+        gbc.gridy = 10;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.BOTH;
+        editorPanel.add(absentScrollPane, gbc);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setBackground(UITheme.SURFACE);
@@ -160,11 +208,19 @@ public class MedicalManagement extends JPanel {
         buttonPanel.add(btnDelete);
 
         gbc.gridx = 0;
-        gbc.gridy = 7;
+        gbc.gridy = 11;
         gbc.gridwidth = 2;
         editorPanel.add(buttonPanel, gbc);
 
-        add(editorPanel, BorderLayout.SOUTH);
+        JScrollPane editorScrollPane = new JScrollPane(editorPanel);
+        editorScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        editorScrollPane.setMinimumSize(new Dimension(700, 260));
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScrollPane, editorScrollPane);
+        splitPane.setResizeWeight(0.55);
+        splitPane.setDividerLocation(320);
+        splitPane.setBorder(BorderFactory.createEmptyBorder());
+        add(splitPane, BorderLayout.CENTER);
 
         medicalTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -172,6 +228,7 @@ public class MedicalManagement extends JPanel {
             }
         });
         cmbSessionType.addActionListener(e -> updateExamCourseState());
+        btnLoadAbsent.addActionListener(e -> loadAbsentAttendance());
         btnBrowse.addActionListener(e -> browseMedicalFile());
         btnRefresh.addActionListener(e -> loadRecords());
         btnClear.addActionListener(e -> clearForm());
@@ -197,6 +254,8 @@ public class MedicalManagement extends JPanel {
                     record.getMedicalId(),
                     record.getRegNo(),
                     record.getSessionDate(),
+                    record.getStartDate(),
+                    record.getEndDate(),
                     record.getSessionType(),
                     record.getExamCourse(),
                     record.getReason(),
@@ -217,15 +276,17 @@ public class MedicalManagement extends JPanel {
         selectedMedicalId = String.valueOf(tableModel.getValueAt(row, 0));
         txtRegNo.setText(String.valueOf(tableModel.getValueAt(row, 1)));
         txtSessionDate.setText(String.valueOf(tableModel.getValueAt(row, 2)));
-        cmbSessionType.setSelectedItem(String.valueOf(tableModel.getValueAt(row, 3)));
-        txtExamCourse.setText(valueOrEmpty(tableModel.getValueAt(row, 4)));
-        txtReason.setText(valueOrEmpty(tableModel.getValueAt(row, 5)));
-        txtMedicalFile.setText(valueOrEmpty(tableModel.getValueAt(row, 6)));
+        txtStartDate.setText(valueOrEmpty(tableModel.getValueAt(row, 3)));
+        txtEndDate.setText(valueOrEmpty(tableModel.getValueAt(row, 4)));
+        cmbSessionType.setSelectedItem(String.valueOf(tableModel.getValueAt(row, 5)));
+        txtExamCourse.setText(valueOrEmpty(tableModel.getValueAt(row, 6)));
+        txtReason.setText(valueOrEmpty(tableModel.getValueAt(row, 7)));
+        txtMedicalFile.setText(valueOrEmpty(tableModel.getValueAt(row, 8)));
         selectedMedicalFile = null;
-        chkApproved.setSelected("Yes".equalsIgnoreCase(String.valueOf(tableModel.getValueAt(row, 7))));
+        chkApproved.setSelected("Yes".equalsIgnoreCase(String.valueOf(tableModel.getValueAt(row, 9))));
         updateExamCourseState();
         if ("Exam".equals(cmbSessionType.getSelectedItem())) {
-            txtExamCourse.setText(valueOrEmpty(tableModel.getValueAt(row, 4)));
+            txtExamCourse.setText(valueOrEmpty(tableModel.getValueAt(row, 6)));
         }
     }
 
@@ -251,6 +312,39 @@ public class MedicalManagement extends JPanel {
             clearForm();
         }
         showMedicalActionResult(result);
+    }
+
+    private void loadAbsentAttendance() {
+        absentTableModel.setRowCount(0);
+        loadedAbsentAttendanceIds.clear();
+
+        if (txtRegNo.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a registration number first.");
+            return;
+        }
+
+        try {
+            StudentMedicalController.AbsentAttendanceResult result = medicalController.loadAbsentAttendance(
+                    txtRegNo.getText().trim(),
+                    LocalDate.parse(txtStartDate.getText().trim()),
+                    LocalDate.parse(txtEndDate.getText().trim())
+            );
+            if (result.hasError()) {
+                JOptionPane.showMessageDialog(this, result.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            for (Object[] row : result.getRows()) {
+                loadedAbsentAttendanceIds.add((Integer) row[0]);
+                absentTableModel.addRow(new Object[]{row[1], row[2], row[3], row[4], row[5]});
+            }
+
+            if (loadedAbsentAttendanceIds.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No absent attendance records found for this student and date range.");
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Start and end dates must be in yyyy-mm-dd format.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void updateMedical() {
@@ -284,12 +378,16 @@ public class MedicalManagement extends JPanel {
         selectedMedicalId = "";
         txtRegNo.setText("");
         txtSessionDate.setText(LocalDate.now().toString());
+        txtStartDate.setText(LocalDate.now().toString());
+        txtEndDate.setText(LocalDate.now().toString());
         cmbSessionType.setSelectedItem("NormalDay");
         txtExamCourse.setText("");
         txtMedicalFile.setText("");
         selectedMedicalFile = null;
         txtReason.setText("");
         chkApproved.setSelected(false);
+        absentTableModel.setRowCount(0);
+        loadedAbsentAttendanceIds.clear();
         medicalTable.clearSelection();
         updateExamCourseState();
     }
@@ -303,11 +401,14 @@ public class MedicalManagement extends JPanel {
                 selectedMedicalId,
                 txtRegNo.getText(),
                 txtSessionDate.getText(),
+                txtStartDate.getText(),
+                txtEndDate.getText(),
                 String.valueOf(cmbSessionType.getSelectedItem()),
                 txtExamCourse.getText(),
                 txtReason.getText(),
                 medicalFilePath,
-                chkApproved.isSelected()
+                chkApproved.isSelected(),
+                loadedAbsentAttendanceIds
         );
     }
 
@@ -386,7 +487,7 @@ public class MedicalManagement extends JPanel {
             button.addActionListener(e -> {
                 fireEditingStopped();
                 int modelRow = table.convertRowIndexToModel(row);
-                String filePath = String.valueOf(table.getModel().getValueAt(modelRow, 6));
+                String filePath = String.valueOf(table.getModel().getValueAt(modelRow, 8));
                 openMedicalFile(filePath);
             });
         }

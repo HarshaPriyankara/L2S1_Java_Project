@@ -22,7 +22,7 @@ public class ViewMedical extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        String[] columns = {"Medical Id", "Registration No", "Medical Date", "Session Type", "Exam Course", "Reason", "Status"};
+        String[] columns = {"Medical Id", "Registration No", "Upload Date", "Session Type", "Exam Course", "Reason", "Status"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {

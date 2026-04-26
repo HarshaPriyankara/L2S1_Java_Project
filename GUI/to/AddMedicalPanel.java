@@ -28,7 +28,7 @@ public class AddMedicalPanel extends JPanel {
         gbc.gridx = 0; gbc.gridy = 1; add(new JLabel("Registration No:"), gbc);
         gbc.gridx = 1; JTextField regField = new JTextField(20); UITheme.styleTextField(regField); add(regField, gbc);
 
-        gbc.gridy = 2; gbc.gridx = 0; add(new JLabel("Session Date (yyyy-mm-dd):"), gbc);
+        gbc.gridy = 2; gbc.gridx = 0; add(new JLabel("Upload Date (yyyy-mm-dd):"), gbc);
         gbc.gridx = 1; JTextField dateField = new JTextField(new SimpleDateFormat("yyyy-MM-dd").format(new Date()), 20); UITheme.styleTextField(dateField); add(dateField, gbc);
 
         gbc.gridy = 3; gbc.gridx = 0; add(new JLabel("Session Type:"), gbc);
