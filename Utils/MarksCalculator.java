@@ -16,7 +16,13 @@ public class MarksCalculator {
         CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
         double caMarks = scheme.calculateCA(marks);
         double endMarks = scheme.calculateEnd(marks);
-        double totalMarks = round(Math.min(100.0, caMarks + endMarks));
+
+        double totalMarks = caMarks + endMarks;
+        if (totalMarks > 100.0) {
+            totalMarks = 100.0;
+        }
+        totalMarks = round(totalMarks);
+
         String grade = calculateGrade(caMarks, endMarks, totalMarks, scheme);
         double gradePoint = GpaCalculator.getGradePoint(grade);
         boolean hasMarks = marks != null && !marks.isEmpty();
@@ -34,24 +40,62 @@ public class MarksCalculator {
         boolean caFailed = caMarks < scheme.getCaPassMark();
         boolean endFailed = scheme.hasEndAssessment() && endMarks < scheme.getEndPassMark();
 
-        if (caFailed && endFailed) return "E(CA & ESA)";
-        if (caFailed) return "E(CA)";
-        if (endFailed) return "E(ESA)";
+        if (caFailed && endFailed) {
+            return "E(CA & ESA)";
+        }
+
+        if (caFailed) {
+            return "E(CA)";
+        }
+
+        if (endFailed) {
+            return "E(ESA)";
+        }
 
         return calculateGrade(totalMarks);
     }
 
     public static String calculateGrade(double totalMarks) {
-        if (totalMarks >= 85) return "A+";
-        if (totalMarks >= 75) return "A";
-        if (totalMarks >= 70) return "A-";
-        if (totalMarks >= 65) return "B+";
-        if (totalMarks >= 60) return "B";
-        if (totalMarks >= 55) return "B-";
-        if (totalMarks >= 50) return "C+";
-        if (totalMarks >= 45) return "C";
-        if (totalMarks >= 40) return "C-";
-        if (totalMarks >= 35) return "D";
+        if (totalMarks >= 85) {
+            return "A+";
+        }
+
+        if (totalMarks >= 75) {
+            return "A";
+        }
+
+        if (totalMarks >= 70) {
+            return "A-";
+        }
+
+        if (totalMarks >= 65) {
+            return "B+";
+        }
+
+        if (totalMarks >= 60) {
+            return "B";
+        }
+
+        if (totalMarks >= 55) {
+            return "B-";
+        }
+
+        if (totalMarks >= 50) {
+            return "C+";
+        }
+
+        if (totalMarks >= 45) {
+            return "C";
+        }
+
+        if (totalMarks >= 40) {
+            return "C-";
+        }
+
+        if (totalMarks >= 35) {
+            return "D";
+        }
+
         return "E";
     }
 
@@ -88,16 +132,48 @@ public class MarksCalculator {
             this.completeMarks = completeMarks;
         }
 
-        public String getRegNo() { return regNo; }
-        public String getCourseCode() { return courseCode; }
-        public String getCourseName() { return courseName; }
-        public int getCredits() { return credits; }
-        public double getCaMarks() { return caMarks; }
-        public double getEndMarks() { return endMarks; }
-        public double getTotalMarks() { return totalMarks; }
-        public String getGrade() { return grade; }
-        public double getGradePoint() { return gradePoint; }
-        public boolean hasMarks() { return hasMarks; }
-        public boolean hasCompleteMarks() { return completeMarks; }
+        public String getRegNo() {
+            return regNo;
+        }
+
+        public String getCourseCode() {
+            return courseCode;
+        }
+
+        public String getCourseName() {
+            return courseName;
+        }
+
+        public int getCredits() {
+            return credits;
+        }
+
+        public double getCaMarks() {
+            return caMarks;
+        }
+
+        public double getEndMarks() {
+            return endMarks;
+        }
+
+        public double getTotalMarks() {
+            return totalMarks;
+        }
+
+        public String getGrade() {
+            return grade;
+        }
+
+        public double getGradePoint() {
+            return gradePoint;
+        }
+
+        public boolean hasMarks() {
+            return hasMarks;
+        }
+
+        public boolean hasCompleteMarks() {
+            return completeMarks;
+        }
     }
 }

@@ -8,8 +8,10 @@ class Tcs2122MarkScheme extends CourseMarkScheme {
     }
 
     protected double calculateCaMarks(Map<String, Double> marks) {
-        return topQuizAverage(marks, 2, 10.0)
-                + fixedAverage(marks, 20.0, "Assignment_1", "Assignment_2");
+        double quizMarks = topQuizAverage(marks, 2, 10.0);
+        double assignmentMarks = fixedAverage(marks, 20.0, "Assignment_1", "Assignment_2");
+
+        return quizMarks + assignmentMarks;
     }
 
     protected double calculateEndMarks(Map<String, Double> marks) {
@@ -21,7 +23,9 @@ class Tcs2122MarkScheme extends CourseMarkScheme {
     }
 
     public boolean hasCompleteMarks(Map<String, Double> marks) {
-        return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
-                && hasAllMarks(marks, "Assignment_1", "Assignment_2");
+        boolean hasEnoughQuizMarks = countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2;
+        boolean hasAssignmentMarks = hasAllMarks(marks, "Assignment_1", "Assignment_2");
+
+        return hasEnoughQuizMarks && hasAssignmentMarks;
     }
 }

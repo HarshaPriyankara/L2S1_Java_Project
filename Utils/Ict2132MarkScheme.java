@@ -8,8 +8,10 @@ class Ict2132MarkScheme extends CourseMarkScheme {
     }
 
     protected double calculateCaMarks(Map<String, Double> marks) {
-        return weightedMark(marks, "Mid_practical", 10.0)
-                + weightedMark(marks, "Mini_project", 30.0);
+        double midPracticalMarks = weightedMark(marks, "Mid_practical", 10.0);
+        double miniProjectMarks = weightedMark(marks, "Mini_project", 30.0);
+
+        return midPracticalMarks + miniProjectMarks;
     }
 
     protected double calculateEndMarks(Map<String, Double> marks) {
@@ -17,7 +19,11 @@ class Ict2132MarkScheme extends CourseMarkScheme {
     }
 
     public double getAssessmentWeight(String type) {
-        return "End_practical".equals(type) ? 60.0 : 0.0;
+        if ("End_practical".equals(type)) {
+            return 60.0;
+        }
+
+        return 0.0;
     }
 
     public String getDefaultEndMarkType() {
@@ -29,6 +35,7 @@ class Ict2132MarkScheme extends CourseMarkScheme {
     }
 
     public boolean hasCompleteMarks(Map<String, Double> marks) {
-        return hasAllMarks(marks, "Mid_practical", "Mini_project", "End_practical");
+        boolean hasRequiredMarks = hasAllMarks(marks, "Mid_practical", "Mini_project", "End_practical");
+        return hasRequiredMarks;
     }
 }

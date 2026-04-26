@@ -49,15 +49,19 @@ public class StudentGpaPanel extends JPanel {
         topPanel.add(showAllButton);
         add(topPanel, BorderLayout.NORTH);
 
-        summaryModel = new DefaultTableModel(new String[]{"Reg No", "SGPA", "CGPA"}, 0) {
+        String[] summaryColumns = {"Reg No", "SGPA", "CGPA"};
+        summaryModel = new DefaultTableModel(summaryColumns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
 
-        detailsModel = new DefaultTableModel(
-                new String[]{"Course Code", "Course Name", "Credits", "Final Marks", "Grade", "Grade Point", "Weighted Point"}, 0) {
+        String[] detailsColumns = {
+                "Course Code", "Course Name", "Credits", "Final Marks",
+                "Grade", "Grade Point", "Weighted Point"
+        };
+        detailsModel = new DefaultTableModel(detailsColumns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -78,16 +82,19 @@ public class StudentGpaPanel extends JPanel {
         JPanel summaryPanel = new JPanel(new BorderLayout(0, 8));
         summaryPanel.setBackground(UITheme.APP_BACKGROUND);
         JLabel batchLabel = new JLabel("Whole Batch SGPA / CGPA");
-        batchLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        Font titleFont = new Font("SansSerif", Font.BOLD, 16);
+        Font summaryFont = new Font("SansSerif", Font.BOLD, 14);
+
+        batchLabel.setFont(titleFont);
         batchLabel.setForeground(UITheme.TEXT_PRIMARY);
         summaryPanel.add(batchLabel, BorderLayout.NORTH);
         summaryPanel.add(new JScrollPane(summaryTable), BorderLayout.CENTER);
 
         JPanel detailsPanel = new JPanel(new BorderLayout(0, 8));
         detailsPanel.setBackground(UITheme.APP_BACKGROUND);
-        selectedStudentLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        selectedStudentLabel.setFont(titleFont);
         selectedStudentLabel.setForeground(UITheme.TEXT_PRIMARY);
-        gpaSummaryLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        gpaSummaryLabel.setFont(summaryFont);
         gpaSummaryLabel.setForeground(UITheme.TEXT_MUTED);
 
         JPanel detailsHeader = new JPanel();
@@ -132,8 +139,11 @@ public class StudentGpaPanel extends JPanel {
             summaryModel.addRow(row);
         }
 
-        if (result.getSelectedStudentId() != null && !result.getSelectedStudentId().isBlank()) {
-            selectedStudentLabel.setText("Subject Grades: " + result.getSelectedStudentId());
+        String selectedStudentId = result.getSelectedStudentId();
+        boolean hasSelectedStudent = selectedStudentId != null && !selectedStudentId.isBlank();
+
+        if (hasSelectedStudent) {
+            selectedStudentLabel.setText("Subject Grades: " + selectedStudentId);
             if (result.getSelectedStudentSummary() != null) {
                 gpaSummaryLabel.setText(result.getSelectedStudentSummary());
             }

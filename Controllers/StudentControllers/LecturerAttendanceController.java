@@ -29,7 +29,11 @@ public class LecturerAttendanceController {
                 double totalHours = summaryRs.getDouble("total_hours");
                 int attendedSessions = summaryRs.getInt("attended_sessions");
                 int totalSessions = summaryRs.getInt("total_sessions");
-                double percentage = totalHours <= 0 ? 0.0 : round((attendedHours / totalHours) * 100.0);
+                double percentage = 0.0;
+
+                if (totalHours > 0) {
+                    percentage = round((attendedHours / totalHours) * 100.0);
+                }
 
                 summaryRows.add(new LecturerAttendanceSummaryRow(
                         summaryRs.getString("Reg_no"),
@@ -45,12 +49,13 @@ public class LecturerAttendanceController {
             if (detailStudentId != null) {
                 try (ResultSet detailRs = attendanceDAO.getStudentAttendanceDetails(courseCode, detailStudentId, sessionFilter)) {
                     while (detailRs.next()) {
-                        detailRows.add(new Object[]{
-                                detailRs.getString("Session_date"),
-                                detailRs.getString("Session_type"),
-                                detailRs.getString("Session_hours"),
-                                detailRs.getString("Status")
-                        });
+                        String sessionDate = detailRs.getString("Session_date");
+                        String sessionType = detailRs.getString("Session_type");
+                        String sessionHours = detailRs.getString("Session_hours");
+                        String status = detailRs.getString("Status");
+
+                        Object[] row = {sessionDate, sessionType, sessionHours, status};
+                        detailRows.add(row);
                     }
                 }
             }

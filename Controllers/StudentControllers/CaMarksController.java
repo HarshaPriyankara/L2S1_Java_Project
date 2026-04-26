@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.sql.ResultSet;
 
-public class Eng2122CaMarksController {
+public class CaMarksController {
     private static final double ATTENDANCE_ELIGIBILITY_PERCENT = 80.0;
     private static final String[] ENG2122_COLUMNS = {
             "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz Part (10)", "Assignment 1",
@@ -55,9 +55,9 @@ public class Eng2122CaMarksController {
     private final MarkDAO markDAO = new MarkDAO();
     private final AttendanceDAO attendanceDAO = new AttendanceDAO();
 
-    public Eng2122CaMarksResult loadCaMarks(String courseCode, String studentId, boolean individualView) {
+    public CaMarksResult loadCaMarks(String courseCode, String studentId, boolean individualView) {
         if (!supportsCourse(courseCode)) {
-            return new Eng2122CaMarksResult(null, null, null, null,
+            return new CaMarksResult(null, null, null, null,
                     "This step supports CA logic for ENG2122, ICT2113, ICT2122, ICT2132, ICT2142, ICT2152, TCS2112, and TCS2122 only.");
         }
 
@@ -65,7 +65,7 @@ public class Eng2122CaMarksController {
             List<Object[]> rows = new ArrayList<>();
             if (individualView) {
                 if (studentId == null || studentId.isBlank()) {
-                    return new Eng2122CaMarksResult(null, null, null, null, "Please enter a registration number.");
+                    return new CaMarksResult(null, null, null, null, "Please enter a registration number.");
                 }
                 Map<String, Double> marks = markDAO.getStudentCourseMarks(studentId.trim(), courseCode);
                 rows.add(buildRow(courseCode, studentId.trim(), marks));
@@ -75,7 +75,7 @@ public class Eng2122CaMarksController {
                     rows.add(buildRow(courseCode, entry.getKey(), entry.getValue()));
                 }
             }
-            return new Eng2122CaMarksResult(
+            return new CaMarksResult(
                     resolveColumns(courseCode),
                     rows,
                     buildTitle(courseCode, studentId, individualView),
@@ -83,14 +83,14 @@ public class Eng2122CaMarksController {
                     null
             );
         } catch (Exception ex) {
-            return new Eng2122CaMarksResult(null, null, null, null,
+            return new CaMarksResult(null, null, null, null,
                     "Unable to load " + courseCode + " CA marks: " + ex.getMessage());
         }
     }
 
-    public Eng2122CaMarksResult loadEndEligibilityByCa(String courseCode, String studentId, boolean individualView) {
+    public CaMarksResult loadEndEligibilityByCa(String courseCode, String studentId, boolean individualView) {
         if (!supportsCourse(courseCode)) {
-            return new Eng2122CaMarksResult(null, null, null, null,
+            return new CaMarksResult(null, null, null, null,
                     "This step supports selected configured courses only.");
         }
 
@@ -98,7 +98,7 @@ public class Eng2122CaMarksController {
             List<Object[]> rows = new ArrayList<>();
             if (individualView) {
                 if (studentId == null || studentId.isBlank()) {
-                    return new Eng2122CaMarksResult(null, null, null, null, "Please enter a registration number.");
+                    return new CaMarksResult(null, null, null, null, "Please enter a registration number.");
                 }
                 Map<String, Double> marks = markDAO.getStudentCourseMarks(studentId.trim(), courseCode);
                 rows.add(buildEligibilityRow(courseCode, studentId.trim(), marks));
@@ -109,7 +109,7 @@ public class Eng2122CaMarksController {
                 }
             }
 
-            return new Eng2122CaMarksResult(
+            return new CaMarksResult(
                     new String[]{"Reg No", "CA Marks", "Required CA Mark", "End Assessment", "Eligibility"},
                     rows,
                     buildEligibilityTitle(courseCode, studentId, individualView),
@@ -117,21 +117,14 @@ public class Eng2122CaMarksController {
                     null
             );
         } catch (Exception ex) {
-            return new Eng2122CaMarksResult(null, null, null, null,
+            return new CaMarksResult(null, null, null, null,
                     "Unable to load end exam eligibility by CA: " + ex.getMessage());
         }
     }
 
-    public Eng2122CaMarksResult loadFinalMarks(String courseCode, String studentId, boolean individualView) {
-        if (!"ENG2122".equalsIgnoreCase(courseCode)
-                && !"ICT2113".equalsIgnoreCase(courseCode)
-                && !"ICT2122".equalsIgnoreCase(courseCode)
-                && !"ICT2132".equalsIgnoreCase(courseCode)
-                && !"ICT2142".equalsIgnoreCase(courseCode)
-                && !"ICT2152".equalsIgnoreCase(courseCode)
-                && !"TCS2112".equalsIgnoreCase(courseCode)
-                && !"TCS2122".equalsIgnoreCase(courseCode)) {
-            return new Eng2122CaMarksResult(null, null, null, null,
+    public CaMarksResult loadFinalMarks(String courseCode, String studentId, boolean individualView) {
+        if (!supportsCourse(courseCode)) {
+            return new CaMarksResult(null, null, null, null,
                     "This step implements final marks logic for ENG2122, ICT2113, ICT2122, ICT2132, ICT2142, ICT2152, TCS2112, and TCS2122 only.");
         }
 
@@ -139,7 +132,7 @@ public class Eng2122CaMarksController {
             List<Object[]> rows = new ArrayList<>();
             if (individualView) {
                 if (studentId == null || studentId.isBlank()) {
-                    return new Eng2122CaMarksResult(null, null, null, null, "Please enter a registration number.");
+                    return new CaMarksResult(null, null, null, null, "Please enter a registration number.");
                 }
                 MarksCalculator.MarkBreakdown breakdown = markDAO.getStudentCourseBreakdown(studentId.trim(), courseCode);
                 if (breakdown != null) {
@@ -151,7 +144,7 @@ public class Eng2122CaMarksController {
                 }
             }
 
-            return new Eng2122CaMarksResult(
+            return new CaMarksResult(
                     resolveFinalMarksColumns(courseCode),
                     rows,
                     buildFinalMarksTitle(courseCode, studentId, individualView),
@@ -159,14 +152,14 @@ public class Eng2122CaMarksController {
                     null
             );
         } catch (Exception ex) {
-            return new Eng2122CaMarksResult(null, null, null, null,
+            return new CaMarksResult(null, null, null, null,
                     "Unable to load final marks: " + ex.getMessage());
         }
     }
 
-    public Eng2122CaMarksResult loadEndEligibilityByAttendanceAndCa(String courseCode, String studentId, boolean individualView) {
+    public CaMarksResult loadEndEligibilityByAttendanceAndCa(String courseCode, String studentId, boolean individualView) {
         if (!supportsCourse(courseCode)) {
-            return new Eng2122CaMarksResult(null, null, null, null,
+            return new CaMarksResult(null, null, null, null,
                     "This step supports selected configured courses only.");
         }
 
@@ -179,7 +172,7 @@ public class Eng2122CaMarksController {
             List<Object[]> rows = new ArrayList<>();
             if (individualView) {
                 if (studentId == null || studentId.isBlank()) {
-                    return new Eng2122CaMarksResult(null, null, null, null, "Please enter a registration number.");
+                    return new CaMarksResult(null, null, null, null, "Please enter a registration number.");
                 }
                 rows.add(buildAttendanceAndCaRow(courseCode, studentId.trim()));
             } else {
@@ -197,7 +190,7 @@ public class Eng2122CaMarksController {
                 }
             }
 
-            return new Eng2122CaMarksResult(
+            return new CaMarksResult(
                     new String[]{"Reg No", "Attendance %", "Required Attendance %", "CA Marks", "Required CA Mark", "End Assessment", "Eligibility"},
                     rows,
                     buildAttendanceEligibilityTitle(courseCode, studentId, individualView),
@@ -205,7 +198,7 @@ public class Eng2122CaMarksController {
                     null
             );
         } catch (Exception ex) {
-            return new Eng2122CaMarksResult(null, null, null, null,
+            return new CaMarksResult(null, null, null, null,
                     "Unable to load end exam eligibility by attendance + CA: " + ex.getMessage());
         }
     }
@@ -281,13 +274,13 @@ public class Eng2122CaMarksController {
         };
     }
 
-    private Eng2122CaMarksResult buildNoEndExamAttendanceEligibility(String courseCode, String studentId,
-                                                                      boolean individualView, CourseMarkScheme scheme) throws Exception {
+    private CaMarksResult buildNoEndExamAttendanceEligibility(String courseCode, String studentId,
+                                                              boolean individualView, CourseMarkScheme scheme) throws Exception {
         List<Object[]> rows = new ArrayList<>();
 
         if (individualView) {
             if (studentId == null || studentId.isBlank()) {
-                return new Eng2122CaMarksResult(null, null, null, null, "Please enter a registration number.");
+                return new CaMarksResult(null, null, null, null, "Please enter a registration number.");
             }
             Map<String, Double> marks = markDAO.getStudentCourseMarks(studentId.trim(), courseCode);
             rows.add(new Object[]{
@@ -314,7 +307,7 @@ public class Eng2122CaMarksController {
             }
         }
 
-        return new Eng2122CaMarksResult(
+        return new CaMarksResult(
                 new String[]{"Reg No", "Attendance %", "Required Attendance %", "CA Marks", "Required CA Mark", "End Assessment", "Eligibility"},
                 rows,
                 buildAttendanceEligibilityTitle(courseCode, studentId, individualView),
@@ -340,6 +333,13 @@ public class Eng2122CaMarksController {
         CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
         boolean attendanceEligible = attendancePercentage >= ATTENDANCE_ELIGIBILITY_PERCENT;
         boolean caEligible = caMarks >= scheme.getCaPassMark();
+        String eligibility;
+
+        if (attendanceEligible && caEligible) {
+            eligibility = "Eligible";
+        } else {
+            eligibility = "Not Eligible";
+        }
 
         return new Object[]{
                 regNo,
@@ -348,7 +348,7 @@ public class Eng2122CaMarksController {
                 caMarks,
                 scheme.getCaPassMark(),
                 resolveEndAssessmentLabel(courseCode),
-                attendanceEligible && caEligible ? "Eligible" : "Not Eligible"
+                eligibility
         };
     }
 
@@ -569,6 +569,13 @@ public class Eng2122CaMarksController {
         double quizContribution = round(bestTwoAverage(quiz1, quiz2, quiz3) * 10.0 / 100.0);
         double assignmentContribution = round(((assignment1 + assignment2) / 2.0) * 20.0 / 100.0);
         double caMarks = round(quizContribution + assignmentContribution);
+        String finalResultBase;
+
+        if (caMarks >= passMark) {
+            finalResultBase = "CA-based final result";
+        } else {
+            finalResultBase = "CA below pass limit";
+        }
 
         return new Object[]{
                 regNo,
@@ -580,7 +587,7 @@ public class Eng2122CaMarksController {
                 display(marks, "Assignment_2", assignment2),
                 assignmentContribution,
                 caMarks,
-                caMarks >= passMark ? "CA-based final result" : "CA below pass limit"
+                finalResultBase
         };
     }
 
@@ -621,27 +628,35 @@ public class Eng2122CaMarksController {
     }
 
     private String buildTitle(String courseCode, String studentId, boolean individualView) {
-        return individualView
-                ? courseCode.toUpperCase() + " CA Marks - " + studentId
-                : courseCode.toUpperCase() + " CA Marks - Whole Batch";
+        if (individualView) {
+            return courseCode.toUpperCase() + " CA Marks - " + studentId;
+        }
+
+        return courseCode.toUpperCase() + " CA Marks - Whole Batch";
     }
 
     private String buildEligibilityTitle(String courseCode, String studentId, boolean individualView) {
-        return individualView
-                ? courseCode.toUpperCase() + " End Exam Eligibility by CA - " + studentId
-                : courseCode.toUpperCase() + " End Exam Eligibility by CA - Whole Batch";
+        if (individualView) {
+            return courseCode.toUpperCase() + " End Exam Eligibility by CA - " + studentId;
+        }
+
+        return courseCode.toUpperCase() + " End Exam Eligibility by CA - Whole Batch";
     }
 
     private String buildFinalMarksTitle(String courseCode, String studentId, boolean individualView) {
-        return individualView
-                ? courseCode.toUpperCase() + " Final Marks (CA + END) - " + studentId
-                : courseCode.toUpperCase() + " Final Marks (CA + END) - Whole Batch";
+        if (individualView) {
+            return courseCode.toUpperCase() + " Final Marks (CA + END) - " + studentId;
+        }
+
+        return courseCode.toUpperCase() + " Final Marks (CA + END) - Whole Batch";
     }
 
     private String buildAttendanceEligibilityTitle(String courseCode, String studentId, boolean individualView) {
-        return individualView
-                ? courseCode.toUpperCase() + " End Exam Eligibility by Attendance + CA - " + studentId
-                : courseCode.toUpperCase() + " End Exam Eligibility by Attendance + CA - Whole Batch";
+        if (individualView) {
+            return courseCode.toUpperCase() + " End Exam Eligibility by Attendance + CA - " + studentId;
+        }
+
+        return courseCode.toUpperCase() + " End Exam Eligibility by Attendance + CA - Whole Batch";
     }
 
     private String[] resolveFinalMarksColumns(String courseCode) {
@@ -759,11 +774,24 @@ public class Eng2122CaMarksController {
             return 0.0;
         }
         Double value = marks.get(key);
-        return value == null ? 0.0 : value;
+
+        if (value == null) {
+            return 0.0;
+        }
+
+        return value;
     }
 
     private Object display(Map<String, Double> marks, String key, double value) {
-        return marks != null && marks.containsKey(key) ? value : "-";
+        if (marks == null) {
+            return "-";
+        }
+
+        if (!marks.containsKey(key)) {
+            return "-";
+        }
+
+        return value;
     }
 
     private double round(double value) {
