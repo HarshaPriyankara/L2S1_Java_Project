@@ -25,21 +25,21 @@ public abstract class CourseMarkScheme {
         String code = courseCode == null ? "" : courseCode.trim().toUpperCase(Locale.ROOT);
         switch (code) {
             case "ENG2122":
-                return new Eng2122Scheme();
+                return new Eng2122MarkScheme();
             case "ICT2113":
-                return new Ict2113Scheme();
+                return new Ict2113MarkScheme();
             case "ICT2122":
-                return new Ict2122Scheme();
+                return new Ict2122MarkScheme();
             case "ICT2132":
-                return new Ict2132Scheme();
+                return new Ict2132MarkScheme();
             case "ICT2142":
-                return new Ict2142Scheme();
+                return new Ict2142MarkScheme();
             case "ICT2152":
-                return new Ict2152Scheme();
+                return new Ict2152MarkScheme();
             case "TCS2112":
-                return new Tcs2112Scheme();
+                return new Tcs2112MarkScheme();
             case "TCS2122":
-                return new Tcs2122Scheme();
+                return new Tcs2122MarkScheme();
             default:
                 return new DefaultScheme(code);
         }
@@ -123,16 +123,8 @@ public abstract class CourseMarkScheme {
         return weighted(total / types.length, weight);
     }
 
-    protected double allQuizAverage(Map<String, Double> marks, double weight) {
-        return averageWeighted(marks, QUIZZES, weight);
-    }
-
     protected double assignmentAverage(Map<String, Double> marks, double weight) {
         return averageWeighted(marks, ASSIGNMENTS, weight);
-    }
-
-    protected double combinedAverage(Map<String, Double> marks, double weight, String... types) {
-        return averageWeighted(marks, types, weight);
     }
 
     protected double weightedMark(Map<String, Double> marks, String type, double weight) {
@@ -214,240 +206,6 @@ public abstract class CourseMarkScheme {
             }
         }
         return count;
-    }
-
-    private static class Eng2122Scheme extends CourseMarkScheme {
-        private Eng2122Scheme() {
-            super("ENG2122", 40.0, 60.0);
-        }
-
-        protected double calculateCaMarks(Map<String, Double> marks) {
-            return topQuizAverage(marks, 2, 10.0)
-                    + fixedAverage(marks, 10.0, "Assignment_1", "Assignment_2")
-                    + weightedMark(marks, "Mid_theory", 20.0);
-        }
-
-        protected double calculateEndMarks(Map<String, Double> marks) {
-            return endTheory(marks, 60.0);
-        }
-
-        public double getAssessmentWeight(String type) {
-            return "End_theory".equals(type) ? 60.0 : 0.0;
-        }
-
-        public String[] getAllowedMarkTypes() {
-            return types("Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2",
-                    "Mid_theory", "End_theory");
-        }
-
-        public boolean hasCompleteMarks(Map<String, Double> marks) {
-            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
-                    && hasAllMarks(marks, "Assignment_1", "Assignment_2")
-                    && hasAllMarks(marks, "Mid_theory", "End_theory");
-        }
-    }
-
-    private static class Ict2113Scheme extends CourseMarkScheme {
-        private Ict2113Scheme() {
-            super("ICT2113", 40.0, 60.0);
-        }
-
-        protected double calculateCaMarks(Map<String, Double> marks) {
-            return topQuizAverage(marks, 2, 10.0)
-                    + weightedMark(marks, "Mid_practical", 20.0)
-                    + fixedAverage(marks, 10.0, "Assignment_1", "Assignment_2");
-        }
-
-        protected double calculateEndMarks(Map<String, Double> marks) {
-            return endTheory(marks, 40.0)
-                    + endPractical(marks, 20.0);
-        }
-
-        public double getAssessmentWeight(String type) {
-            if ("End_theory".equals(type)) return 40.0;
-            if ("End_practical".equals(type)) return 20.0;
-            return 0.0;
-        }
-
-        public String[] getAllowedMarkTypes() {
-            return types("Quiz_1", "Quiz_2", "Quiz_3",
-                    "Assignment_1", "Assignment_2", "Mid_practical", "End_theory", "End_practical");
-        }
-
-        public boolean hasCompleteMarks(Map<String, Double> marks) {
-            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
-                    && hasAllMarks(marks, "Assignment_1", "Assignment_2", "Mid_practical", "End_theory", "End_practical");
-        }
-    }
-
-    private static class Ict2122Scheme extends CourseMarkScheme {
-        private Ict2122Scheme() {
-            super("ICT2122", 30.0, 70.0);
-        }
-
-        protected double calculateCaMarks(Map<String, Double> marks) {
-            return topQuizAverage(marks, 2, 10.0)
-                    + weightedMark(marks, "Mid_theory", 20.0);
-        }
-
-        protected double calculateEndMarks(Map<String, Double> marks) {
-            return endTheory(marks, 70.0);
-        }
-
-        public double getAssessmentWeight(String type) {
-            return "End_theory".equals(type) ? 70.0 : 0.0;
-        }
-
-        public String[] getAllowedMarkTypes() {
-            return types("Quiz_1", "Quiz_2", "Quiz_3", "Mid_theory", "End_theory");
-        }
-
-        public boolean hasCompleteMarks(Map<String, Double> marks) {
-            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
-                    && hasAllMarks(marks, "Mid_theory", "End_theory");
-        }
-    }
-
-    private static class Ict2132Scheme extends CourseMarkScheme {
-        private Ict2132Scheme() {
-            super("ICT2132", 40.0, 60.0);
-        }
-
-        protected double calculateCaMarks(Map<String, Double> marks) {
-            return weightedMark(marks, "Mid_practical", 10.0)
-                    + weightedMark(marks, "Mini_project", 30.0);
-        }
-
-        protected double calculateEndMarks(Map<String, Double> marks) {
-            return endPractical(marks, 60.0);
-        }
-
-        public double getAssessmentWeight(String type) {
-            return "End_practical".equals(type) ? 60.0 : 0.0;
-        }
-
-        public String getDefaultEndMarkType() {
-            return "End_practical";
-        }
-
-        public String[] getAllowedMarkTypes() {
-            return types("Mid_practical", "Mini_project", "End_practical");
-        }
-
-        public boolean hasCompleteMarks(Map<String, Double> marks) {
-            return hasAllMarks(marks, "Mid_practical", "Mini_project", "End_practical");
-        }
-    }
-
-    private static class Ict2142Scheme extends CourseMarkScheme {
-        private Ict2142Scheme() {
-            super("ICT2142", 30.0, 70.0);
-        }
-
-        protected double calculateCaMarks(Map<String, Double> marks) {
-            return topQuizAverage(marks, 2, 10.0)
-                    + fixedAverage(marks, 20.0, "Assignment_1", "Assignment_2");
-        }
-
-        protected double calculateEndMarks(Map<String, Double> marks) {
-            return endTheory(marks, 70.0);
-        }
-
-        public double getAssessmentWeight(String type) {
-            return "End_theory".equals(type) ? 70.0 : 0.0;
-        }
-
-        public String[] getAllowedMarkTypes() {
-            return types("Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2", "End_theory");
-        }
-
-        public boolean hasCompleteMarks(Map<String, Double> marks) {
-            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
-                    && hasAllMarks(marks, "Assignment_1", "Assignment_2", "End_theory");
-        }
-    }
-
-    private static class Ict2152Scheme extends CourseMarkScheme {
-        private Ict2152Scheme() {
-            super("ICT2152", 40.0, 60.0);
-        }
-
-        protected double calculateCaMarks(Map<String, Double> marks) {
-            return topQuizAverage(marks, 2, 10.0)
-                    + weightedMark(marks, "Mini_project", 20.0)
-                    + fixedAverage(marks, 10.0, "Assignment_1", "Assignment_2");
-        }
-
-        protected double calculateEndMarks(Map<String, Double> marks) {
-            return endTheory(marks, 60.0);
-        }
-
-        public double getAssessmentWeight(String type) {
-            return "End_theory".equals(type) ? 60.0 : 0.0;
-        }
-
-        public String[] getAllowedMarkTypes() {
-            return types("Quiz_1", "Quiz_2", "Quiz_3", "Mini_project", "Assignment_1", "Assignment_2", "End_theory");
-        }
-
-        public boolean hasCompleteMarks(Map<String, Double> marks) {
-            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
-                    && hasAllMarks(marks, "Mini_project", "Assignment_1", "Assignment_2")
-                    && hasAllMarks(marks, "End_theory");
-        }
-    }
-
-    private static class Tcs2112Scheme extends CourseMarkScheme {
-        private Tcs2112Scheme() {
-            super("TCS2112", 30.0, 70.0);
-        }
-
-        protected double calculateCaMarks(Map<String, Double> marks) {
-            return topQuizAverage(marks, 2, 10.0)
-                    + fixedAverage(marks, 10.0, "Assignment_1", "Assignment_2")
-                    + weightedMark(marks, "Mid_theory", 10.0);
-        }
-
-        protected double calculateEndMarks(Map<String, Double> marks) {
-            return endTheory(marks, 70.0);
-        }
-
-        public double getAssessmentWeight(String type) {
-            return "End_theory".equals(type) ? 70.0 : 0.0;
-        }
-
-        public String[] getAllowedMarkTypes() {
-            return types("Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2", "Mid_theory", "End_theory");
-        }
-
-        public boolean hasCompleteMarks(Map<String, Double> marks) {
-            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
-                    && hasAllMarks(marks, "Assignment_1", "Assignment_2", "Mid_theory", "End_theory");
-        }
-    }
-
-    private static class Tcs2122Scheme extends CourseMarkScheme {
-        private Tcs2122Scheme() {
-            super("TCS2122", 30.0, 0.0);
-        }
-
-        protected double calculateCaMarks(Map<String, Double> marks) {
-            return topQuizAverage(marks, 2, 10.0)
-                    + fixedAverage(marks, 20.0, "Assignment_1", "Assignment_2");
-        }
-
-        protected double calculateEndMarks(Map<String, Double> marks) {
-            return 0.0;
-        }
-
-        public String[] getAllowedMarkTypes() {
-            return types("Quiz_1", "Quiz_2", "Quiz_3", "Assignment_1", "Assignment_2");
-        }
-
-        public boolean hasCompleteMarks(Map<String, Double> marks) {
-            return countMarks(marks, "Quiz_1", "Quiz_2", "Quiz_3") >= 2
-                    && hasAllMarks(marks, "Assignment_1", "Assignment_2");
-        }
     }
 
     private static class DefaultScheme extends CourseMarkScheme {
