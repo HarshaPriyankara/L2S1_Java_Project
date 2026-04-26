@@ -13,9 +13,15 @@ public class LecturerMarksOverviewController {
     public LecturerMarksOverviewResult loadOverview(String lecturerId, String courseCode) {
         try {
             List<String> courses = lecturerStudentDAO.getLecturerCourses(lecturerId);
-            List<String> markTypes = courseCode == null || courseCode.isBlank()
-                    ? Collections.emptyList()
-                    : Arrays.asList(CourseMarkScheme.forCourse(courseCode).getAllowedMarkTypes());
+            List<String> markTypes;
+
+            if (courseCode == null || courseCode.isBlank()) {
+                markTypes = Collections.emptyList();
+            } else {
+                String[] allowedMarkTypes = CourseMarkScheme.forCourse(courseCode).getAllowedMarkTypes();
+                markTypes = Arrays.asList(allowedMarkTypes);
+            }
+
             return new LecturerMarksOverviewResult(courses, markTypes, null);
         } catch (Exception ex) {
             return new LecturerMarksOverviewResult(null, null, "Unable to load marks overview: " + ex.getMessage());

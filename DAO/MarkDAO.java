@@ -57,7 +57,12 @@ public class MarkDAO {
             pst.setString(1, regNo);
             pst.setString(2, courseCode);
             List<MarksCalculator.MarkBreakdown> results = buildBreakdowns(pst.executeQuery());
-            return results.isEmpty() ? null : results.get(0);
+
+            if (results.isEmpty()) {
+                return null;
+            }
+
+            return results.get(0);
         }
     }
 
@@ -88,10 +93,18 @@ public class MarkDAO {
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     String regNo = rs.getString("Reg_no");
-                    Map<String, Double> marks = groupedMarks.computeIfAbsent(regNo, key -> new HashMap<>());
+                    Map<String, Double> marks = groupedMarks.get(regNo);
+
+                    if (marks == null) {
+                        marks = new HashMap<>();
+                        groupedMarks.put(regNo, marks);
+                    }
+
                     String markType = rs.getString("Marks_type");
                     if (markType != null) {
-                        marks.put(normalizeMarkType(markType), rs.getDouble("Marks_value"));
+                        String normalizedMarkType = normalizeMarkType(markType);
+                        double markValue = rs.getDouble("Marks_value");
+                        marks.put(normalizedMarkType, markValue);
                     }
                 }
             }
@@ -102,7 +115,12 @@ public class MarkDAO {
     public Map<String, Double> getStudentCourseMarks(String regNo, String courseCode) throws SQLException {
         Map<String, Map<String, Double>> groupedMarks = getCourseMarksByStudent(courseCode);
         Map<String, Double> marks = groupedMarks.get(regNo);
-        return marks == null ? new HashMap<>() : new HashMap<>(marks);
+
+        if (marks == null) {
+            return new HashMap<>();
+        }
+
+        return new HashMap<>(marks);
     }
 
     private List<MarksCalculator.MarkBreakdown> buildBreakdowns(ResultSet rs) throws SQLException {
@@ -126,7 +144,9 @@ public class MarkDAO {
 
             String markType = rs.getString("Marks_type");
             if (markType != null) {
-                group.marks.put(normalizeMarkType(markType), rs.getDouble("Marks_value"));
+                String normalizedMarkType = normalizeMarkType(markType);
+                double markValue = rs.getDouble("Marks_value");
+                group.marks.put(normalizedMarkType, markValue);
             }
         }
 
@@ -159,21 +179,34 @@ public class MarkDAO {
     }
 
     private String normalizeMarkType(String markType) {
-        if (markType == null) return "";
+        if (markType == null) {
+            return "";
+        }
 
         String normalized = markType.trim().replace(" ", "_").toLowerCase();
         switch (normalized) {
-            case "quiz_1": return "Quiz_1";
-            case "quiz_2": return "Quiz_2";
-            case "quiz_3": return "Quiz_3";
-            case "assignment_1": return "Assignment_1";
-            case "assignment_2": return "Assignment_2";
-            case "mini_project": return "Mini_project";
-            case "mid_theory": return "Mid_theory";
-            case "mid_practical": return "Mid_practical";
-            case "end_theory": return "End_theory";
-            case "end_practical": return "End_practical";
-            default: return markType.trim();
+            case "quiz_1":
+                return "Quiz_1";
+            case "quiz_2":
+                return "Quiz_2";
+            case "quiz_3":
+                return "Quiz_3";
+            case "assignment_1":
+                return "Assignment_1";
+            case "assignment_2":
+                return "Assignment_2";
+            case "mini_project":
+                return "Mini_project";
+            case "mid_theory":
+                return "Mid_theory";
+            case "mid_practical":
+                return "Mid_practical";
+            case "end_theory":
+                return "End_theory";
+            case "end_practical":
+                return "End_practical";
+            default:
+                return markType.trim();
         }
     }
 
@@ -195,7 +228,8 @@ public class MarkDAO {
             pst.setString(3, formattedType); // Formatted type එක මෙතනට
             pst.setDouble(4, marks);
 
-            return pst.executeUpdate() > 0;
+            int affectedRows = pst.executeUpdate();
+            return affectedRows > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -220,7 +254,8 @@ public class MarkDAO {
             pst.setDouble(4, marks);
             pst.setInt(5, id);
 
-            return pst.executeUpdate() > 0;
+            int affectedRows = pst.executeUpdate();
+            return affectedRows > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -234,7 +269,8 @@ public class MarkDAO {
              PreparedStatement pst = con.prepareStatement(sql)) {
 
             pst.setInt(1, id);
-            return pst.executeUpdate() > 0;
+            int affectedRows = pst.executeUpdate();
+            return affectedRows > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

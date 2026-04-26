@@ -23,7 +23,11 @@ public class LecturerGpaController {
                 summaryRows.add(buildSummaryRow(entry.getKey(), gpaResult));
             }
 
-            String trimmedStudentId = studentId == null ? "" : studentId.trim();
+            String trimmedStudentId = "";
+            if (studentId != null) {
+                trimmedStudentId = studentId.trim();
+            }
+
             if (trimmedStudentId.isEmpty()) {
                 return new LecturerGpaResult(summaryRows, new ArrayList<>(), null, null, null);
             }
@@ -37,15 +41,26 @@ public class LecturerGpaController {
             GpaCalculator.GpaResult studentGpa = GpaCalculator.calculate(studentBreakdowns);
             List<Object[]> detailRows = new ArrayList<>();
             for (MarksCalculator.MarkBreakdown breakdown : studentBreakdowns) {
-                detailRows.add(new Object[]{
+                Object finalMarks = "Pending";
+                Object gradePoint = "Pending";
+                Object weightedPoint = "Pending";
+
+                if (breakdown.hasMarks()) {
+                    finalMarks = breakdown.getTotalMarks();
+                    gradePoint = breakdown.getGradePoint();
+                    weightedPoint = round(breakdown.getCredits() * breakdown.getGradePoint());
+                }
+
+                Object[] row = {
                         breakdown.getCourseCode(),
                         breakdown.getCourseName(),
                         breakdown.getCredits(),
-                        breakdown.hasMarks() ? breakdown.getTotalMarks() : "Pending",
+                        finalMarks,
                         breakdown.getGrade(),
-                        breakdown.hasMarks() ? breakdown.getGradePoint() : "Pending",
-                        breakdown.hasMarks() ? round(breakdown.getCredits() * breakdown.getGradePoint()) : "Pending"
-                });
+                        gradePoint,
+                        weightedPoint
+                };
+                detailRows.add(row);
             }
 
             return new LecturerGpaResult(
@@ -68,16 +83,34 @@ public class LecturerGpaController {
         }
 
         for (MarksCalculator.MarkBreakdown breakdown : breakdowns) {
-            grouped.computeIfAbsent(breakdown.getRegNo(), key -> new ArrayList<>()).add(breakdown);
+            List<MarksCalculator.MarkBreakdown> studentBreakdowns = grouped.get(breakdown.getRegNo());
+
+            if (studentBreakdowns == null) {
+                studentBreakdowns = new ArrayList<>();
+                grouped.put(breakdown.getRegNo(), studentBreakdowns);
+            }
+
+            studentBreakdowns.add(breakdown);
         }
         return grouped;
     }
 
     private Object[] buildSummaryRow(String regNo, GpaCalculator.GpaResult gpaResult) {
+        Object sgpa = "Pending";
+        Object cgpa = "Pending";
+
+        if (gpaResult.isSgpaAvailable()) {
+            sgpa = gpaResult.getSgpa();
+        }
+
+        if (gpaResult.isCgpaAvailable()) {
+            cgpa = gpaResult.getCgpa();
+        }
+
         return new Object[]{
                 regNo,
-                gpaResult.isSgpaAvailable() ? gpaResult.getSgpa() : "Pending",
-                gpaResult.isCgpaAvailable() ? gpaResult.getCgpa() : "Pending"
+                sgpa,
+                cgpa
         };
     }
 

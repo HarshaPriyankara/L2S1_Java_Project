@@ -79,6 +79,10 @@ public class LecturerStudentDAO {
     }
 
     private String safe(String value) {
-        return value == null ? "-" : value;
+        if (value == null) {
+            return "-";
+        }
+
+        return value;
     }
 }
