@@ -1,0 +1,131 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36" version="28.1.2">
+  <diagram id="compact-login-class-diagram" name="Login Class Diagram">
+    <mxGraphModel dx="1268" dy="645" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1120" pageHeight="700" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Login Class Diagram" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#000000;fontStyle=1;fontSize=18;align=center;" parent="1" vertex="1">
+          <mxGeometry x="300" y="20" width="330" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="LoginForm" value="&lt;b&gt;LoginForm&lt;/b&gt;&lt;br&gt;&lt;br&gt;- loginController&lt;br&gt;&lt;br&gt;- loginAction()" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=7;strokeColor=#000000;fillColor=none;fontColor=#000000;fontSize=12;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="40" y="105" width="200" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="LoginController" value="&lt;b&gt;LoginController&lt;/b&gt;&lt;br&gt;&lt;br&gt;- userDAO&lt;br&gt;- dashboardFactory&lt;br&gt;&lt;br&gt;+ authenticate()" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=7;strokeColor=#000000;fillColor=none;fontColor=#000000;fontSize=12;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="320" y="100" width="220" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="UserDAO" value="&lt;br&gt;&lt;b&gt;UserDAO&lt;/b&gt;&lt;br&gt;&lt;br&gt;+ validateUser()&lt;br&gt;- mapUser()" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=7;strokeColor=#000000;fillColor=none;fontColor=#000000;fontSize=12;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="620" y="105" width="190" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="DBConnection" value="&lt;b style=&quot;color: rgb(0, 0, 0); background-color: rgb(236, 236, 236);&quot;&gt;DBConnection&lt;/b&gt;&lt;br&gt;&lt;br style=&quot;forced-color-adjust: none; color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(236, 236, 236); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;&quot;&gt;&lt;span style=&quot;float: none; display: inline !important; color: rgb(0, 0, 0); background-color: rgb(236, 236, 236);&quot;&gt;+ getConnection()&lt;/span&gt;&lt;br&gt;&lt;br style=&quot;forced-color-adjust: none; color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(236, 236, 236); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;&quot;&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=7;strokeColor=#000000;fillColor=none;fontColor=#000000;fontSize=12;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="940" y="105" width="170" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="LoginResult" value="&lt;b&gt;LoginResult&lt;/b&gt;&lt;br&gt;- success&lt;br&gt;- user&lt;br&gt;- dashboard&lt;br&gt;&lt;br&gt;+ isSuccess()" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=7;strokeColor=#000000;fillColor=none;fontColor=#000000;fontSize=12;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="320" y="305" width="220" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="DashboardFactory" value="&lt;b&gt;DashboardFactory&lt;/b&gt;&lt;br&gt;&lt;br&gt;+ createDashboard()" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=7;strokeColor=#000000;fillColor=none;fontColor=#000000;fontSize=12;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="620" y="305" width="190" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="User" value="&lt;b&gt;User&lt;/b&gt;&lt;br&gt;- userID&lt;br&gt;- role&lt;br&gt;&lt;div&gt;+ getRoleKey()&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=7;strokeColor=#000000;fillColor=none;fontColor=#000000;fontSize=12;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="890" y="290" width="170" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="BaseDashboard" value="&lt;b&gt;BaseDashboard&lt;/b&gt;&lt;br&gt;&lt;br&gt;# currentUser&lt;br&gt;&lt;br&gt;# setupUserPanels()" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=7;strokeColor=#000000;fillColor=none;fontColor=#000000;fontSize=12;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="620" y="520" width="190" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="RoleDashboards" value="&lt;br&gt;&lt;b&gt;Role Dashboards&lt;/b&gt;&lt;br&gt;&lt;br&gt;Admin / Lecturer / Student / TO" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=7;strokeColor=#000000;fillColor=none;fontColor=#000000;fontSize=12;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="320" y="530" width="220" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="owns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;startArrow=diamond;startFill=1;endArrow=open;endFill=0;" parent="1" source="LoginForm" target="LoginController" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="152" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" value="uses" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;startArrow=diamond;startFill=0;endArrow=open;endFill=0;" parent="1" source="LoginController" target="UserDAO" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" value="uses" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;endArrow=open;endFill=0;dashed=1;" parent="1" source="UserDAO" target="DBConnection" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="145" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" value="returns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;endArrow=open;endFill=0;" parent="1" source="UserDAO" target="User" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="150" />
+              <mxPoint x="850" y="335" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" value="uses" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;startArrow=diamond;startFill=0;endArrow=open;endFill=0;" parent="1" source="LoginController" target="DashboardFactory" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="185" />
+              <mxPoint x="580" y="342" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" value="returns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;endArrow=open;endFill=0;" parent="1" source="LoginController" target="LoginResult" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="250" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" value="has" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;endArrow=open;endFill=0;" parent="1" source="LoginResult" target="User" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="400" />
+              <mxPoint x="730" y="410" />
+              <mxPoint x="975" y="410" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" value="reads role" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;endArrow=open;endFill=0;" parent="1" source="DashboardFactory" target="User" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="342" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" value="creates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;endArrow=open;endFill=0;" parent="1" source="DashboardFactory" target="RoleDashboards" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="342" />
+              <mxPoint x="580" y="572" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" value="extends" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;endArrow=block;endFill=0;" parent="1" source="RoleDashboards" target="BaseDashboard" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="572" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" value="currentUser" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;startArrow=diamond;startFill=0;endArrow=open;endFill=0;" parent="1" source="BaseDashboard" target="User" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="568" />
+              <mxPoint x="850" y="335" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" value="checks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;fontColor=#000000;strokeWidth=1;endArrow=open;endFill=0;dashed=1;" parent="1" source="LoginForm" target="LoginResult" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="140" y="260" />
+              <mxPoint x="430" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
