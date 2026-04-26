@@ -95,10 +95,9 @@ public class AddCourseMaterialPanel extends JPanel {
             @Override
             public boolean importData(TransferSupport support) {
                 try {
-                    List<File> files = (List<File>) support.getTransferable()
-                            .getTransferData(DataFlavor.javaFileListFlavor);
-                    if (!files.isEmpty()) {
-                        txtLink.setText(files.get(0).getAbsolutePath());
+                    Object transferredData = support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    if (transferredData instanceof List<?> files && !files.isEmpty() && files.get(0) instanceof File file) {
+                        txtLink.setText(file.getAbsolutePath());
                         return true;
                     }
                 } catch (Exception ex) {
