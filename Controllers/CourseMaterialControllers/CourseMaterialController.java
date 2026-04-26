@@ -6,8 +6,11 @@ import Utils.FileStorageSupport;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CourseMaterialController {
+    private static final Logger LOGGER = Logger.getLogger(CourseMaterialController.class.getName());
     private final CourseMaterialDAO courseMaterialDAO = new CourseMaterialDAO();
     private final FileStorageSupport fileStorageSupport = new FileStorageSupport() {
         @Override
@@ -126,7 +129,10 @@ public class CourseMaterialController {
 
         File file = new File(filePath);
         if (file.exists() && file.isFile()) {
-            file.delete();
+            boolean deleted = file.delete();
+            if (!deleted) {
+                LOGGER.log(Level.WARNING, "Unable to delete stored course material file: {0}", filePath);
+            }
         }
     }
 }

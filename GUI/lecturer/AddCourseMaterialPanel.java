@@ -12,8 +12,11 @@ import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AddCourseMaterialPanel extends JPanel {
+    private static final Logger LOGGER = Logger.getLogger(AddCourseMaterialPanel.class.getName());
 
     private final String lecturerId;
     private final CourseMaterialController courseMaterialController = new CourseMaterialController();
@@ -97,12 +100,12 @@ public class AddCourseMaterialPanel extends JPanel {
             public boolean importData(TransferSupport support) {
                 try {
                     Object transferredData = support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-                    if (transferredData instanceof List<?> files && !files.isEmpty() && files.get(0) instanceof File file) {
+                    if (transferredData instanceof List<?> files && !files.isEmpty() && files.getFirst() instanceof File file) {
                         txtLink.setText(file.getAbsolutePath());
                         return true;
                     }
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    LOGGER.log(Level.WARNING, "Unable to import dropped course material file.", ex);
                 }
                 return false;
             }
