@@ -3,20 +3,14 @@ package Controllers.MarksControllers;
 import java.util.List;
 
 public class MarksLoadResult {
-    private final List<String> studentIds;
     private final List<Object[]> tableRows;
     private final String statusMessage;
     private final String errorMessage;
 
-    public MarksLoadResult(List<String> studentIds, List<Object[]> tableRows, String statusMessage, String errorMessage) {
-        this.studentIds = studentIds;
+    public MarksLoadResult(List<Object[]> tableRows, String statusMessage, String errorMessage) {
         this.tableRows = tableRows;
         this.statusMessage = statusMessage;
         this.errorMessage = errorMessage;
-    }
-
-    public List<String> getStudentIds() {
-        return studentIds;
     }
 
     public List<Object[]> getTableRows() {

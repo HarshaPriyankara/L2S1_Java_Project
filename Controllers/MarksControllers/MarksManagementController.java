@@ -29,12 +29,11 @@ public class MarksManagementController {
     }
 
     public MarksLoadResult loadEnrolledStudents(String selectedCourse, String selectedType) {
-        if (!isAllowedMarkType(selectedCourse, selectedType)) {
-            return new MarksLoadResult(null, null, null,
+        if (isInvalidMarkType(selectedCourse, selectedType)) {
+            return new MarksLoadResult(null, null,
                     selectedType + " is not valid for " + selectedCourse);
         }
 
-        List<String> studentIds = new ArrayList<>();
         List<Object[]> rows = new ArrayList<>();
 
         String query = "SELECT e.Reg_no, e.Course_code, m.Mark_id, m.Marks_value " +
@@ -51,7 +50,6 @@ public class MarksManagementController {
 
             while (rs.next()) {
                 String regNo = rs.getString("Reg_no");
-                studentIds.add(regNo);
 
                 List<Object> row = new ArrayList<>();
                 row.add(regNo);
@@ -63,9 +61,9 @@ public class MarksManagementController {
                 rows.add(row.toArray());
             }
 
-            return new MarksLoadResult(studentIds, rows, rows.size() + " students loaded", null);
+            return new MarksLoadResult(rows, rows.size() + " students loaded", null);
         } catch (SQLException ex) {
-            return new MarksLoadResult(null, null, null, "Error: " + ex.getMessage());
+            return new MarksLoadResult(null, null, "Error: " + ex.getMessage());
         }
     }
 
@@ -81,7 +79,7 @@ public class MarksManagementController {
                 String type = String.valueOf(row[2]);
                 String markStr = String.valueOf(row[3]).trim();
 
-                if (!isAllowedMarkType(course, type)) {
+                if (isInvalidMarkType(course, type)) {
                     return new MarksSaveResult(false, type + " is not valid for " + course);
                 }
 
@@ -104,14 +102,14 @@ public class MarksManagementController {
         }
     }
 
-    private boolean isAllowedMarkType(String course, String type) {
-        if (course == null || type == null) return false;
+    private boolean isInvalidMarkType(String course, String type) {
+        if (course == null || type == null) return true;
         for (String allowedType : CourseMarkScheme.forCourse(course).getAllowedMarkTypes()) {
             if (allowedType.equals(type)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private Object formatMarkForEntry(Object mark) {
