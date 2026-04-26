@@ -25,7 +25,7 @@ public class TechnicalOfficerDashboard extends BaseDashboard {
     protected void setupUserPanels() {
         // Adding the panels required by the project document [cite: 31, 33, 34]
         contentPanel.add(new AttendanceManagement(), "Attendance");
-        contentPanel.add(new MedicalManagement(this), "Medical");
+        contentPanel.add(new MedicalManagement(), "Medical");
         contentPanel.add(new Timetable(this), "Timetable");
 
         contentPanel.add(new ProfileManagementPanel(currentUser.getUserID(), false, contentPanel, cardLayout), "Profile");

@@ -20,7 +20,7 @@ public class LoginForm extends JFrame {
         getContentPane().setBackground(UITheme.APP_BACKGROUND);
 
         JLabel imageLabel = new JLabel();
-        ImageIcon icon = new ImageIcon("Images/login2.jpg"); // your image path
+        ImageIcon icon = new ImageIcon("Images/login.jpg"); // your image path
         Image img = icon.getImage().getScaledInstance(500, 600, Image.SCALE_SMOOTH);
         imageLabel.setIcon(new ImageIcon(img));
 

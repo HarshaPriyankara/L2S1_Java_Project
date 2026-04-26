@@ -1,5 +1,6 @@
 package DAO;
 
+import Controllers.CourseMaterialControllers.CourseMaterialRow;
 import Utils.DBConnection;
 import java.sql.ResultSet;
 import java.sql.Connection;
@@ -7,16 +8,17 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CourseMaterialDAO {
+    private static final Logger LOGGER = Logger.getLogger(CourseMaterialDAO.class.getName());
 
-    public static boolean addMaterial(String title, String courseCode, String uploadedBy, String fileUrl) {
+    public boolean addMaterial(String title, String courseCode, String uploadedBy, String fileUrl) {
         String sql = "INSERT INTO course_material (Title, Course_code, Uploaded_by, File_URL) VALUES (?, ?, ?, ?)";
 
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, title);
             pstmt.setString(2, courseCode);
             pstmt.setString(3, uploadedBy);
@@ -25,13 +27,13 @@ public class CourseMaterialDAO {
             int rowsInserted = pstmt.executeUpdate();
             return rowsInserted > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Unable to add course material.", e);
             return false;
         }
     }
 
-    public List<Object[]> getMaterialsByLecturer(String lecturerId) {
-        List<Object[]> materials = new ArrayList<>();
+    public List<CourseMaterialRow> getMaterialsByLecturer(String lecturerId) {
+        List<CourseMaterialRow> materials = new ArrayList<>();
         String sql = "SELECT Material_id, Title, Course_code, Uploaded_at, File_URL FROM course_material " +
                 "WHERE Uploaded_by = ? ORDER BY Material_id DESC";
 
@@ -41,16 +43,16 @@ public class CourseMaterialDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                materials.add(new Object[]{
+                materials.add(new CourseMaterialRow(
                         rs.getInt("Material_id"),
                         rs.getString("Title"),
                         rs.getString("Course_code"),
                         rs.getString("Uploaded_at"),
                         rs.getString("File_URL")
-                });
+                ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Unable to load lecturer course materials.", e);
         }
 
         return materials;
@@ -69,7 +71,7 @@ public class CourseMaterialDAO {
                 courseCodes.add(rs.getString("Course_code"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Unable to load lecturer course codes.", e);
         }
 
         return courseCodes;
@@ -93,7 +95,7 @@ public class CourseMaterialDAO {
                 });
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Unable to load course materials by course.", e);
         }
 
         return materials;
@@ -110,7 +112,7 @@ public class CourseMaterialDAO {
             pstmt.setInt(4, materialId);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Unable to update course material.", e);
             return false;
         }
     }
@@ -124,7 +126,7 @@ public class CourseMaterialDAO {
             pstmt.setString(2, lecturerId);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Unable to delete course material.", e);
             return false;
         }
     }

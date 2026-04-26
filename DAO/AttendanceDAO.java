@@ -3,6 +3,7 @@ package DAO;
 import Utils.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AttendanceDAO {
 
@@ -167,5 +168,52 @@ public class AttendanceDAO {
             pst.setString(3, sessionFilter);
         }
         return pst.executeQuery();
+    }
+
+    public List<Object[]> getAbsentAttendanceByStudentAndDateRange(String studentId, java.time.LocalDate startDate,
+                                                                   java.time.LocalDate endDate) throws SQLException {
+        List<Object[]> rows = new ArrayList<>();
+        String sql = "SELECT Attendance_id, Course_code, Session_date, Session_type, Session_hours, Status " +
+                "FROM attendance " +
+                "WHERE Reg_no = ? AND Session_date BETWEEN ? AND ? AND Status = 'Absent' " +
+                "ORDER BY Session_date ASC, Course_code ASC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, studentId);
+            pst.setDate(2, Date.valueOf(startDate));
+            pst.setDate(3, Date.valueOf(endDate));
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    rows.add(new Object[]{
+                            rs.getInt("Attendance_id"),
+                            rs.getString("Course_code"),
+                            rs.getDate("Session_date"),
+                            rs.getString("Session_type"),
+                            rs.getDouble("Session_hours"),
+                            rs.getString("Status")
+                    });
+                }
+            }
+        }
+        return rows;
+    }
+
+    public void linkAttendanceToMedical(List<Integer> attendanceIds, int medicalId) throws SQLException {
+        if (attendanceIds == null || attendanceIds.isEmpty()) {
+            return;
+        }
+
+        String sql = "UPDATE attendance SET Medical_id = ? WHERE Attendance_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            for (Integer attendanceId : attendanceIds) {
+                pst.setInt(1, medicalId);
+                pst.setInt(2, attendanceId);
+                pst.addBatch();
+            }
+            pst.executeBatch();
+        }
     }
 }
