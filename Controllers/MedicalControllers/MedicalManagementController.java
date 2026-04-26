@@ -99,23 +99,6 @@ public class MedicalManagementController {
         }
     }
 
-    public StudentMedicalController.MedicalActionResult approveMedical(MedicalManagementFormData formData) {
-        if (formData.getMedicalId().isBlank()) {
-            return new StudentMedicalController.MedicalActionResult(false, "Please select a medical record to approve.");
-        }
-
-        MedicalManagementFormData approvedForm = new MedicalManagementFormData(
-                formData.getMedicalId(),
-                formData.getRegNo(),
-                formData.getSessionDate(),
-                formData.getSessionType(),
-                formData.getExamCourse(),
-                formData.getReason(),
-                true
-        );
-        return updateMedical(approvedForm);
-    }
-
     public StudentMedicalController.MedicalActionResult deleteMedical(String medicalId) {
         String normalizedId = medicalId == null ? "" : medicalId.trim();
         if (normalizedId.isBlank()) {

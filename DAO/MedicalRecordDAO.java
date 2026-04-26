@@ -166,13 +166,13 @@ public class MedicalRecordDAO {
     }
 
     private void ensureMedicalColumns() throws SQLException {
-        ensureColumn("Upload_date", "ALTER TABLE medical_record ADD COLUMN Upload_date DATE NULL");
-        ensureColumn("Medical_file", "ALTER TABLE medical_record ADD COLUMN Medical_file VARCHAR(1000) DEFAULT NULL");
-        ensureColumn("Start_date", "ALTER TABLE medical_record ADD COLUMN Start_date DATE NULL");
-        ensureColumn("End_date", "ALTER TABLE medical_record ADD COLUMN End_date DATE NULL");
+        ensureColumn("ALTER TABLE medical_record ADD COLUMN Upload_date DATE NULL");
+        ensureColumn("ALTER TABLE medical_record ADD COLUMN Medical_file VARCHAR(1000) DEFAULT NULL");
+        ensureColumn("ALTER TABLE medical_record ADD COLUMN Start_date DATE NULL");
+        ensureColumn("ALTER TABLE medical_record ADD COLUMN End_date DATE NULL");
     }
 
-    private void ensureColumn(String columnName, String sql) throws SQLException {
+    private void ensureColumn(String sql) throws SQLException {
         try (Connection con = DBConnection.getConnection();
              Statement stmt = con.createStatement()) {
             stmt.executeUpdate(sql);

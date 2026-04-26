@@ -41,7 +41,7 @@ public class MedicalManagement extends JPanel {
     private File selectedMedicalFile;
     private String selectedMedicalId = "";
 
-    public MedicalManagement(TechnicalOfficerDashboard dashboard) {
+    public MedicalManagement() {
         setLayout(new BorderLayout(15, 15));
         setBackground(UITheme.APP_BACKGROUND);
         setBorder(UITheme.createContentBorder());
@@ -222,19 +222,19 @@ public class MedicalManagement extends JPanel {
         splitPane.setBorder(BorderFactory.createEmptyBorder());
         add(splitPane, BorderLayout.CENTER);
 
-        medicalTable.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
+        medicalTable.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
                 populateFromSelectedRow();
             }
         });
-        cmbSessionType.addActionListener(e -> updateExamCourseState());
-        btnLoadAbsent.addActionListener(e -> loadAbsentAttendance());
-        btnBrowse.addActionListener(e -> browseMedicalFile());
-        btnRefresh.addActionListener(e -> loadRecords());
-        btnClear.addActionListener(e -> clearForm());
-        btnAdd.addActionListener(e -> addMedical());
-        btnUpdate.addActionListener(e -> updateMedical());
-        btnDelete.addActionListener(e -> deleteMedical());
+        cmbSessionType.addActionListener(ignored -> updateExamCourseState());
+        btnLoadAbsent.addActionListener(ignored -> loadAbsentAttendance());
+        btnBrowse.addActionListener(ignored -> browseMedicalFile());
+        btnRefresh.addActionListener(ignored -> loadRecords());
+        btnClear.addActionListener(ignored -> clearForm());
+        btnAdd.addActionListener(ignored -> addMedical());
+        btnUpdate.addActionListener(ignored -> updateMedical());
+        btnDelete.addActionListener(ignored -> deleteMedical());
 
         updateExamCourseState();
         loadRecords();
@@ -462,12 +462,13 @@ public class MedicalManagement extends JPanel {
         }
     }
 
-    private class OpenButtonRenderer extends JButton implements TableCellRenderer {
+    private static class OpenButtonRenderer extends JButton implements TableCellRenderer {
         OpenButtonRenderer() {
             UITheme.stylePrimaryButton(this);
         }
 
         @Override
+        @SuppressWarnings("unused")
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                        boolean hasFocus, int row, int column) {
             setText(value == null || value.toString().isBlank() ? "No File" : value.toString());
@@ -478,13 +479,11 @@ public class MedicalManagement extends JPanel {
 
     private class OpenButtonEditor extends AbstractCellEditor implements TableCellEditor {
         private final JButton button = new JButton("Open");
-        private final JTable table;
         private int row;
 
         OpenButtonEditor(JTable table) {
-            this.table = table;
             UITheme.stylePrimaryButton(button);
-            button.addActionListener(e -> {
+            button.addActionListener(ignored -> {
                 fireEditingStopped();
                 int modelRow = table.convertRowIndexToModel(row);
                 String filePath = String.valueOf(table.getModel().getValueAt(modelRow, 8));
@@ -493,6 +492,7 @@ public class MedicalManagement extends JPanel {
         }
 
         @Override
+        @SuppressWarnings("unused")
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
             this.row = row;
             button.setText(value == null || value.toString().isBlank() ? "No File" : value.toString());

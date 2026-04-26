@@ -5,23 +5,11 @@ import DAO.MedicalRecordDAO;
 import Models.MedicalRecord;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 public class StudentMedicalController {
     private final MedicalRecordDAO medicalRecordDAO = new MedicalRecordDAO();
     private final AttendanceDAO attendanceDAO = new AttendanceDAO();
-
-    public MedicalActionResult submitMedical(String studentId, LocalDate sessionDate, String sessionType,
-                                             String examCourse, String reason) {
-        return submitMedical(studentId, sessionDate, sessionType, examCourse, reason, null);
-    }
-
-    public MedicalActionResult submitMedical(String studentId, LocalDate sessionDate, String sessionType,
-                                             String examCourse, String reason, String medicalFilePath) {
-        return submitMedical(studentId, sessionDate, sessionDate, sessionDate, sessionType, examCourse, reason,
-                medicalFilePath, new ArrayList<>());
-    }
 
     public MedicalActionResult submitMedical(String studentId, LocalDate sessionDate, LocalDate startDate,
                                              LocalDate endDate, String sessionType, String examCourse, String reason,

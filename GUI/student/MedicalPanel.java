@@ -142,11 +142,11 @@ public class MedicalPanel extends JPanel {
         actionPanel.add(btnSubmit);
         formPanel.add(actionPanel, gbc);
 
-        cmbSessionType.addActionListener(e -> updateExamCourseState());
-        btnLoadAbsent.addActionListener(e -> loadAbsentAttendance());
-        btnBrowse.addActionListener(e -> browseMedicalFile());
-        btnSubmit.addActionListener(e -> submitMedical());
-        btnViewRecords.addActionListener(e -> showMedicalRecordsWindow());
+        cmbSessionType.addActionListener(ignored -> updateExamCourseState());
+        btnLoadAbsent.addActionListener(ignored -> loadAbsentAttendance());
+        btnBrowse.addActionListener(ignored -> browseMedicalFile());
+        btnSubmit.addActionListener(ignored -> submitMedical());
+        btnViewRecords.addActionListener(ignored -> showMedicalRecordsWindow());
 
         return formPanel;
     }
@@ -336,7 +336,7 @@ public class MedicalPanel extends JPanel {
         JButton closeButton = new JButton("Close");
         UITheme.styleNeutralButton(closeButton);
         UITheme.setStandardButtonSize(closeButton);
-        closeButton.addActionListener(e -> dialog.dispose());
+        closeButton.addActionListener(ignored -> dialog.dispose());
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footer.setBackground(UITheme.APP_BACKGROUND);
         footer.add(closeButton);
@@ -371,12 +371,13 @@ public class MedicalPanel extends JPanel {
                 .toLocalDate();
     }
 
-    private class OpenButtonRenderer extends JButton implements TableCellRenderer {
+    private static class OpenButtonRenderer extends JButton implements TableCellRenderer {
         OpenButtonRenderer() {
             UITheme.stylePrimaryButton(this);
         }
 
         @Override
+        @SuppressWarnings("unused")
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                        boolean hasFocus, int row, int column) {
             setText(value == null || value.toString().isBlank() ? "No File" : value.toString());
@@ -387,13 +388,11 @@ public class MedicalPanel extends JPanel {
 
     private class OpenButtonEditor extends AbstractCellEditor implements TableCellEditor {
         private final JButton button = new JButton("Open");
-        private final JTable table;
         private int row;
 
         OpenButtonEditor(JTable table) {
-            this.table = table;
             UITheme.stylePrimaryButton(button);
-            button.addActionListener(e -> {
+            button.addActionListener(ignored -> {
                 fireEditingStopped();
                 int modelRow = table.convertRowIndexToModel(row);
                 String filePath = String.valueOf(table.getModel().getValueAt(modelRow, 4));
@@ -402,6 +401,7 @@ public class MedicalPanel extends JPanel {
         }
 
         @Override
+        @SuppressWarnings("unused")
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
             this.row = row;
             button.setText(value == null || value.toString().isBlank() ? "No File" : value.toString());

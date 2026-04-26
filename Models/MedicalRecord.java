@@ -18,16 +18,6 @@ public class MedicalRecord {
     public MedicalRecord() {
     }
 
-    public MedicalRecord(int medicalId, String regNo, LocalDate sessionDate, String reason, String sessionType, String examCourse, boolean approved) {
-        this.medicalId = medicalId;
-        this.regNo = regNo;
-        this.sessionDate = sessionDate;
-        this.reason = reason;
-        this.sessionType = sessionType;
-        this.examCourse = examCourse;
-        this.approved = approved;
-    }
-
     public int getMedicalId() {
         return medicalId;
     }
