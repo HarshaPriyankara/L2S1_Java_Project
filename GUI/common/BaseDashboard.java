@@ -22,13 +22,13 @@ public abstract class BaseDashboard extends  JFrame {
         this.loggedInID = user.getUserID();
 
         setTitle(title);
-        setSize(1200, 750); // Standardized size for all users
+        setSize(1200, 750); // panel  size for all users
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         getContentPane().setBackground(UITheme.APP_BACKGROUND);
 
-        // Standardized layout structure
+        // Standard layout
         add(buildSidebar(), BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
         contentPanel.setBackground(UITheme.APP_BACKGROUND);
@@ -72,10 +72,10 @@ public abstract class BaseDashboard extends  JFrame {
         sidebar.add(idLabel);
         sidebar.add(Box.createVerticalStrut(30));
 
-        // 3. Child class buttons (Admin, Student, etc.)
+        //  add child class dynamically relavently user role
         addNavigationButtons(sidebar);
 
-        // 4. Logout button at the very bottom
+        //  logout button
         sidebar.add(Box.createVerticalGlue());
         sidebar.add(createNavButton("Logout", () -> {
             new LoginForm().setVisible(true);
