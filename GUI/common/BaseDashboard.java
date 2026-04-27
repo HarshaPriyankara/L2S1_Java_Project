@@ -7,7 +7,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 // Uses abstraction
-public abstract class BaseDashboard extends JFrame {
+public abstract class BaseDashboard extends  JFrame {
 
     // encapsulation uses child class
     protected final Color DARK_BG = UITheme.SIDEBAR;
