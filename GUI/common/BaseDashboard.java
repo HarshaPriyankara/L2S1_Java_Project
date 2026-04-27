@@ -6,10 +6,10 @@ import java.awt.*;
 
 import java.awt.image.BufferedImage;
 
-// Using 'abstract' fulfills the Abstraction requirement
+// Uses abstraction
 public abstract class BaseDashboard extends JFrame {
 
-    // Encapsulation: Using protected allows child classes to access these
+    // encapsulation uses child class
     protected final Color DARK_BG = UITheme.SIDEBAR;
     protected final Color BUTTON_COLOR = UITheme.PRIMARY;
     protected final CardLayout cardLayout = new CardLayout();
