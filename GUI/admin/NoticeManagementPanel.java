@@ -5,11 +5,10 @@ import GUI.common.UITheme;
 import javax.swing.*;
 import java.awt.*;
 
-// INHERITANCE: Inheriting from the standard JPanel to act as a container
 public class NoticeManagementPanel extends JPanel {
     private static final Color CARD_COLOR = new Color(85, 179, 232);
 
-    // ENCAPSULATION: Encapsulated constants and internal state
+
     public NoticeManagementPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -36,8 +35,7 @@ public class NoticeManagementPanel extends JPanel {
         this.repaint();
     }
 
-    // ABSTRACTION: Loading complex inner panels independently of the main buttons 
-    private void loadCreateNoticePanel() {
+     private void loadCreateNoticePanel() {
         this.removeAll(); 
         this.setLayout(new BorderLayout());
         this.add(new CreateNotice(this)); 

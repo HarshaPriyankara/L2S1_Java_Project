@@ -7,9 +7,7 @@ import Controllers.NoticeControllers.NoticeOperationResult;
 import javax.swing.*;
 import java.awt.*;
 
-// ENCAPSULATION & INHERITANCE: CreateNotice acts as a base class. 
-// Relevant UI elements are declared as 'protected' so subclasses (UpdateNotice) can inherit and access them.
-public class CreateNotice extends JPanel {
+ public class CreateNotice extends JPanel {
 
     protected JTextField titleField;
     protected JTextArea contentArea;
@@ -34,7 +32,7 @@ public class CreateNotice extends JPanel {
         mainContent.setLayout(null);
         mainContent.setBackground(new Color(236, 240, 241));
 
-        // --- Title Field ---
+        //  Title
         JLabel lblTitle = new JLabel("Notice Title:");
         lblTitle.setBounds(50, 60, 100, 30);
         lblTitle.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -45,7 +43,7 @@ public class CreateNotice extends JPanel {
         titleField.setFont(new Font("SansSerif", Font.PLAIN, 14));
         mainContent.add(titleField);
 
-        // --- Content Area ---
+        // Content
         JLabel lblContent = new JLabel("Notice Content:");
         lblContent.setBounds(50, 140, 150, 30);
         lblContent.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -60,7 +58,7 @@ public class CreateNotice extends JPanel {
         scrollPane.setBounds(50, 170, 650, 230);
         mainContent.add(scrollPane);
 
-        // --- Target Roles ---
+        //Target Roles
         JLabel lblTarget = new JLabel("Target Roles:");
         lblTarget.setBounds(50, 410, 100, 30);
         lblTarget.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -81,7 +79,7 @@ public class CreateNotice extends JPanel {
         chkUndergrad.setBackground(new Color(236, 240, 241));
         mainContent.add(chkUndergrad);
 
-        // --- Submit Button ---
+        //Submit Button
         btnSubmit = new JButton("Submit & Save");
         btnSubmit.setBounds(50, 460, 150, 40);
         btnSubmit.setBackground(new Color(39, 174, 96));
@@ -90,7 +88,7 @@ public class CreateNotice extends JPanel {
         btnSubmit.addActionListener(e -> saveNoticeAction());
         mainContent.add(btnSubmit);
 
-        // --- Back Button ---
+        //Back Button
         JButton btnBack = new JButton("Back");
         btnBack.setBounds(50, 20, 80, 25);
         btnBack.setBackground(new Color(149, 165, 166));
@@ -103,8 +101,7 @@ public class CreateNotice extends JPanel {
         return mainContent;
     }
 
-    // POLYMORPHISM: This method is designed to be overridden by subclasses.
-    protected void saveNoticeAction() {
+     protected void saveNoticeAction() {
         NoticeOperationResult result = handleNoticeSave(buildFormData());
         if (result.isSuccess()) {
             JOptionPane.showMessageDialog(this, result.getMessage());
@@ -128,7 +125,7 @@ public class CreateNotice extends JPanel {
         return noticeController.createNotice(formData);
     }
 
-    // Reusability
+    // after operatin clear the field
     protected void clearFields() {
         titleField.setText("");
         contentArea.setText("");
