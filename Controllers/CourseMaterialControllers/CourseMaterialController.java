@@ -2,6 +2,7 @@ package Controllers.CourseMaterialControllers;
 
 import DAO.CourseMaterialDAO;
 import Utils.FileStorageSupport;
+import Models.CourseMaterial;
 
 import java.io.File;
 import java.time.LocalDate;
