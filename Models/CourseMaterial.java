@@ -1,10 +1,8 @@
-/*package Models;
+package Models;
 
 import java.time.LocalDate;
 /// @author harsha
 public class CourseMaterial {
-
-
     //fields
     private String materialId;
     private String courseCode;
@@ -13,13 +11,9 @@ public class CourseMaterial {
     private String type;
     private String uploadedBy;
     private LocalDate uploadedAt;
-
     //constructors
-
-
     public CourseMaterial() {
     }
-
     public CourseMaterial(String materialId, String courseCode, String title,
                           String fileURL, String type,
                           String uploadedBy, LocalDate uploadedAt) {
@@ -32,28 +26,11 @@ public class CourseMaterial {
         this.uploadedAt = uploadedAt;
     }
 
-    public void upload(){
-        this.uploadedAt = LocalDate.now();
-        System.out.println("[CourseMaterial] Uploaded: " + title + " for course " + courseCode);
-    }
+    public String getCourseCode() { return courseCode; }
+    public String getTitle() { return title; }
+    public String getType() { return type; }
 
-    public void delete(){
-        System.out.println("[CourseMaterial] Delete course " + materialId);
-    }
-
-    public void download(){
-        System.out.println("[CourseMaterial] Download URL " + fileURL);
-    }
-
-    public String getMaterialsDetails() {
-        return "Material ID : " + materialId + "\n" +
-                "Course Code : " + courseCode + "\n" +
-                "Title       : " + title + "\n" +
-                "Type        : " + type + "\n" +
-                "File URL    : " + fileURL + "\n" +
-                "Uploaded By : " + uploadedBy + "\n" +
-                "Uploaded At : " + (uploadedAt != null ? uploadedAt.toString() : "N/A");
-    }
-
-
-}*/
+    public void setCourseCode(String courseCode) { this.courseCode = courseCode; }
+    public void setTitle(String title) { this.title = title; }
+    public void setType(String type) { this.type = type; }
+}
