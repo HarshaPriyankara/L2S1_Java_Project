@@ -7,7 +7,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class AttendancePanel extends JPanel {
-    private final AttendanceController controller = new AttendanceController();
+    private final AttendanceController controller = new AttendanceController(); //get DTO
     private JComboBox<String> courseComboBox;
     private JTable attendanceTable;
     private DefaultTableModel model;
@@ -58,26 +58,26 @@ public class AttendancePanel extends JPanel {
     }
 
     private void loadAttendanceData() {
-        String selectedCourse = (String) courseComboBox.getSelectedItem();
+        String selectedCourse = (String) courseComboBox.getSelectedItem(); //course select
         if (selectedCourse == null) {
             return;
         }
 
         model.setRowCount(0);
-        AttendanceController.StudentAttendanceResult result = controller.loadStudentAttendance(studentID, selectedCourse);
+        AttendanceController.StudentAttendanceResult result = controller.loadStudentAttendance(studentID, selectedCourse);//controler method call
         if (result.hasError()) {
             JOptionPane.showMessageDialog(this, result.getErrorMessage());
             return;
         }
 
-        for (Object[] row : result.getRows()) {
+        for (Object[] row : result.getRows()) { //display raw
             model.addRow(row);
         }
 
-        int totalSessions = result.getTotalSessions();
+        int totalSessions = result.getTotalSessions();  //dto using get data
         int presentSessions = result.getPresentSessions();
         if (totalSessions > 0) {
-            double percentage = (double) presentSessions / totalSessions * 100;
+            double percentage = (double) presentSessions / totalSessions * 100;  //integer conver double value
             lblPercentage.setText(String.format("Attendance Percentage: %.2f%%", percentage));
             if (percentage < 80) {
                 lblPercentage.setForeground(Color.RED);

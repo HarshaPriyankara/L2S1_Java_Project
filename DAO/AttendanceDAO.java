@@ -21,7 +21,7 @@ public class AttendanceDAO {
         return courses;
     }
 
-    // Get enroll students
+    // Get enroll students - retrive
     public ArrayList<String> getEnrolledStudentIDs(String courseCode) throws SQLException {
         ArrayList<String> students = new ArrayList<>();
         String sql = "SELECT Reg_no FROM enrollment WHERE Course_code = ?";

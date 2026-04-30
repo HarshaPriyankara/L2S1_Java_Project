@@ -18,13 +18,13 @@ public class AttendanceController {
             return new ArrayList<>();
         }
     }
-
+ //retrive student table
     public void loadEnrolledToTable(String courseCode, javax.swing.table.DefaultTableModel model) {
         try {
-            model.setRowCount(0);
+            model.setRowCount(0);//table clear
             ArrayList<String> students = dao.getEnrolledStudentIDs(courseCode);
             for (String id : students) {
-                model.addRow(new Object[]{id, courseCode, "Present", 2.0});
+                model.addRow(new Object[]{id, courseCode, "Present", 2.0});//return student
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -33,6 +33,7 @@ public class AttendanceController {
 
     public boolean saveAttendance(String course, String date, String type, Vector<Vector> data) {
         try {
+            //using loop save all attendance
             for (Vector row : data) {
                 dao.addAttendance(row.get(0).toString(), course, date, type,
                         Double.parseDouble(row.get(3).toString()), row.get(2).toString());
@@ -50,16 +51,18 @@ public class AttendanceController {
             return new ArrayList<>();
         }
     }
-
+   /* y
+   80%
+    */
     public StudentAttendanceResult loadStudentAttendance(String studentId, String courseCode) {
         List<Object[]> rows = new ArrayList<>();
         int totalSessions = 0;
-        int presentSessions = 0;
+        int presentSessions = 0; //present,medical record
 
-        try (ResultSet rs = dao.getStudentAttendance(studentId, courseCode)) {
-            while (rs.next()) {
+        try (ResultSet rs = dao.getStudentAttendance(studentId, courseCode)) { //get att record
+            while (rs.next()) { //raw
                 totalSessions++;
-                String status = rs.getString("Status");
+                String status = rs.getString("Status"); //get status colum value
                 if ("Present".equalsIgnoreCase(status) || "Medical".equalsIgnoreCase(status)) {
                     presentSessions++;
                 }
@@ -71,9 +74,9 @@ public class AttendanceController {
                         status
                 });
             }
-            return new StudentAttendanceResult(rows, totalSessions, presentSessions, null);
+            return new StudentAttendanceResult(rows, totalSessions, presentSessions, null); //return gui
         } catch (Exception ex) {
-            return new StudentAttendanceResult(null, 0, 0, "Error loading data: " + ex.getMessage());
+            return new StudentAttendanceResult(null, 0, 0, "Error loading data: " + ex.getMessage());//crete new object return gui
         }
     }
 
@@ -114,6 +117,10 @@ public class AttendanceController {
             return new AttendanceActionResult(false, "Delete failed: " + ex.getMessage());
         }
     }
+
+    /*
+    DTO - percentage
+     */
 
     public static class StudentAttendanceResult {
         private final List<Object[]> rows;

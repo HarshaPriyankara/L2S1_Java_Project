@@ -113,7 +113,7 @@ public class TimetableManagement extends JPanel {
 
         add(southPanel, BorderLayout.SOUTH);
 
-        // --- Listeners ---
+        // Listeners
 
         // add data to table using form
         btnAddRow.addActionListener(e -> {

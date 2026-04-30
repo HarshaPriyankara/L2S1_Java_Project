@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MarksManagementController {
     public List<String> loadLecturerCourses(String lecturerId) throws SQLException {
         List<String> courses = new ArrayList<>();

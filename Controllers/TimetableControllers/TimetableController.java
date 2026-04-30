@@ -12,12 +12,12 @@ public class TimetableController {
     private final TimetableDAO timetableDAO = new TimetableDAO();
     private final UndergraduateDAO undergraduateDAO = new UndergraduateDAO();
 
-    // 1. කාලසටහන Load කිරීම (දැන් deptId විතරයි)
+    //timetable load
     public List<Timetable> loadTimetable(String deptId) {
         return timetableDAO.getFiltered(deptId);
     }
 
-    // 2. කාලසටහන Sync කිරීම
+    //Sync
     public TimetableOperationResult syncTimetable(List<TimetableRowInput> rows, String deptId) {
         List<Timetable> newList = new ArrayList<>();
 
@@ -31,7 +31,7 @@ public class TimetableController {
                 timetable.setCourseCode(row.getCourseCode());
                 timetable.setDay(row.getDay());
 
-                // වෙලාව Format කිරීම (. තිබුණොත් : වලට හරවනවා)
+                //time format
                 String startTime = row.getStartTime().replace(".", ":");
                 String endTime = row.getEndTime().replace(".", ":");
 
@@ -43,7 +43,7 @@ public class TimetableController {
                 newList.add(timetable);
             }
 
-            // DAO එකේ අප්ඩේට් කරපු syncTimetable මෙතඩ් එක කෝල් කරනවා
+
             if (timetableDAO.syncTimetable(newList, deptId)) {
                 return new TimetableOperationResult(true, "Timetable Updated Successfully!");
             }
@@ -54,7 +54,7 @@ public class TimetableController {
         }
     }
 
-    // 3. ශිෂ්‍යයාට අදාළ කාලසටහන ලබා ගැනීම
+    // student timetable
     public TimetableStudentResult loadStudentTimetable(String studentId) {
         String deptId = undergraduateDAO.getStudentDepartmentId(studentId);
 
@@ -62,7 +62,7 @@ public class TimetableController {
             return new TimetableStudentResult(null, "Unable to find your department details.");
         }
 
-        // DAO එකේ පරාමිතීන් අයින් කළ නිසා මෙතනත් සරලයි
+
         List<Timetable> list = timetableDAO.getStudentTimetable(deptId);
         return new TimetableStudentResult(list, null);
     }

@@ -62,7 +62,7 @@ public class TimetableDAO {
     public List<Timetable> getFiltered(String deptId) {
         List<Timetable> list = new ArrayList<>();
 
-        // JOIN එකක් මගින් Course Name එක ලබා ගනී
+        //set course name using left join
         String sql = "SELECT t.*, c.Course_name FROM timetable t " +
                 "LEFT JOIN course c ON t.Course_code = c.Course_code " +
                 "WHERE t.Department_id = ? " +
