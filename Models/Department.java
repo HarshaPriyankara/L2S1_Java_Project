@@ -1,4 +1,4 @@
-public class Department {
+/*public class Department {
 
     private String departmentId;
     private String departmentName;
@@ -16,4 +16,4 @@ public class Department {
     public void updateDepartment() {
 
     }
-}
+}*/

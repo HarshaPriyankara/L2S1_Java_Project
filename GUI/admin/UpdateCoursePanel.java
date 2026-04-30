@@ -15,15 +15,14 @@ class UpdateCoursePanel extends JPanel {
     private final CourseController courseController = new CourseController();
 
     public UpdateCoursePanel(JPanel parentPanel, CardLayout cardLayout) {
-        // Layout eka BoxLayout (Y_AXIS) ekata maru kara
+
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(UITheme.SURFACE);
         setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
 
-        // 1. Title eka add kara
+        // Add Title
         addTitle("Update Course Details", BUTTON_COLOR);
 
-        // 2. UserManagement eke wage fields tika piliwelata add kara
         cmbCode     = addDropdown("Course Code (to Update)");
         txtName     = addField("New Course Name");
         cmbType     = addTypeDropdown("New Type");
@@ -39,7 +38,7 @@ class UpdateCoursePanel extends JPanel {
             }
         });
 
-        // 3. Button Row setup kara
+        // Setup button Row
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         row.setBackground(UITheme.SURFACE);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -59,11 +58,9 @@ class UpdateCoursePanel extends JPanel {
         row.add(btnUpdate);
         add(row);
 
-        // Update button action (Oyaage original logic eka - method wenas kale ne)
+        // Update button action
         btnUpdate.addActionListener(e -> updateCourse());
     }
-
-    // ── UserManagement eke thibba Styling Methods (Copy-Paste) ──
 
     private void addTitle(String text, Color color) {
         JLabel lbl = new JLabel(text);

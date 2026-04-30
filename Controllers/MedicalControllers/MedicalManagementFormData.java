@@ -16,17 +16,6 @@ public class MedicalManagementFormData {
     private final boolean approved;
     private final List<Integer> attendanceIds;
 
-    public MedicalManagementFormData(String medicalId, String regNo, String sessionDate, String sessionType,
-                                     String examCourse, String reason, boolean approved) {
-        this(medicalId, regNo, sessionDate, sessionType, examCourse, reason, null, approved);
-    }
-
-    public MedicalManagementFormData(String medicalId, String regNo, String sessionDate, String sessionType,
-                                     String examCourse, String reason, String medicalFilePath, boolean approved) {
-        this(medicalId, regNo, sessionDate, sessionDate, sessionDate, sessionType, examCourse, reason,
-                medicalFilePath, approved, new ArrayList<>());
-    }
-
     public MedicalManagementFormData(String medicalId, String regNo, String sessionDate, String startDate,
                                      String endDate, String sessionType, String examCourse, String reason,
                                      String medicalFilePath, boolean approved, List<Integer> attendanceIds) {

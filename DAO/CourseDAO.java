@@ -43,7 +43,7 @@ public class CourseDAO {
             pstmt.setString(3, course.getType());
             pstmt.setString(4, course.getLecturerId());
             pstmt.setString(5, course.getDeptId());
-            pstmt.setString(6, course.getCourseCode()); // WHERE clause එක සඳහා
+            pstmt.setString(6, course.getCourseCode());
 
             return pstmt.executeUpdate() > 0;
 

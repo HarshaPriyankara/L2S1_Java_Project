@@ -1,5 +1,5 @@
 package Controllers.CourseControllers;
-
+/// @author harsha
 public class CourseFormData {
     private final String code;
     private final String name;
@@ -7,7 +7,7 @@ public class CourseFormData {
     private final String type;
     private final String lecturer;
     private final String department;
-
+    /// @author harsha
     public CourseFormData(String code, String name, String credits, String type, String lecturer, String department) {
         this.code = code == null ? "" : code.trim();
         this.name = name == null ? "" : name.trim();
