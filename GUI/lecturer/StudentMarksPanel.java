@@ -14,29 +14,41 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class StudentMarksPanel extends JPanel {
+
     private static final Color CARD_COLOR = new Color(85, 179, 232);
 
+    //create objects
     private final LecturerMarksOverviewController overviewController = new LecturerMarksOverviewController();
     private final CaMarksController caMarksController = new CaMarksController();
+
+    //for top search options
     private final JComboBox<String> courseComboBox = new JComboBox<>();
     private final JTextField studentSearchField = new JTextField(12);
     private final JComboBox<String> scopeComboBox = new JComboBox<>(new String[]{"Whole Batch", "Individual Student"});
-    private final DefaultListModel<String> markTypeModel = new DefaultListModel<>();
-    private final JLabel caRuleLabel = new JLabel("CA Eligibility Rule: -");
-    private final JLabel attendanceRuleLabel = new JLabel("Attendance + CA Rule: -");
-    private final Runnable onBack;
+
+    private final DefaultListModel<String> markTypeModel = new DefaultListModel<>();  // for available assessment type of course display
+    private final JLabel caRuleLabel = new JLabel("CA Eligibility Rule: -");  //for eligibility rule
+    private final JLabel attendanceRuleLabel = new JLabel("Attendance + CA Rule: -");  //for attendance rule
+
+    private final Runnable onBack;  //for goto menu
+
     private final String lecturerId;
 
     private final CardLayout centerCardLayout = new CardLayout();
     private final JPanel centerCardPanel = new JPanel(centerCardLayout);
+
+    //data models of various table
     private DefaultTableModel caMarksModel;
     private DefaultTableModel eligibilityModel;
     private DefaultTableModel attendanceEligibilityModel;
     private DefaultTableModel finalMarksModel;
+
+    //GUI tables
     private JTable caTable;
     private JTable eligibilityTable;
     private JTable attendanceEligibilityTable;
     private JTable finalMarksTable;
+
     private final JLabel caViewTitleLabel = new JLabel("ENG2122 CA Marks");
     private final JLabel caNoteLabel = new JLabel();
     private final JLabel eligibilityTitleLabel = new JLabel("End Exam Eligibility by CA");
@@ -46,6 +58,8 @@ public class StudentMarksPanel extends JPanel {
     private final JLabel finalMarksTitleLabel = new JLabel("Final Marks (CA + END)");
     private final JLabel finalMarksNoteLabel = new JLabel();
 
+    //constructor
+    /// @author dilusha
     public StudentMarksPanel(String lecturerId, Runnable onBack) {
         this.lecturerId = lecturerId;
         this.onBack = onBack;
@@ -57,13 +71,13 @@ public class StudentMarksPanel extends JPanel {
         JPanel topPanel = buildTopPanel();
         add(topPanel, BorderLayout.NORTH);
 
-        //create table structures
+        //create table models
         caMarksModel = createCaMarksModel(new String[]{"Reg No"});
         eligibilityModel = createCaMarksModel(new String[]{"Reg No"});
         attendanceEligibilityModel = createCaMarksModel(new String[]{"Reg No"});
         finalMarksModel = createCaMarksModel(new String[]{"Reg No", "CA Marks", "End Marks", "Final Marks", "Grade"});
 
-        //cards of main 4
+        //add all cards for centerpanel
         centerCardPanel.setBackground(UITheme.APP_BACKGROUND);
         centerCardPanel.add(buildOverviewPanel(), "Overview");
         centerCardPanel.add(buildCaMarksPanel(), "CA");
@@ -74,24 +88,29 @@ public class StudentMarksPanel extends JPanel {
 
         scopeComboBox.addActionListener(e -> updateSearchState());
 
-        updateSearchState();
-        loadInitialData();
+        updateSearchState(); // regno field disable
+
+        loadInitialData();  // bottom descriptions
         centerCardLayout.show(centerCardPanel, "Overview");
     }
 
+    /// @author dilusha
     private JPanel buildTopPanel() {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         topPanel.setBackground(UITheme.APP_BACKGROUND);
 
+        //back button
         JButton backButton = new JButton("Back");
         UITheme.styleNeutralButton(backButton);
         UITheme.setStandardButtonSize(backButton);
         backButton.addActionListener(e -> this.onBack.run());
 
+        //view scope and regno field
         UITheme.styleComboBox(courseComboBox);
         UITheme.styleComboBox(scopeComboBox);
         UITheme.styleTextField(studentSearchField);
 
+        //load mark base button
         JButton loadButton = new JButton("Load Marks Base");
         UITheme.stylePrimaryButton(loadButton);
         UITheme.setWideButtonSize(loadButton);
@@ -100,6 +119,7 @@ public class StudentMarksPanel extends JPanel {
             centerCardLayout.show(centerCardPanel, "Overview");
         });
 
+        //create complete top panel
         topPanel.add(backButton);
         topPanel.add(new JLabel("Course:"));
         topPanel.add(courseComboBox);
@@ -111,6 +131,7 @@ public class StudentMarksPanel extends JPanel {
         return topPanel;
     }
 
+    /// @author dilusha
     private JPanel buildOverviewPanel() {
         JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
         centerPanel.setBackground(UITheme.APP_BACKGROUND);
@@ -151,6 +172,7 @@ public class StudentMarksPanel extends JPanel {
         infoPanel.add(markTypesPanel, BorderLayout.CENTER);
         infoPanel.add(rulePanel, BorderLayout.SOUTH);
 
+        //change panel when create button
         JPanel actionCardsPanel = new JPanel();
         actionCardsPanel.setBackground(UITheme.APP_BACKGROUND);
         actionCardsPanel.setLayout(new BoxLayout(actionCardsPanel, BoxLayout.Y_AXIS));
@@ -167,6 +189,7 @@ public class StudentMarksPanel extends JPanel {
         return centerPanel;
     }
 
+    /// @author dilusha
     private JPanel buildCaMarksPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 12));
         panel.setBackground(UITheme.APP_BACKGROUND);
@@ -196,6 +219,7 @@ public class StudentMarksPanel extends JPanel {
         return panel;
     }
 
+    /// @author dilusha
     private JPanel buildEligibilityPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 12));
         panel.setBackground(UITheme.APP_BACKGROUND);
@@ -224,6 +248,7 @@ public class StudentMarksPanel extends JPanel {
         return panel;
     }
 
+    /// @author dilusha
     private JPanel buildFinalMarksPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 12));
         panel.setBackground(UITheme.APP_BACKGROUND);
@@ -253,6 +278,7 @@ public class StudentMarksPanel extends JPanel {
         return panel;
     }
 
+    /// @author dilusha
     private JPanel buildAttendanceEligibilityPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 12));
         panel.setBackground(UITheme.APP_BACKGROUND);
@@ -281,8 +307,9 @@ public class StudentMarksPanel extends JPanel {
         return panel;
     }
 
+    ///  @author dilusha
     private void loadInitialData() {
-        LecturerMarksOverviewResult result = overviewController.loadOverview(lecturerId, null);
+        LecturerMarksOverviewResult result = overviewController.loadOverview(lecturerId, null);  // get courses and types and marks types based on lec id
         if (result.hasError()) {
             JOptionPane.showMessageDialog(this, result.getErrorMessage());
             return;
@@ -298,22 +325,24 @@ public class StudentMarksPanel extends JPanel {
         }
     }
 
+    /// @author dilusha
     private void loadOverview() {
         String courseCode = (String) courseComboBox.getSelectedItem();
-        LecturerMarksOverviewResult result = overviewController.loadOverview(lecturerId, courseCode);
+        LecturerMarksOverviewResult result = overviewController.loadOverview(lecturerId, courseCode); //
         if (result.hasError()) {
             JOptionPane.showMessageDialog(this, result.getErrorMessage());
             return;
         }
 
+        //update available marks type
         markTypeModel.clear();
         for (String type : result.getAllowedMarkTypes()) {
             markTypeModel.addElement(type);
         }
 
-        CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
-        double caPassMark = scheme.getCaPassMark();
-        double caTotalMark = scheme.getCaWeight();
+        CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode); //get marking scheme based on course
+        double caPassMark = scheme.getCaPassMark(); // get passmark of relevent scheme
+        double caTotalMark = scheme.getCaWeight(); //get ca weight
         String caRuleText = String.format(
                 "CA Eligibility Rule: CA marks should be at least %.2f out of %.2f",
                 caPassMark,
@@ -325,6 +354,7 @@ public class StudentMarksPanel extends JPanel {
         attendanceRuleLabel.setText(attendanceRuleText);
     }
 
+    //Ca mark panel
     private void showCaMarksView() {
         String courseCode = (String) courseComboBox.getSelectedItem();
         String selectedScope = (String) scopeComboBox.getSelectedItem();
@@ -337,19 +367,23 @@ public class StudentMarksPanel extends JPanel {
             return;
         }
 
+        //set table model
         caTable.setModel(createCaMarksModel(result.getColumns()));
         caMarksModel = (DefaultTableModel) caTable.getModel();
         UITheme.styleTable(caTable);
         caMarksModel.setRowCount(0);
+
+        //create table rows
         for (Object[] row : result.getRows()) {
             caMarksModel.addRow(row);
         }
 
-        caViewTitleLabel.setText(result.getTitle());
-        caNoteLabel.setText(result.getNote());
+        caViewTitleLabel.setText(result.getTitle());  //set title
+        caNoteLabel.setText(result.getNote());  //set note
         centerCardLayout.show(centerCardPanel, "CA");
     }
 
+    /// @author dilusha
     private void showEligibilityByCaView() {
         String courseCode = (String) courseComboBox.getSelectedItem();
         String selectedScope = (String) scopeComboBox.getSelectedItem();
@@ -375,11 +409,16 @@ public class StudentMarksPanel extends JPanel {
         centerCardLayout.show(centerCardPanel, "EligibilityByCa");
     }
 
+    //for 3rd button
+    /// @author dilusha
     private void showEligibilityByAttendanceAndCaView() {
+
+        //get selected itmens from top panel
         String courseCode = (String) courseComboBox.getSelectedItem();
         String selectedScope = (String) scopeComboBox.getSelectedItem();
         boolean individualView = "Individual Student".equals(selectedScope);
         String studentId = studentSearchField.getText().trim();
+
 
         CaMarksResult result = caMarksController.loadEndEligibilityByAttendanceAndCa(courseCode, studentId, individualView);
         if (result.hasError()) {
@@ -425,6 +464,8 @@ public class StudentMarksPanel extends JPanel {
         centerCardLayout.show(centerCardPanel, "FinalMarks");
     }
 
+    //create table and set editable false
+    /// @author dilusha
     private DefaultTableModel createCaMarksModel(String[] columns) {
         return new DefaultTableModel(columns, 0) {
             @Override
@@ -434,6 +475,7 @@ public class StudentMarksPanel extends JPanel {
         };
     }
 
+    /// @author dilusha
     private void updateSearchState() {
         String selectedScope = (String) scopeComboBox.getSelectedItem();
         boolean individual = "Individual Student".equals(selectedScope);

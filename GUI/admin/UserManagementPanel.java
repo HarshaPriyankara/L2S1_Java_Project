@@ -109,8 +109,7 @@ public class UserManagementPanel extends JPanel {
         private void showUpdateForm() {
         prepareForm("Update User Details", BUTTON_COLOR);
 
-        // button for load user by id
-        JTextField txtSearch = addField("Search User ID");
+        JTextField txtSearch = addField("Search User ID"); //text field
         JButton fetchBtn = actionButton(buttonRow(), "Load Data", BUTTON_COLOR);
 
         contentPanel.add(Box.createVerticalStrut(15));
@@ -134,7 +133,7 @@ public class UserManagementPanel extends JPanel {
 
         backButton(buttonRow());
         JButton updateBtn = actionButton(buttonRow(), "Update User", BUTTON_COLOR);
-        updateBtn.setEnabled(false);
+        updateBtn.setEnabled(false);   //disable update button
 
         // Load Logic
         fetchBtn.addActionListener(e -> {
@@ -149,7 +148,7 @@ public class UserManagementPanel extends JPanel {
                 txtAddr.setText(u.getAddress());
                 txtPic.setText(u.getProfilePicPath());
                 cmbRole.setSelectedItem(toRoleLabel(u.getRole()));
-
+                //set enable button and fields
                 setFieldsEnabled(true, txtNewId, txtFN, txtLN, txtEmail, txtDb, txtContact, txtAddr, txtPic, txtPw, cmbRole);
                 updateBtn.setEnabled(true);
             } else {
@@ -171,7 +170,7 @@ public class UserManagementPanel extends JPanel {
             u.setProfilePicPath(txtPic.getText().trim());
 
             try {
-                u.setDob(java.time.LocalDate.parse(txtDb.getText().trim()));
+                u.setDob(java.time.LocalDate.parse(txtDb.getText().trim()));  //convert string date to local date
             } catch (java.time.format.DateTimeParseException ex) {
                 JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.");
                 return;

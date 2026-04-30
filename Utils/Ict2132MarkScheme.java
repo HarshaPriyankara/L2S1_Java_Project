@@ -30,6 +30,7 @@ class Ict2132MarkScheme extends CourseMarkScheme {
         return "End_practical";
     }
 
+    ///  @author dilusha
     public String[] getAllowedMarkTypes() {
         return types("Mid_practical", "Mini_project", "End_practical");
     }

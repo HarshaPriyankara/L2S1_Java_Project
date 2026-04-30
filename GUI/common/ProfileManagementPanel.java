@@ -39,6 +39,8 @@ public class ProfileManagementPanel extends JPanel {
     }
 
 
+    //profile update form of lecturer
+    /// @author dilusha
     private void showUpdateForm() {
         contentPanel.removeAll();
         contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
@@ -46,7 +48,7 @@ public class ProfileManagementPanel extends JPanel {
 
         User existing = controller.getUserData(loggedInUserId);
 
-        // --- READ ONLY FIELDS (Locked) ---
+        // locked read only fields
         addReadOnlyField("User ID", existing.getUserID());
         addReadOnlyField("Password", "******** (Contact Admin to Change)");
 
@@ -54,7 +56,7 @@ public class ProfileManagementPanel extends JPanel {
         contentPanel.add(new JSeparator());
         contentPanel.add(Box.createVerticalStrut(15));
 
-        // --- EDITABLE FIELDS ---
+        // editable fields
         JTextField txtFN      = addAlignedField("First Name", existing.getFname());
         JTextField txtLN      = addAlignedField("Last Name", existing.getLname());
         JTextField txtEmail   = addAlignedField("Email", existing.getEmail());
@@ -63,6 +65,7 @@ public class ProfileManagementPanel extends JPanel {
         JTextField txtContact = addAlignedField("Contact No", existing.getContactNo());
         JTextField txtAddr    = addAlignedField("Address", existing.getAddress());
 
+        //set role to readonly field
         final JComboBox<String> cmbRole;
         if (allowRoleEdit) {
             cmbRole = addRoleDropdown(existing.getRole());
@@ -105,7 +108,7 @@ public class ProfileManagementPanel extends JPanel {
         refresh();
     }
 
-    // --- HELPER METHODS FOR UI ---
+    //for gui helper
 
     private JTextField addAlignedField(String labelText, String value) {
         JPanel row = createRow();
@@ -118,6 +121,8 @@ public class ProfileManagementPanel extends JPanel {
         return f;
     }
 
+    //add read only flields
+    /// @author dilusha
     private void addReadOnlyField(String label, String value) {
         JPanel row = createRow();
         row.add(createLabel(label));
@@ -141,6 +146,8 @@ public class ProfileManagementPanel extends JPanel {
         return combo;
     }
 
+    //create photopicher and file chooser
+    /// @author dilusha
     private JTextField addPhotoPicker(String labelText, String currentPath) {
         JPanel row = createRow();
         row.add(createLabel(labelText));
@@ -198,6 +205,7 @@ public class ProfileManagementPanel extends JPanel {
         return card;
     }
 
+    /// @author dilusha
     private JPanel buttonRow() {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 20));
         row.setBackground(UITheme.APP_BACKGROUND);
@@ -205,7 +213,7 @@ public class ProfileManagementPanel extends JPanel {
         return row;
     }
 
-
+    /// @author dilusha
     private void backButton(JPanel row) {
         JButton btn = new JButton("Back");
         btn.setPreferredSize(new Dimension(100, 38));

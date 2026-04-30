@@ -32,24 +32,22 @@ public class MarksCalculator {
                 caMarks, endMarks, totalMarks, grade, gradePoint, hasMarks, completeMarks);
     }
 
-    public static String calculateGrade(double caMarks, double endMarks, double totalMarks) {
-        return calculateGrade(caMarks, endMarks, totalMarks, CourseMarkScheme.forCourse(null));
-    }
+
 
     public static String calculateGrade(double caMarks, double endMarks, double totalMarks, CourseMarkScheme scheme) {
         boolean caFailed = caMarks < scheme.getCaPassMark();
         boolean endFailed = scheme.hasEndAssessment() && endMarks < scheme.getEndPassMark();
 
         if (caFailed && endFailed) {
-            return "E(CA & ESA)";
+            return "E";
         }
 
         if (caFailed) {
-            return "E(CA)";
+            return "EC";
         }
 
         if (endFailed) {
-            return "E(ESA)";
+            return "EE";
         }
 
         return calculateGrade(totalMarks);

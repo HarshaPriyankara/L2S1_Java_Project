@@ -19,23 +19,27 @@ public class StudentDetails extends JPanel {
 
         contentPanel.add(buildMenuPanel(), "Menu");
         contentPanel.add(new StudentAttendancePanel(lecturerId, () -> cardLayout.show(contentPanel, "Menu")), "Attendance");
-        contentPanel.add(new StudentMarksPanel(lecturerId, () -> cardLayout.show(contentPanel, "Menu")), "Marks");
+        contentPanel.add(new StudentMarksPanel(lecturerId, () -> cardLayout.show(contentPanel, "Menu")), "Marks"); // pass lecturer id and menu panel to studentMarksPanel
         contentPanel.add(new StudentGpaPanel(() -> cardLayout.show(contentPanel, "Menu")), "Gpa");
 
         add(contentPanel, BorderLayout.CENTER);
         cardLayout.show(contentPanel, "Menu");
     }
 
+    /// @author dilusha
     private JPanel buildMenuPanel() {
+        //main GUI
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BorderLayout());
         menuPanel.setBackground(Color.WHITE);
 
+        //for main BG
         JPanel content = new JPanel();
         content.setBackground(Color.WHITE);
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
 
+        //title contents
         JLabel titleLabel = new JLabel("Student Records");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         titleLabel.setForeground(UITheme.TEXT_PRIMARY);
@@ -50,6 +54,7 @@ public class StudentDetails extends JPanel {
         content.add(subtitleLabel);
         content.add(Box.createVerticalStrut(28));
 
+        //3 buttons
         content.add(createMenuCard("Student Attendance", () -> cardLayout.show(contentPanel, "Attendance")));
         content.add(Box.createVerticalStrut(20));
         content.add(createMenuCard("Student Marks", () -> cardLayout.show(contentPanel, "Marks")));
@@ -60,6 +65,7 @@ public class StudentDetails extends JPanel {
         return menuPanel;
     }
 
+    /// @author dilusha
     private JPanel createMenuCard(String title, Runnable action) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(CARD_COLOR);

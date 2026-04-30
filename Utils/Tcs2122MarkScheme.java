@@ -4,12 +4,12 @@ import java.util.Map;
 
 class Tcs2122MarkScheme extends CourseMarkScheme {
     Tcs2122MarkScheme() {
-        super("TCS2122", 30.0, 0.0);
+        super("TCS2122", 100.0, 0.0);
     }
 
     protected double calculateCaMarks(Map<String, Double> marks) {
-        double quizMarks = topQuizAverage(marks, 2, 10.0);
-        double assignmentMarks = fixedAverage(marks, 20.0, "Assignment_1", "Assignment_2");
+        double quizMarks = topQuizAverage(marks, 2, 60.0);
+        double assignmentMarks = fixedAverage(marks, 40.0, "Assignment_1", "Assignment_2");
 
         return quizMarks + assignmentMarks;
     }

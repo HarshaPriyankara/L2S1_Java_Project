@@ -13,6 +13,7 @@ import java.util.Map;
 
 public class LecturerStudentDAO {
 
+    ///  @author dilusha
     public List<String> getLecturerCourses(String lecturerId) throws SQLException {
         List<String> courses = new ArrayList<>();
         String sql = "SELECT Course_code FROM course WHERE Lecturer_in_charge = ? ORDER BY Course_code";

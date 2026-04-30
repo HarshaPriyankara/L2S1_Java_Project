@@ -47,11 +47,5 @@ public class AdminProfileController extends BaseUserController {
         return dao.deleteUser(id) ? "SUCCESS: User deleted." : "DATABASE_ERROR: Delete failed.";
     }
 
-//    private String normalizeRole(String role) {
-//        if (role == null) return "";
-//        String value = role.trim().toLowerCase();
-//        if (value.equals("lecture")) return "lecturer";
-//        if (value.equals("technical officer")) return "techofficer";
-//        return value;
-//    }
+
 }

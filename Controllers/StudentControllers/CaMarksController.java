@@ -10,51 +10,54 @@ import java.util.List;
 import java.util.Map;
 import java.sql.ResultSet;
 
+/// @author dilusha
 public class CaMarksController {
     private static final double ATTENDANCE_ELIGIBILITY_PERCENT = 80.0;
     private static final String[] ENG2122_COLUMNS = {
-            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz Part (10)", "Assignment 1",
-            "Assignment 2", "Assignment Part (10)", "Mid Theory", "Mid Part (20)", "CA Marks (40)", "CA Eligible"
+            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz (10%)", "Assignment 1",
+            "Assignment 2", "Assignment (10%)", "Mid Theory", "Mid (20%)", "CA Marks (40%)", "CA Eligible"
     };
 
     private static final String[] ICT2113_COLUMNS = {
-            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz Part (10)", "Assignment 1",
-            "Assignment 2", "Assignment Part (10)", "Mid Practical", "Practical Part (20)", "CA Marks (40)", "CA Eligible"
+            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz (10%)", "Assignment 1",
+            "Assignment 2", "Assignment (10%)", "Mid Practical", "Mid (20%)", "CA Marks (40%)", "CA Eligible"
     };
 
     private static final String[] ICT2122_COLUMNS = {
-            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz Part (10)", "Mid Theory",
-            "Theory Part (20)", "CA Marks (30)", "CA Eligible"
+            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz (10%)", "Mid Theory",
+            "Mid (20%)", "CA Marks (30%)", "CA Eligible"
     };
 
     private static final String[] ICT2132_COLUMNS = {
-            "Reg No", "Mid Practical", "Practical Part (10)", "Mini Project",
-            "Project Part (30)", "CA Marks (40)", "CA Eligible"
+            "Reg No", "Mid Practical", "Mid (20%)", "Mini Project",
+            "Project Part (30)", "CA Marks (40%)", "CA Eligible"
     };
 
     private static final String[] ICT2142_COLUMNS = {
-            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz Part (10)", "Assignment 1",
-            "Assignment 2", "Assignment Part (20)", "CA Marks (30)", "CA Eligible"
+            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz (10%)", "Assignment 1",
+            "Assignment 2", "Assignment (10%)", "CA Marks (30%)", "CA Eligible"
     };
 
     private static final String[] ICT2152_COLUMNS = {
-            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz Part (10)", "Mini Project",
-            "Project Part (20)", "Assignment 1", "Assignment 2", "Assignment Part (10)", "CA Marks (40)", "CA Eligible"
+            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz (10%)", "Mini Project",
+            "Project Part (20)", "Assignment 1", "Assignment 2", "Assignment (10%)", "CA Marks (40%)", "CA Eligible"
     };
 
     private static final String[] TCS2112_COLUMNS = {
-            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz Part (10)", "Assignment 1",
-            "Assignment 2", "Assignment Part (10)", "Mid Theory", "Theory Part (10)", "CA Marks (30)", "CA Eligible"
+            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz (10%)", "Assignment 1",
+            "Assignment 2", "Assignment (10%)", "Mid Theory", "Mid (20%)", "CA Marks (40%)", "CA Eligible"
     };
 
     private static final String[] TCS2122_COLUMNS = {
-            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz Part (10)", "Assignment 1",
-            "Assignment 2", "Assignment Part (20)", "CA Marks (30)", "Final Result Base"
+            "Reg No", "Quiz 1", "Quiz 2", "Quiz 3", "Quiz (60%)", "Assignment 1",
+            "Assignment 2", "Assignment (40%)", "CA Marks (100%)", "Final Result Base"
     };
 
     private final MarkDAO markDAO = new MarkDAO();
     private final AttendanceDAO attendanceDAO = new AttendanceDAO();
 
+    //create entire table of ca marks
+    /// @author dilusha
     public CaMarksResult loadCaMarks(String courseCode, String studentId, boolean individualView) {
         if (!supportsCourse(courseCode)) {
             return new CaMarksResult(null, null, null, null,
@@ -72,7 +75,7 @@ public class CaMarksController {
             } else {
                 Map<String, Map<String, Double>> groupedMarks = markDAO.getCourseMarksByStudent(courseCode);
                 for (Map.Entry<String, Map<String, Double>> entry : groupedMarks.entrySet()) {
-                    rows.add(buildRow(courseCode, entry.getKey(), entry.getValue()));
+                    rows.add(buildRow(courseCode, entry.getKey(), entry.getValue())); // create one row for one iteration
                 }
             }
             return new CaMarksResult(
@@ -88,6 +91,8 @@ public class CaMarksController {
         }
     }
 
+
+    /// @author dilusha
     public CaMarksResult loadEndEligibilityByCa(String courseCode, String studentId, boolean individualView) {
         if (!supportsCourse(courseCode)) {
             return new CaMarksResult(null, null, null, null,
@@ -95,7 +100,7 @@ public class CaMarksController {
         }
 
         try {
-            List<Object[]> rows = new ArrayList<>();
+            List<Object[]> rows = new ArrayList<>();  //list of rows
             if (individualView) {
                 if (studentId == null || studentId.isBlank()) {
                     return new CaMarksResult(null, null, null, null, "Please enter a registration number.");
@@ -104,6 +109,7 @@ public class CaMarksController {
                 rows.add(buildEligibilityRow(courseCode, studentId.trim(), marks));
             } else {
                 Map<String, Map<String, Double>> groupedMarks = markDAO.getCourseMarksByStudent(courseCode);
+                //create all rows of eligibility by CA
                 for (Map.Entry<String, Map<String, Double>> entry : groupedMarks.entrySet()) {
                     rows.add(buildEligibilityRow(courseCode, entry.getKey(), entry.getValue()));
                 }
@@ -157,6 +163,7 @@ public class CaMarksController {
         }
     }
 
+    /// @author dilusha
     public CaMarksResult loadEndEligibilityByAttendanceAndCa(String courseCode, String studentId, boolean individualView) {
         if (!supportsCourse(courseCode)) {
             return new CaMarksResult(null, null, null, null,
@@ -203,6 +210,8 @@ public class CaMarksController {
         }
     }
 
+
+    /// @author dilusha
     private Object[] buildRow(String courseCode, String regNo, Map<String, Double> marks) {
         double passMark = CourseMarkScheme.forCourse(courseCode).getCaPassMark();
         if ("ICT2113".equalsIgnoreCase(courseCode)) {
@@ -229,6 +238,8 @@ public class CaMarksController {
         return buildEng2122Row(regNo, marks, passMark);
     }
 
+    //create complete row of eligibility tables by CA
+    /// @author dilusha
     private Object[] buildEligibilityRow(String courseCode, String regNo, Map<String, Double> marks) {
         CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
         double caMarks = round(scheme.calculateCA(marks));
@@ -274,8 +285,10 @@ public class CaMarksController {
         };
     }
 
-    private CaMarksResult buildNoEndExamAttendanceEligibility(String courseCode, String studentId,
-                                                              boolean individualView, CourseMarkScheme scheme) throws Exception {
+    //for no end exam massege
+    /// @author dilusha
+    private CaMarksResult buildNoEndExamAttendanceEligibility(String courseCode, String studentId, boolean individualView, CourseMarkScheme scheme) throws Exception {
+        //for store list of rows
         List<Object[]> rows = new ArrayList<>();
 
         if (individualView) {
@@ -283,9 +296,10 @@ public class CaMarksController {
                 return new CaMarksResult(null, null, null, null, "Please enter a registration number.");
             }
             Map<String, Double> marks = markDAO.getStudentCourseMarks(studentId.trim(), courseCode);
+            double attendancePercentage = loadAttendancePercentage(courseCode, studentId.trim());
             rows.add(new Object[]{
                     studentId.trim(),
-                    "-",
+                    attendancePercentage,
                     ATTENDANCE_ELIGIBILITY_PERCENT,
                     round(scheme.calculateCA(marks)),
                     scheme.getCaPassMark(),
@@ -295,9 +309,11 @@ public class CaMarksController {
         } else {
             Map<String, Map<String, Double>> groupedMarks = markDAO.getCourseMarksByStudent(courseCode);
             for (Map.Entry<String, Map<String, Double>> entry : groupedMarks.entrySet()) {
+                double attendancePercentage = loadAttendancePercentage(courseCode, entry.getKey());
+
                 rows.add(new Object[]{
                         entry.getKey(),
-                        "-",
+                        attendancePercentage,
                         ATTENDANCE_ELIGIBILITY_PERCENT,
                         round(scheme.calculateCA(entry.getValue())),
                         scheme.getCaPassMark(),
@@ -316,6 +332,8 @@ public class CaMarksController {
         );
     }
 
+    //for one person end exam eligibility by CA
+    /// @author dilusha
     private Object[] buildAttendanceAndCaRow(String courseCode, String regNo) throws Exception {
         CourseMarkScheme scheme = CourseMarkScheme.forCourse(courseCode);
         double caMarks = round(scheme.calculateCA(markDAO.getStudentCourseMarks(regNo, courseCode)));
@@ -369,6 +387,7 @@ public class CaMarksController {
         return round((attendedHours / totalHours) * 100.0);
     }
 
+    /// @author dilusha
     private Object[] buildEng2122Row(String regNo, Map<String, Double> marks, double passMark) {
         double quiz1 = valueOf(marks, "Quiz_1");
         double quiz2 = valueOf(marks, "Quiz_2");
@@ -399,7 +418,9 @@ public class CaMarksController {
         };
     }
 
+    /// @author dilusha
     private Object[] buildIct2113Row(String regNo, Map<String, Double> marks, double passMark) {
+       //get data from map
         double quiz1 = valueOf(marks, "Quiz_1");
         double quiz2 = valueOf(marks, "Quiz_2");
         double quiz3 = valueOf(marks, "Quiz_3");
@@ -429,6 +450,7 @@ public class CaMarksController {
         };
     }
 
+    /// @author dilusha
     private Object[] buildIct2122Row(String regNo, Map<String, Double> marks, double passMark) {
         double quiz1 = valueOf(marks, "Quiz_1");
         double quiz2 = valueOf(marks, "Quiz_2");
@@ -453,6 +475,7 @@ public class CaMarksController {
         };
     }
 
+    /// @author dilusha
     private Object[] buildIct2132Row(String regNo, Map<String, Double> marks, double passMark) {
         double midPractical = valueOf(marks, "Mid_practical");
         double miniProject = valueOf(marks, "Mini_project");
@@ -473,6 +496,7 @@ public class CaMarksController {
         };
     }
 
+    /// @author dilusha
     private Object[] buildIct2142Row(String regNo, Map<String, Double> marks, double passMark) {
         double quiz1 = valueOf(marks, "Quiz_1");
         double quiz2 = valueOf(marks, "Quiz_2");
@@ -499,6 +523,7 @@ public class CaMarksController {
         };
     }
 
+    /// @author dilusha
     private Object[] buildIct2152Row(String regNo, Map<String, Double> marks, double passMark) {
         double quiz1 = valueOf(marks, "Quiz_1");
         double quiz2 = valueOf(marks, "Quiz_2");
@@ -529,6 +554,7 @@ public class CaMarksController {
         };
     }
 
+    /// @author dilusha
     private Object[] buildTcs2112Row(String regNo, Map<String, Double> marks, double passMark) {
         double quiz1 = valueOf(marks, "Quiz_1");
         double quiz2 = valueOf(marks, "Quiz_2");
@@ -559,6 +585,7 @@ public class CaMarksController {
         };
     }
 
+    /// @author dilusha
     private Object[] buildTcs2122Row(String regNo, Map<String, Double> marks, double passMark) {
         double quiz1 = valueOf(marks, "Quiz_1");
         double quiz2 = valueOf(marks, "Quiz_2");
@@ -566,8 +593,8 @@ public class CaMarksController {
         double assignment1 = valueOf(marks, "Assignment_1");
         double assignment2 = valueOf(marks, "Assignment_2");
 
-        double quizContribution = round(bestTwoAverage(quiz1, quiz2, quiz3) * 10.0 / 100.0);
-        double assignmentContribution = round(((assignment1 + assignment2) / 2.0) * 20.0 / 100.0);
+        double quizContribution = round(bestTwoAverage(quiz1, quiz2, quiz3) * 60.0 / 100.0);
+        double assignmentContribution = round(((assignment1 + assignment2) / 2.0) * 40.0 / 100.0);
         double caMarks = round(quizContribution + assignmentContribution);
         String finalResultBase;
 
@@ -591,6 +618,7 @@ public class CaMarksController {
         };
     }
 
+    /// @author dilusha
     private boolean supportsCourse(String courseCode) {
         return "ENG2122".equalsIgnoreCase(courseCode)
                 || "ICT2113".equalsIgnoreCase(courseCode)
@@ -602,6 +630,8 @@ public class CaMarksController {
                 || "TCS2122".equalsIgnoreCase(courseCode);
     }
 
+    //return tables colomns names
+    /// @author dilusha
     private String[] resolveColumns(String courseCode) {
         if ("ICT2113".equalsIgnoreCase(courseCode)) {
             return ICT2113_COLUMNS;
@@ -627,6 +657,8 @@ public class CaMarksController {
         return ENG2122_COLUMNS;
     }
 
+    //create title of ca marks button result
+    /// @author dilusha
     private String buildTitle(String courseCode, String studentId, boolean individualView) {
         if (individualView) {
             return courseCode.toUpperCase() + " CA Marks - " + studentId;
@@ -694,6 +726,8 @@ public class CaMarksController {
         return "ENG2122 final marks reuse the existing course breakdown logic: CA (40) + End Theory (60).";
     }
 
+    //create bottom description of ca marks table
+    /// @author dilusha
     private String buildNote(String courseCode) {
         if ("ICT2113".equalsIgnoreCase(courseCode)) {
             return "ICT2113 rule: Best 2 quizzes -> 10%, Assignment 1 & 2 -> 10%, Mid Practical -> 20%";
@@ -763,6 +797,7 @@ public class CaMarksController {
         return "Theory";
     }
 
+    /// @author dilusha
     private double bestTwoAverage(double q1, double q2, double q3) {
         double[] values = {q1, q2, q3};
         java.util.Arrays.sort(values);
@@ -782,6 +817,8 @@ public class CaMarksController {
         return value;
     }
 
+    //for show - if empty
+    ///  @author dilusha
     private Object display(Map<String, Double> marks, String key, double value) {
         if (marks == null) {
             return "-";

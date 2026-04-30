@@ -79,6 +79,7 @@ public class MarkDAO {
         }
     }
 
+    ///  @author dilusha
     public Map<String, Map<String, Double>> getCourseMarksByStudent(String courseCode) throws SQLException {
         String sql = "SELECT e.Reg_no, m.Marks_type, m.Marks_value " +
                 "FROM enrollment e " +
@@ -86,20 +87,22 @@ public class MarkDAO {
                 "WHERE e.Course_code = ? " +
                 "ORDER BY e.Reg_no, m.Marks_type";
 
-        Map<String, Map<String, Double>> groupedMarks = new LinkedHashMap<>();
+        Map<String, Map<String, Double>> groupedMarks = new LinkedHashMap<>();  //use linked hash map for keep order
         try (Connection con = DBConnection.getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, courseCode);
+            //use try for auto closing
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    String regNo = rs.getString("Reg_no");
-                    Map<String, Double> marks = groupedMarks.get(regNo);
+                    String regNo = rs.getString("Reg_no");  //get reg no
+                    Map<String, Double> marks = groupedMarks.get(regNo);  //get details from linked hashed map by regno
 
                     if (marks == null) {
                         marks = new HashMap<>();
-                        groupedMarks.put(regNo, marks);
+                        groupedMarks.put(regNo, marks); //insert to linked hash map
                     }
 
+                    //if already have regno then insert into inner map
                     String markType = rs.getString("Marks_type");
                     if (markType != null) {
                         String normalizedMarkType = normalizeMarkType(markType);
@@ -112,6 +115,7 @@ public class MarkDAO {
         return groupedMarks;
     }
 
+    ///  @author dilusha
     public Map<String, Double> getStudentCourseMarks(String regNo, String courseCode) throws SQLException {
         Map<String, Map<String, Double>> groupedMarks = getCourseMarksByStudent(courseCode);
         Map<String, Double> marks = groupedMarks.get(regNo);
@@ -178,6 +182,7 @@ public class MarkDAO {
         }
     }
 
+    /// @author dilusha
     private String normalizeMarkType(String markType) {
         if (markType == null) {
             return "";

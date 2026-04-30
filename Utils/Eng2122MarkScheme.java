@@ -27,6 +27,7 @@ class Eng2122MarkScheme extends CourseMarkScheme {
         return 0.0;
     }
 
+    ///  @author dilusha
     public String[] getAllowedMarkTypes() {
         String[] allowedTypes = types(
                 "Quiz_1", "Quiz_2", "Quiz_3",
