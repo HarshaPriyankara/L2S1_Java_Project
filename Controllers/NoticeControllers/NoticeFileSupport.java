@@ -13,7 +13,7 @@ final class NoticeFileSupport {
     }
 
     static String saveContent(String title, String content) throws IOException {
-        String sanitizedTitle = title.replaceAll("[^a-zA-Z0-9\\s]", "_").trim();
+        String sanitizedTitle = title.replaceAll("[^a-zA-Z0-9\\s]", "_").trim();  //replace "_" instead of not should be number,character,spaces
         if (sanitizedTitle.isEmpty()) {
             sanitizedTitle = "notice";
         }

@@ -5,20 +5,17 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-// ABSTRACTION: Interface representing the contract for Notice data operations.
-// This hides the implementation details from the rest of the application.
-interface INoticeDAO {
+ interface INoticeDAO {
     List<Notice> getNoticesByRole(String role);
     String getNoticeContentPath(int noticeId);
     boolean updateNotice(int id, String roles, String title, String path);
     Notice getNoticeById(int noticeId);
 }
 
-// INHERITANCE: NoticeDAO implements the abstract INoticeDAO interface.
-public class NoticeDAO implements INoticeDAO {
+ public class NoticeDAO implements INoticeDAO {
 
-    // POLYMORPHISM: Compile-time polymorphism (Method Overloading)
-    // Providing an overload method without a parameter to fetch 'All' roles.
+    // Method Overloading
+    // Providing an overload method without a parameter to  'All' roles.
     public List<Notice> getNoticesByRole() {
         return getNoticesByRole("All");
     }

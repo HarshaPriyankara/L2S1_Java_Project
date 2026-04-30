@@ -66,7 +66,7 @@ public class ViewNotice extends JPanel {
         }
     }
 
-    // --- Renderer ---
+    // Renderer
     class ButtonRenderer extends JButton implements TableCellRenderer {
         public ButtonRenderer(String text, Color bg) {
             setText(text);
@@ -84,7 +84,7 @@ public class ViewNotice extends JPanel {
         }
     }
 
-    // --- View Button Editor ---
+    // View Button Editor
     class ButtonEditor extends DefaultCellEditor {
         protected JButton button;
 
@@ -114,7 +114,7 @@ public class ViewNotice extends JPanel {
         }
     }
 
-    // --- Update Button Editor ---
+    // Update Button Editor
     class UpdateButtonEditor extends DefaultCellEditor {
         protected JButton button;
         private int currentRow;
@@ -139,7 +139,7 @@ public class ViewNotice extends JPanel {
         }
     }
 
-    // --- Delete Button Editor ---
+    //Delete Button Editor
     class DeleteButtonEditor extends DefaultCellEditor {
         protected JButton button;
 

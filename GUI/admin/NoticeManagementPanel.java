@@ -76,8 +76,7 @@ public class NoticeManagementPanel extends JPanel {
         this.removeAll();
         this.setLayout(new BorderLayout());
         
-        // Using Polymorphic GUI transition by reusing UI via UpdateNotice which extends CreateNotice
-        this.add(new UpdateNotice(this, id, title));
+         this.add(new UpdateNotice(this, id, title));
 
         this.revalidate();
         this.repaint();
