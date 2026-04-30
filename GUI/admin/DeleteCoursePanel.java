@@ -18,10 +18,10 @@ class DeleteCoursePanel extends JPanel {
         setBackground(UITheme.SURFACE);
         setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
 
-        // 1. Title
+        // Title
         addTitle("Delete Course", DELETE_COLOR);
 
-        // 2. Description label
+        // Description label
         JLabel desc = new JLabel("Select the Course Code of the course you want to delete.");
         desc.setFont(new Font("SansSerif", Font.PLAIN, 13));
         desc.setForeground(UITheme.TEXT_MUTED);
@@ -29,7 +29,7 @@ class DeleteCoursePanel extends JPanel {
         add(desc);
         add(Box.createVerticalStrut(20));
 
-        // 3. Course code dropdown
+        // Course code dropdown
         cmbCode = addDropdown("Course Code");
         refreshCourseCodes();
 
@@ -40,7 +40,7 @@ class DeleteCoursePanel extends JPanel {
             }
         });
 
-        // 4. Button Row setup
+        // Button Row setup
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         row.setBackground(UITheme.SURFACE);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -60,7 +60,7 @@ class DeleteCoursePanel extends JPanel {
         row.add(btnDelete);
         add(row);
 
-        // --- Delete Button Action (Oyaage original logic eka) ---
+        // Delete Button Action
         btnDelete.addActionListener(e -> {
             String code = selectedValue(cmbCode);
 
@@ -85,7 +85,7 @@ class DeleteCoursePanel extends JPanel {
         });
     }
 
-    // --- UserManagement Styling Methods ---
+    // UserManagement Styling Methods
 
     private void addTitle(String text, Color color) {
         JLabel lbl = new JLabel(text);
