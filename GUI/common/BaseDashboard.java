@@ -6,10 +6,10 @@ import java.awt.*;
 
 import java.awt.image.BufferedImage;
 
-// Using 'abstract' fulfills the Abstraction requirement
-public abstract class BaseDashboard extends JFrame {
+// Uses abstraction
+public abstract class BaseDashboard extends  JFrame {
 
-    // Encapsulation: Using protected allows child classes to access these
+    // encapsulation uses child class
     protected final Color DARK_BG = UITheme.SIDEBAR;
     protected final Color BUTTON_COLOR = UITheme.PRIMARY;
     protected final CardLayout cardLayout = new CardLayout();
@@ -22,13 +22,13 @@ public abstract class BaseDashboard extends JFrame {
         this.loggedInID = user.getUserID();
 
         setTitle(title);
-        setSize(1200, 750); // Standardized size for all users
+        setSize(1200, 750); // panel  size for all users
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         getContentPane().setBackground(UITheme.APP_BACKGROUND);
 
-        // Standardized layout structure
+        // Standard layout
         add(buildSidebar(), BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
         contentPanel.setBackground(UITheme.APP_BACKGROUND);
@@ -41,7 +41,7 @@ public abstract class BaseDashboard extends JFrame {
         cardLayout.show(contentPanel, "Home");
     }
 
-    // Abstract method: Every dashboard MUST implement its own panel setup
+    // Abstract  Every dashboard MUST implement its own panel setup
     protected abstract void setupUserPanels();
 
     private JPanel buildSidebar() {
@@ -51,7 +51,7 @@ public abstract class BaseDashboard extends JFrame {
         sidebar.setPreferredSize(new Dimension(250, 0));
         sidebar.setBorder(BorderFactory.createEmptyBorder(40, 15, 20, 15));
 
-        // 1. Profile Picture at the top
+        //Profile Picture at the top
         String imagePath = currentUser.getProfilePicPath();
         JLabel photoLabel = new JLabel();
         photoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -64,7 +64,7 @@ public abstract class BaseDashboard extends JFrame {
         sidebar.add(photoLabel);
         sidebar.add(Box.createVerticalStrut(15));
 
-        // 2. User ID Label
+        //User ID Label
         JLabel idLabel = new JLabel("Welcome " + currentUser.getFname());
         idLabel.setForeground(new Color(214, 224, 236));
         idLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -72,10 +72,10 @@ public abstract class BaseDashboard extends JFrame {
         sidebar.add(idLabel);
         sidebar.add(Box.createVerticalStrut(30));
 
-        // 3. Child class buttons (Admin, Student, etc.)
+        //add child class dynamically relavently user role
         addNavigationButtons(sidebar);
 
-        // 4. Logout button at the very bottom
+        //logout button
         sidebar.add(Box.createVerticalGlue());
         sidebar.add(createNavButton("Logout", () -> {
             new LoginForm().setVisible(true);
@@ -85,10 +85,10 @@ public abstract class BaseDashboard extends JFrame {
         return sidebar;
     }
 
-    // Abstract method: Each role adds different buttons
+    // Abstract Each role adds different buttons
     protected abstract void addNavigationButtons(JPanel sidebar);
 
-    // Common method to create styled buttons (Encapsulation) [cite: 102]
+    // Common method to create styled buttons
     protected JButton createNavButton(String text, Runnable action) {
         JButton btn = new JButton(text);
         UITheme.stylePrimaryButton(btn);
@@ -108,7 +108,7 @@ public abstract class BaseDashboard extends JFrame {
         return p;
     }
 
-    // Helper Method 1: Processes the image into a circle
+    //Processes the image into a circle
     private ImageIcon createCircularIcon(String path) {
         int size = 100;
         try {
@@ -137,7 +137,7 @@ public abstract class BaseDashboard extends JFrame {
         }
     }
 
-    // Helper Method 2: Draws a default avatar if no picture exists
+    // Draws a default avatar if no picture exists
     private void setDefaultAvatar(JLabel label) {
         int size = 100;
         BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);

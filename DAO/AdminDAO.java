@@ -43,7 +43,7 @@ public class AdminDAO {
 
             while (rs.next()) {
                 notices.add(new Object[]{
-                        rs.getInt("Notice_id"), // ඔයාගේ DB එකේ ID එකේ නම බලන්න
+                        rs.getInt("Notice_id"),
                         rs.getString("Title"),
                         rs.getString("Target_role"),
                         rs.getDate("Created_date")

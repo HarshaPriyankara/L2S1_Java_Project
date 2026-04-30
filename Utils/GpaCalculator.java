@@ -39,6 +39,9 @@ public class GpaCalculator {
         }
     }
 
+    /**
+     *
+     * @Author isuru */
     public static GpaResult calculate(List<MarksCalculator.MarkBreakdown> breakdowns) {
         Map<String, MarksCalculator.MarkBreakdown> marksByCourse = new HashMap<>();
         if (breakdowns != null) {

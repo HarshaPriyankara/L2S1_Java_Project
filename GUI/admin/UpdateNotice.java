@@ -9,8 +9,7 @@ import Models.Notice;
 import javax.swing.*;
 import java.awt.*;
 
-// INHERITANCE: UpdateNotice is "a kind of" CreateNotice. It inherits all UI layout.
-// This prevents rewriting the whole UI panel logic perfectly showing code reusability.
+// INHERITANCE UpdateNotice is "a kind of" CreateNotice.
 public class UpdateNotice extends CreateNotice {
     
     // ENCAPSULATION
@@ -38,8 +37,7 @@ public class UpdateNotice extends CreateNotice {
         loadNoticeData();
     }
 
-    // ABSTRACTION: Delegating complex database retrieval directly to NoticeDAO 
-    private void loadNoticeData() {
+     private void loadNoticeData() {
         NoticeDetailsResult result = noticeController.getNoticeDetails(this.noticeId);
         if (result.hasError()) {
             JOptionPane.showMessageDialog(this, result.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -64,8 +62,7 @@ public class UpdateNotice extends CreateNotice {
         return noticeController.updateNotice(this.noticeId, formData);
     }
 
-    // POLYMORPHISM: Change post-action behavior to exit panel
-    @Override
+     @Override
     protected void clearFields() {
         super.clearFields();
         parentPanel.showMainButtons(); // Auto redirect after update

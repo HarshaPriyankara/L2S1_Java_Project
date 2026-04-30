@@ -9,10 +9,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.List;
 
-// INHERITANCE: Extending JPanel 
+
 public class ViewNotice extends JPanel {
 
-    // ENCAPSULATION: All internal fields are kept private
+   //internal field
     private JTable table;
     private DefaultTableModel model;
     private List<Notice> noticeList;
@@ -29,7 +29,7 @@ public class ViewNotice extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        // --- Top Panel with Back Button ---
+        // Back Button
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setBackground(Color.WHITE);
         JButton btnBack = new JButton("Back");
@@ -37,10 +37,9 @@ public class ViewNotice extends JPanel {
         topPanel.add(btnBack);
         add(topPanel, BorderLayout.NORTH);
 
-        // --- 1. Table Setup ---
+        // Table Setup column
         String[] columns = {"Title", "Added Date", "Action"};
-        
-        // POLYMORPHISM: Overriding anonymous inner class method to disable cell editing
+
         model = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -49,7 +48,7 @@ public class ViewNotice extends JPanel {
         table = new JTable(model);
         table.setRowHeight(40);
 
-        // --- 2. Button Renderer ---
+        // Button Renderer
         table.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -64,7 +63,7 @@ public class ViewNotice extends JPanel {
 
         refreshTable();
 
-        // --- 3. Click Event ---
+        // Click Event
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {

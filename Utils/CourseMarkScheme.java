@@ -57,9 +57,7 @@ public abstract class CourseMarkScheme {
         return caWeight;
     }
 
-    public final double getEndWeight() {
-        return endWeight;
-    }
+
 
     public final double getCaPassMark() {
         return round(caWeight * 0.5);
@@ -74,17 +72,13 @@ public abstract class CourseMarkScheme {
         return endWeight > 0.0;
     }
 
-    public double getAssessmentWeight(String type) {
-        return 0.0;
-    }
+
 
     public String[] getAllowedMarkTypes() {
         return MarksCalculator.MARK_TYPES;
     }
 
-    public String getDefaultEndMarkType() {
-        return "End_theory";
-    }
+
 
     public boolean hasCompleteMarks(Map<String, Double> marks) {
         return hasAllMarks(marks, getAllowedMarkTypes());
