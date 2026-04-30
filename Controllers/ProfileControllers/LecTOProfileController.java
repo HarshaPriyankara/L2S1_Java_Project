@@ -4,6 +4,7 @@ import Models.User;
 
 public class LecTOProfileController extends BaseUserController {
 
+    /// @author dilusha
     @Override
     public String updateProfile(User updatedUser) {
         if (isNullOrEmpty(updatedUser.getFname()) || isNullOrEmpty(updatedUser.getEmail()) || updatedUser.getDateOfBirth() == null) {

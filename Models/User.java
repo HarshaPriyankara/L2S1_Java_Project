@@ -13,15 +13,8 @@ public class User {
     private String contactNo;
     private String address;
     private String profilePic;
-
     private String originalUserID;
 
-    public boolean login(){
-
-        return false;
-    }
-    public void logout(){}
-    public void updateProfile(){}
     public String getDetails(){return null;}
 
     public String getRole() {

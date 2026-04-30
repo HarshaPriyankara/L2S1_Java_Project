@@ -62,13 +62,14 @@ public abstract class CourseMarkScheme {
     }
 
     public final double getCaPassMark() {
-        return round(caWeight * 0.4);
+        return round(caWeight * 0.5);
     }
 
     public final double getEndPassMark() {
         return round(endWeight / 2.0);
     }
 
+    ///  @author dilusha
     public final boolean hasEndAssessment() {
         return endWeight > 0.0;
     }

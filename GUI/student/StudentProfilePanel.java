@@ -82,8 +82,8 @@ public class StudentProfilePanel extends JPanel {
         refresh();
     }
 
-    // --- REUSABLE HELPERS ---
 
+    //for read only field
     private void addReadOnlyField(String label, String value) {
         JPanel row = createRow();
         row.add(createLabel(label));

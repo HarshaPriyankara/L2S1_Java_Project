@@ -13,10 +13,12 @@ public class LecturerMarksOverviewResult {
         this.errorMessage = errorMessage;
     }
 
+    ///  @author dilusha
     public List<String> getLecturerCourses() {
         return lecturerCourses;
     }
 
+    /// @author dlisha
     public List<String> getAllowedMarkTypes() {
         return allowedMarkTypes;
     }

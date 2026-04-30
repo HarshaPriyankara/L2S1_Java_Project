@@ -4,14 +4,15 @@ import DAO.UserDAO;
 import Models.User;
 
 public abstract class BaseUserController {
-    // Encapsulation: Protect the DAO instance
+
     protected final UserDAO dao;
 
     public BaseUserController() {
         this.dao = new UserDAO();
     }
 
-    // Inheritance: Common method for all user types
+    //get user data for all type of users (inheritance)
+    /// @author dilusha
     public User getUserData(String userId) {
         if (userId == null || userId.trim().isEmpty())
             return null;
@@ -19,10 +20,10 @@ public abstract class BaseUserController {
         return dao.getUserById(userId.trim());
     }
 
-    // Abstraction & Polymorphism: Subclasses must implement specific profile update logic
+    // for subclasses
     public abstract String updateProfile(User user);
     
-    // Encapsulation: Reusable helper method
+    // for chrck null or empty
     protected boolean isNullOrEmpty(String str) {
         return str == null || str.trim().isEmpty();
     }

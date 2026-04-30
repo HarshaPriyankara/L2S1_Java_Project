@@ -19,7 +19,7 @@ public class StudentProfileController extends BaseUserController {
 
         user.setOriginalUserID(user.getUserID());
         
-        // Ensure we don't mess up passwords for students (they can't change it here)
+        // ensure password is privious
         user.setPassword(existing.getPassword());
 
         if (dao.updateUser(user)) {

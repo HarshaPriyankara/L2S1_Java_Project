@@ -34,7 +34,7 @@ public class UserDAO {
                 "Role, date_of_birth, Address, contact_no, profile_pic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false);  //off automatic comit
 
             pst.setString(1, user.getUserID());
             pst.setString(2, user.getFname());
@@ -64,6 +64,7 @@ public class UserDAO {
     }
 
     // Update UPDATE USER
+    /// @author dilusha
     public boolean updateUser(User user) {
         String sql = "UPDATE user SET User_id=?, F_name=?, L_name=?, Email=?, Password=?, " +
                 "Role=?, date_of_birth=?, Address=?, contact_no=?, profile_pic=? WHERE User_id=?";
@@ -119,7 +120,7 @@ public class UserDAO {
         }
     }
 
-    // ── Delete user ──────────────────────────────────────────────────────────
+
 
     public boolean deleteUser(String userId) {
         String sql = "DELETE FROM user WHERE User_id = ?";
@@ -134,7 +135,6 @@ public class UserDAO {
         }
     }
 
-    // ── Check user exists ────────────────────────────────────────────────────
 
     public boolean userExists(String userId) {
         String sql = "SELECT 1 FROM user WHERE User_id = ?";
@@ -151,8 +151,8 @@ public class UserDAO {
     }
 
 
-    // ── Get user by ID  for update user───────────────────────────────────────────────────────
-
+    //get user by id for update form
+    /// @author dilusha
     public User getUserById(String userId) {
         String sql = "SELECT * FROM user WHERE User_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -185,6 +185,7 @@ public class UserDAO {
         return false;
     }
 
+    //for add relevent chlid tables
     private void ensureRoleProfileExists(Connection conn, String userId, String role) throws SQLException {
         if (role == null || role.isBlank()) {
             return;
@@ -193,9 +194,7 @@ public class UserDAO {
         String tableName;
         String idColumn;
         switch (role) {
-            case "admin":
-                // The current schema stores admins only in the user table.
-                return;
+
             case "student":
                 tableName = "student";
                 idColumn = "Reg_no";
@@ -204,9 +203,7 @@ public class UserDAO {
                 tableName = "lecturer";
                 idColumn = "Lecturer_id";
                 break;
-            case "techofficer":
-                // The current schema stores technical officers only in the user table.
-                return;
+
             default:
                 return;
         }
@@ -227,19 +224,24 @@ public class UserDAO {
         }
     }
 
+    //for check if role change table change
     private void syncRoleProfilesOnUpdate(Connection conn, String oldUserId, String newUserId,
                                           String oldRole, String newRole) throws SQLException {
+        //get old user table name and new table name
         String oldTable = getRoleProfileTable(oldRole);
         String newTable = getRoleProfileTable(newRole);
+        //get colomns name old and new
         String oldIdColumn = getRoleProfileIdColumn(oldRole);
         String newIdColumn = getRoleProfileIdColumn(newRole);
 
-        boolean idChanged = oldUserId != null && !oldUserId.equals(newUserId);
+        boolean idChanged = oldUserId != null && !oldUserId.equals(newUserId);  //check user id is changed or not
 
+        //if no have table for new roles return
         if (oldTable == null && newTable == null) {
             return;
         }
 
+        //if table same only update id
         if (oldTable != null && oldTable.equals(newTable)) {
             if (idChanged) {
                 String updateSql = "UPDATE " + oldTable + " SET " + oldIdColumn + " = ? WHERE " + oldIdColumn + " = ?";
@@ -252,6 +254,7 @@ public class UserDAO {
             return;
         }
 
+        //delete from old table
         if (oldTable != null) {
             String deleteSql = "DELETE FROM " + oldTable + " WHERE " + oldIdColumn + " = ?";
             try (PreparedStatement pst = conn.prepareStatement(deleteSql)) {
@@ -260,6 +263,7 @@ public class UserDAO {
             }
         }
 
+        //insert into new table
         if (newTable != null) {
             String insertSql = "INSERT INTO " + newTable + " (" + newIdColumn + ") VALUES (?)";
             try (PreparedStatement pst = conn.prepareStatement(insertSql)) {
@@ -269,6 +273,7 @@ public class UserDAO {
         }
     }
 
+    //checksync is require or not
     private boolean requiresProfileSync(String oldRole, String newRole) {
         return getRoleProfileTable(oldRole) != null || getRoleProfileTable(newRole) != null;
     }
@@ -285,6 +290,7 @@ public class UserDAO {
         }
     }
 
+    //on off foriegn key checks
     private void setForeignKeyChecks(Connection conn, boolean enabled) throws SQLException {
         try (PreparedStatement pst = conn.prepareStatement("SET FOREIGN_KEY_CHECKS = " + (enabled ? "1" : "0"))) {
             pst.execute();
@@ -323,6 +329,8 @@ public class UserDAO {
         }
     }
 
+    // do correction
+    /// @author dilusha
     private String normalizeRole(String role) {
         if (role == null) return null;
 
@@ -344,6 +352,7 @@ public class UserDAO {
         }
     }
 
+    //for create new user based on fetched data
     private User mapUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setUserID(rs.getString("User_id"));
@@ -358,7 +367,7 @@ public class UserDAO {
 
         Date dob = rs.getDate("date_of_birth");
         if (dob != null) {
-            user.setDob(dob.toLocalDate());
+            user.setDob(dob.toLocalDate()); //convert database used old type to modern type
         }
         return user;
     }

@@ -27,6 +27,7 @@ class Ict2152MarkScheme extends CourseMarkScheme {
         return 0.0;
     }
 
+    ///  @author dilusha
     public String[] getAllowedMarkTypes() {
         return types("Quiz_1", "Quiz_2", "Quiz_3", "Mini_project", "Assignment_1", "Assignment_2", "End_theory");
     }

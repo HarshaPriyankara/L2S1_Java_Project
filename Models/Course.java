@@ -1,8 +1,6 @@
 package Models;
 
 public class Course {
-
-
     //fields
     private String courseCode;
     private String courseName;
@@ -10,8 +8,6 @@ public class Course {
     private String type;
     private String lecturer;
     private String department;
-
-
     //constructors
     public Course() {
     }
@@ -23,28 +19,6 @@ public class Course {
         this.type = type;
         this.lecturer = lecturer;
         this.department = departmentId;
-    }
-
-
-
-    public void addMaterial(String materialId,String type,String fileURL,String uploadedBy, String title) {
-        System.out.println("[Course] Material added to " + courseCode + ": " + title);
-
-    }
-
-    public void updateCourse(String courseName, int credits) {
-        this.courseName = courseName;
-        this.credits = credits;
-
-        System.out.println("[Course] updated : " + courseCode);
-    }
-
-    public String getCourseDetails() {
-
-        return "Course Code    : " + courseCode + "\n" +
-                "Course Name    : " + courseName + "\n" +
-                "Credits        : " + credits + "\n" +
-                "Department     : " + department;
     }
 
     public String getCourseCode() {

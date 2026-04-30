@@ -97,7 +97,7 @@ public class LecturerDashboard extends BaseDashboard {
             // 2. Set the necessary data
             testUser.setUserID("adm001");
             testUser.setRole("lecture");
-            testUser.setFname("Admin");
+            testUser.setFname("test");
             testUser.setLname("User");
 
             // 3. Pass the object to the constructor
